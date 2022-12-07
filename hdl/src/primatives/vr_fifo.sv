@@ -29,12 +29,7 @@ module vr_fifo
     output logic out_valid
     );
     
-    logic [DATA_W-1:0] fifo [DEPTH-1:0]; // FIFO Memory Structure
-    logic [PTR_W-1:0]    write_ptr;      // FIFO Write Pointer
-    logic [PTR_W-1:0]    read_ptr;       // FIFO Read Pointer
-    logic [PTR_W-1:0]    ptr_dif;        // Difference between Write and Read Pointers
-    
-    assign ptr_dif = write_ptr - read_ptr;
+    assign out_data = fifo [read_ptr[PTR_W-2:0]]; // Output Data is dereferenced value of the Read Pointer
     
     logic in_shake;    // Successful Write Handshake
     logic out_shake;   // Successful Read Handshake
@@ -42,7 +37,14 @@ module vr_fifo
     assign in_shake  = (in_valid  == 1'b1) && (in_ready  == 1'b1);
     assign out_shake = (out_valid == 1'b1) && (out_ready == 1'b1);
     
-    // Conditions to write and read from FIFO's
+    logic [DATA_W-1:0] fifo [DEPTH-1:0]; // FIFO Memory Structure
+    logic [PTR_W-1:0]  write_ptr;        // FIFO Write Pointer
+    logic [PTR_W-1:0]  read_ptr;         // FIFO Read Pointer
+    logic [PTR_W-1:0]  ptr_dif;          // Difference between Write and Read Pointers
+    
+    assign ptr_dif = write_ptr - read_ptr;
+    
+    // EXAMPLE: Conditions to write and read from FIFO's
     // Write Ptr  | Read Ptr  | Ptr_Dif | Valid Write | Valid Read
     //    000     -    000    =   000   |      Y      |     N
     //    001     -    000    =   001   |      Y      |     Y
@@ -54,8 +56,6 @@ module vr_fifo
     //    111     -    000    =   111   |      N      |     N
     // WriteValid: WritePtr - ReadPtr < 3'd4
     // ReadValid:  WritePtr - ReadPtr - 1 < 3'd4
-    
-    assign out_data = fifo [read_ptr[PTR_W-2:0]]; // Out Data is dereferenced value of the Read Pointer
     
     always_ff @(posedge clk, negedge nrst) begin
         if (!nrst) begin
