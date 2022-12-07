@@ -1,0 +1,21 @@
+#-----------------------------------------------------------------------------
+# SoC Labs Environment Setup Script
+# A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+#
+# Contributors
+#
+# David Mapstone (d.a.mapstone@soton.ac.uk)
+#
+# Copyright  2022, SoC Labs (www.soclabs.org)
+#-----------------------------------------------------------------------------
+
+#!/usr/bin/env bash
+
+# Set environment Variables for Repository
+export SHA_2_ACC_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+# Add simulation directory to Path
+export PATH=$PATH:$SHA_2_ACC_DIR/simulate
+
+# Set Default Simulator
+export SIMULATOR="ivlog"
