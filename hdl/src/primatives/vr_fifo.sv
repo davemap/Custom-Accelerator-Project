@@ -8,12 +8,11 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-module vr_fifo 
-    #(
-    parameter DEPTH  = 4,                // FIFO Row Depth
-    parameter DATA_W = 32,               // FIFO Row Width
-    parameter PTR_W  = $clog2(DEPTH) + 1 // Read/Write Pointer Width
-    )(
+module vr_fifo #(
+    parameter DEPTH  = 4,                 // FIFO Row Depth
+    parameter DATA_W = 32,                // FIFO Row Width
+    parameter PTR_W  = $clog2(DEPTH) + 1  // Read/Write Pointer Width
+)(
     input logic clk,
     input logic nrst,
     input logic en,
@@ -27,7 +26,7 @@ module vr_fifo
     output logic [DATA_W-1:0] out_data,
     input  logic out_ready,
     output logic out_valid
-    );
+);
     
     assign out_data = fifo [read_ptr[PTR_W-2:0]]; // Output Data is dereferenced value of the Read Pointer
     
