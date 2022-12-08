@@ -17,26 +17,29 @@ module vr_fifo #(
     input logic nrst,
     input logic en,
     
+    // Synchronous, localised reset
+    input logic sync_rst,
+    
     // In (Write) Control
     input  logic [DATA_W-1:0] in_data,
+    input  logic in_last,
     input  logic in_valid,
     output logic in_ready,
     
     // Out (Read) Control
     output logic [DATA_W-1:0] out_data,
+    output logic out_last,
     input  logic out_ready,
     output logic out_valid
 );
-    
-    assign out_data = fifo [read_ptr[PTR_W-2:0]]; // Output Data is dereferenced value of the Read Pointer
-    
+
     logic in_shake;    // Successful Write Handshake
     logic out_shake;   // Successful Read Handshake
     
     assign in_shake  = (in_valid  == 1'b1) && (in_ready  == 1'b1);
     assign out_shake = (out_valid == 1'b1) && (out_ready == 1'b1);
     
-    logic [DATA_W-1:0] fifo [DEPTH-1:0]; // FIFO Memory Structure
+    logic [DATA_W:0]   fifo [DEPTH-1:0]; // FIFO Memory Structure
     logic [PTR_W-1:0]  write_ptr;        // FIFO Write Pointer
     logic [PTR_W-1:0]  read_ptr;         // FIFO Read Pointer
     logic [PTR_W-1:0]  ptr_dif;          // Difference between Write and Read Pointers
@@ -56,8 +59,10 @@ module vr_fifo #(
     // WriteValid: WritePtr - ReadPtr < 3'd4
     // ReadValid:  WritePtr - ReadPtr - 1 < 3'd4
     
+    assign {out_data,out_last} = fifo [read_ptr[PTR_W-2:0]]; // Output Data is dereferenced value of the Read Pointer
+    
     always_ff @(posedge clk, negedge nrst) begin
-        if (!nrst) begin
+        if ((!nrst) || sync_rst) begin
             // Under Reset
             // - Pointers reset to 0 (FIFO is empty without needing to reset the memories)
             // - Control taken low
@@ -72,7 +77,7 @@ module vr_fifo #(
                 // Empty Rows in FIFO in FIFO
                 if (in_shake) begin 
                     // Successful Handshake store data in FIFO and increment Write Pointer 
-                    fifo [write_ptr[PTR_W-2:0]] <= in_data;
+                    fifo [write_ptr[PTR_W-2:0]] <= {in_data,in_last};
                     write_ptr                   <= write_ptr + 1;
                     if ((ptr_dif + (1 - out_shake)) < DEPTH) begin 
                         // Still space in FIFO after latest write
