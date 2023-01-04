@@ -25,10 +25,13 @@ module message_build (
     input  logic data_out_ready
 );
 
-    logic [9:0]  data_word_rem, next_data_word_rem;      // Remainder number of bits after 512 division
+    logic [8:0]  data_word_rem, next_data_word_rem;      // Remainder number of bits after 512 division
     logic [63:0] cfg_size_reg, next_cfg_size;
     logic [2:0]  state, next_state;                      // State Machine State
     logic [53:0] data_word_count, next_data_word_count; 
+    
+    logic next_data_in_ready, next_cfg_ready, next_data_out_valid;
+    logic [511:0] next_data_out;
     
     logic [511:0] last_word_mask;
     logic [511:0] end_marker;
@@ -90,7 +93,7 @@ module message_build (
                         next_cfg_size        = cfg_size;
                         next_cfg_ready       = 1'b0;
                         next_data_in_ready   = 1'b1;
-                        next_data_word_count = (cfg_size >> 9) + |cfg_size[8:0]; // Divide by 512 and round up
+                        next_data_word_count = cfg_size[63:10] + {53'd0, |cfg_size[8:0]}; // Divide by 512 and round up
                         next_data_word_rem   = cfg_size[8:0];
                         if (next_data_word_count > 1) begin
                             next_state = 3'd2;
@@ -146,9 +149,9 @@ module message_build (
                                 // NEXT STATE: Generate Additional Word
                                 next_state           = 3'd4;
                                 next_data_in_ready   = 1'b0;
-                            else
+                            end else begin
                                 // Size can fit in last data word
-                                next_data_out       = last_data_word | cfg_size_reg;
+                                next_data_out       = last_data_word | {448'd0, cfg_size_reg};
                                 next_data_out_valid = 1'b1;
                                 // NEXT STATE: Read Next Config
                                 next_state           = 3'd1;
