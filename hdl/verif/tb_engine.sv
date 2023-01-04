@@ -10,7 +10,7 @@
 //-----------------------------------------------------------------------------
 
 `timescale 1ns/1ns
-`include "sha_2_engine.sv"
+`include "message_build.sv"
 module tb_engine;
     
     logic clk;
@@ -31,7 +31,7 @@ module tb_engine;
     logic data_out_valid;
     logic data_out_ready;
         
-    sha_2_engine uut (
+    message_build uut (
                   .clk (clk),
                   .nrst(nrst),
                   .data_in(data_in),
@@ -72,18 +72,17 @@ module tb_engine;
         end
     end
     
-
     logic [511:0] temp_data ;
     
     initial begin
         $dumpfile("engine_sim.vcd");
         $dumpvars(0, tb_engine);
     
-        for (int idx = 0; idx < 4; idx = idx + 1) begin
-            $dumpvars(0, uut.data_in_fifo[idx]);
-            $dumpvars(0, uut.cfg_size_fifo[idx]);
-            $dumpvars(0, uut.cfg_scheme_fifo[idx]);
-        end
+        // for (int idx = 0; idx < 4; idx = idx + 1) begin
+        //     $dumpvars(0, uut.data_in_fifo   [idx]);
+        //     $dumpvars(0, uut.cfg_size_fifo  [idx]);
+        //     $dumpvars(0, uut.cfg_scheme_fifo[idx]);
+        // end
        
         data_in_drive_en = 0;
         
@@ -99,7 +98,7 @@ module tb_engine;
         cfg_scheme = 0;
         cfg_valid = 0;
         
-        data_out_ready = 0;
+        data_out_ready = 1;
         
         #20 nrst  = 1;
         #20 nrst  = 0;
@@ -108,7 +107,7 @@ module tb_engine;
        
         // Write some data into the config register
         # 30 
-        cfg_size = 512;
+        cfg_size = 448;
         cfg_scheme = 2;
         cfg_valid = 1;
         

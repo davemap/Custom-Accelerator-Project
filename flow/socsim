@@ -15,4 +15,4 @@ DEFAULT_SIMULATOR="ivlog"
 if [[ -z "${SIMULATOR}" ]]; then 
     SIMULATOR=$DEFAULT_SIMULATOR
 fi
-$SHA_2_ACC_DIR"/simulate/simulators/"$SIMULATOR"_sim.sh"
+$SHA_2_ACC_DIR"/flow/simulators/"$SIMULATOR"_sim.sh"

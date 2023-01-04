@@ -48,6 +48,12 @@ module message_build (
     // Combine Last Data (after being masked) with end marker and size
     assign last_data_word = (data_in & last_word_mask) | end_marker;
     
+    logic [53:0] word_extract;
+    logic [8:0]  rem_extract;
+    
+    assign word_extract = cfg_size[63:10];
+    assign rem_extract  = cfg_size[8:0];
+    
     always_ff @(posedge clk, negedge nrst) begin
         if ((!nrst) | sync_rst) begin
             state           <= 3'd0;
@@ -85,6 +91,7 @@ module message_build (
         case (state)
             3'd0: begin // First time State
                     next_cfg_ready = 1'b1;
+                    next_state     = 3'd1;
                 end
 
             3'd1: begin // Initial Config Read
@@ -93,8 +100,8 @@ module message_build (
                         next_cfg_size        = cfg_size;
                         next_cfg_ready       = 1'b0;
                         next_data_in_ready   = 1'b1;
-                        next_data_word_count = cfg_size[63:10] + {53'd0, |cfg_size[8:0]}; // Divide by 512 and round up
-                        next_data_word_rem   = cfg_size[8:0];
+                        next_data_word_count = word_extract + {53'd0, |rem_extract}; // Divide by 512 and round up
+                        next_data_word_rem   = rem_extract;
                         if (next_data_word_count > 1) begin
                             next_state = 3'd2;
                         end else begin
