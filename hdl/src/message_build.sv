@@ -52,6 +52,8 @@ module message_build (
     logic [54:0] word_extract;
     logic [8:0]  rem_extract;
     
+    logic extra_word, next_extra_word;
+    
     assign word_extract = cfg_size[63:9];
     assign rem_extract  = cfg_size[8:0];
     
@@ -66,6 +68,7 @@ module message_build (
             data_out_last   <= 1'b0;
             data_out        <= 512'd0;
             data_word_count <= 55'd0;
+            extra_word      <= 1'b0;
         end else begin
             state           <= next_state;
             data_in_ready   <= next_data_in_ready;
@@ -76,6 +79,7 @@ module message_build (
             data_out_last   <= next_data_out_last;
             data_out        <= next_data_out;
             data_word_count <= next_data_word_count;
+            extra_word      <= next_extra_word;
         end    
     end
     
@@ -90,6 +94,7 @@ module message_build (
         next_data_out_last   = data_out_last;
         next_data_out        = data_out;
         next_data_word_count = data_word_count;
+        next_extra_word      = extra_word;
         
         // Override
         case (state)
@@ -139,7 +144,7 @@ module message_build (
                             // Write Input Data to Output 
                             next_data_out       = data_in;
                             next_data_out_valid = 1'b1;
-                            if (data_word_count == 1) begin
+                            if (next_data_word_count == 1) begin
                                 // Last Input Data Word
                                 next_state = 3'd3;
                             end
@@ -170,13 +175,16 @@ module message_build (
                                 next_data_in_ready   = 1'b0;
                             end else begin
                                 // Size can fit in last data word
-                                next_data_out       = last_data_word | {448'd0, cfg_size_reg};
-                                next_data_out_valid = 1'b1;
-                                next_data_out_last  = 1'b1;
+                                next_data_out        = last_data_word | {448'd0, cfg_size_reg};
+                                next_data_out_valid  = 1'b1;
+                                next_data_out_last   = 1'b1;
+                                next_data_word_count = data_word_count - 1;
+                                next_extra_word      = 1'b1;
                                 // NEXT STATE: Read Next Config
                                 next_state           = 3'd1;
                                 next_data_in_ready   = 1'b0;
                                 next_cfg_ready       = 1'b1;
+                                next_extra_word      = 1'b0;
                             end
                         end
                     end
@@ -197,6 +205,7 @@ module message_build (
                         next_state           = 3'd1;
                         next_data_in_ready   = 1'b0;
                         next_cfg_ready       = 1'b1;
+                        next_extra_word      = 1'b0;
                     end
                 end
                 
