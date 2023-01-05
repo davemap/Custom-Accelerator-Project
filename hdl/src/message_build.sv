@@ -30,7 +30,7 @@ module message_build (
     logic [2:0]  state, next_state;                      // State Machine State
     logic [53:0] data_word_count, next_data_word_count; 
     
-    logic next_data_in_ready, next_cfg_ready, next_data_out_valid;
+    logic next_data_in_ready, next_cfg_ready, next_data_out_valid, next_data_out_last;
     logic [511:0] next_data_out;
     
     logic [511:0] last_word_mask;
@@ -62,6 +62,7 @@ module message_build (
             cfg_size_reg    <= 64'd0;
             data_word_rem   <= 9'd0;
             data_out_valid  <= 1'b0;
+            data_out_last   <= 1'b0;
             data_out        <= 512'd0;
             data_word_count <= 54'd0;
         end else begin
@@ -71,6 +72,7 @@ module message_build (
             cfg_size_reg    <= next_cfg_size;
             data_word_rem   <= next_data_word_rem;
             data_out_valid  <= next_data_out_valid;
+            data_out_last   <= next_data_out_last;
             data_out        <= next_data_out;
             data_word_count <= next_data_word_count;
         end    
@@ -84,6 +86,7 @@ module message_build (
         next_cfg_size        = cfg_size_reg;
         next_data_word_rem   = data_word_rem;
         next_data_out_valid  = data_out_valid;
+        next_data_out_last   = data_out_last;
         next_data_out        = data_out;
         next_data_word_count = data_word_count;
         
@@ -95,6 +98,12 @@ module message_build (
                 end
 
             3'd1: begin // Initial Config Read
+                    if (!(data_out_valid && !data_out_ready)) begin
+                        // If data out handshake has been seen, drop valid
+                        next_data_out_valid = 1'b0;
+                        next_data_out_last  = 1'b0;
+                    end
+                    // If there is no Valid data at the output or there is a valid transfer happening on this clock cycle
                     if (cfg_valid == 1'b1) begin
                         // Handshake to Acknowledge Config Has been Read
                         next_cfg_size        = cfg_size;
@@ -120,6 +129,7 @@ module message_build (
                         // These can be overloaded later if data is written to the outputs
                         next_data_out_valid = 1'b0; 
                         next_data_in_ready  = 1'b1;
+                        next_data_out_last  = 1'b0;
                         // Check Inputs have data
                         if (data_in_valid && data_in_ready) begin
                             // Valid Handshake and data can be processed
@@ -153,6 +163,7 @@ module message_build (
                                 // If can't fit size in last word
                                 next_data_out       = last_data_word;
                                 next_data_out_valid = 1'b1;
+                                next_data_out_last  = 1'b0;
                                 // NEXT STATE: Generate Additional Word
                                 next_state           = 3'd4;
                                 next_data_in_ready   = 1'b0;
@@ -160,6 +171,7 @@ module message_build (
                                 // Size can fit in last data word
                                 next_data_out       = last_data_word | {448'd0, cfg_size_reg};
                                 next_data_out_valid = 1'b1;
+                                next_data_out_last  = 1'b1;
                                 // NEXT STATE: Read Next Config
                                 next_state           = 3'd1;
                                 next_data_in_ready   = 1'b0;
@@ -179,6 +191,7 @@ module message_build (
                         // Size can fit in last data word
                         next_data_out       = {~|data_word_rem, 447'd0, cfg_size_reg};
                         next_data_out_valid = 1'b1;
+                        next_data_out_last  = 1'b1;
                         // NEXT STATE: Read Next Config
                         next_state           = 3'd1;
                         next_data_in_ready   = 1'b0;

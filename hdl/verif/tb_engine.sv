@@ -8,9 +8,9 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-
 `timescale 1ns/1ns
 `include "message_build.sv"
+
 module tb_engine;
     
     logic clk;
@@ -74,16 +74,16 @@ module tb_engine;
     
     logic [511:0] temp_data ;
     
+    int fd; // File descriptor handle
+    string str1,str2,str3,str4,str5;
+    
     initial begin
         $dumpfile("engine_sim.vcd");
         $dumpvars(0, tb_engine);
-    
-        // for (int idx = 0; idx < 4; idx = idx + 1) begin
-        //     $dumpvars(0, uut.data_in_fifo   [idx]);
-        //     $dumpvars(0, uut.cfg_size_fifo  [idx]);
-        //     $dumpvars(0, uut.cfg_scheme_fifo[idx]);
-        // end
-       
+        fd = $fopen("input_builder_stim.csv", "r");
+        
+        $fscanf(fd, "%s,%s,%s,%s,%s", str1, str2, str3, str4, str5);
+        $fclose(fd);
         data_in_drive_en = 0;
         
         for (int idx_1 = 0; idx_1 < 20; idx_1 = idx_1 + 1) begin
