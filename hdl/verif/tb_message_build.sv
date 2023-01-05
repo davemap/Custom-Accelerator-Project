@@ -122,11 +122,15 @@ module tb_message_build;
     
     logic [511:0] data_out_check;
     logic data_out_last_check;
+    logic check_output;
+    logic test_end;
     
     // Handle Output Ready Driving
     always_ff @(posedge clk, negedge nrst) begin: data_out_recieve
         if (!nrst) begin
             data_out_ready          <=   1'b0;
+            check_output            <=   1'b0;
+            test_end                <=   1'b0;
         end else begin
             // Synchronise Ready to Clock
             if (data_out_drive_ready) begin
@@ -136,25 +140,36 @@ module tb_message_build;
             end
             // Check Data on Handshake
             if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
+                check_output <= 1'b1;
                 if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                     data_out_check <= data_out_queue.pop_front();
-                    assert (data_out == data_out_check) else begin
-                        $error("data_out missmatch! recieve: %x != check: %x", data_out, data_out_check);
-                        $finish;
-                    end
                     data_out_last_check <= data_out_last_queue.pop_front();
-                    assert (data_out_last == data_out_last_check) else begin
-                        $error("data_out_last missmatch! recieve: %x != check: %x", data_out_last, data_out_last_check);
-                        $finish;
-                    end
                 end else begin
-                    $display("Test Complete");
-                    $finish;
+                    test_end <= 1'b1;
                 end
-            end 
+            end else begin
+                check_output <= 1'b0;
+            end
         end
     end
     
+    // Handle Output Data Verification
+    always @(posedge clk) begin
+        if (check_output == 1'b1) begin
+            assert (data_out == data_out_check) else begin
+                $error("data_out missmatch! recieve: %x != check: %x", data_out, data_out_check);
+                $finish;
+            end
+            assert (data_out_last == data_out_last_check) else begin
+                $error("data_out_last missmatch! recieve: %x != check: %x", data_out_last, data_out_last_check);
+                $finish;
+            end
+        end
+        if (test_end == 1'b1) begin
+            $display("Test Passes");
+            $finish;
+        end
+    end
     
     // File Reading Variables
     int fd; // File descriptor Handle
@@ -222,4 +237,5 @@ module tb_message_build;
             #10 clk = 1;
         end
     end
+    
 endmodule
