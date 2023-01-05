@@ -18,7 +18,7 @@ def main():
         quit()
     # Read in Descriptor File
     # - contains number of packets of data to generate and random seed
-    stim_file = os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "model_builder_stim.csv"
+    stim_file = os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/model/" + "model_builder_stim.csv"
     with open(stim_file, "r") as stim:
         csvreader = csv.reader(stim, delimiter=",")
         stim_list = list(csvreader)
@@ -81,21 +81,21 @@ def main():
 
     # Write out Input Data Stimulus to Text File
     input_header = ["input_data", "input_data_last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "input_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(in_data_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), in_data_words_last_list[idx]])
             
     # Write out Cfg Stimulus to Text File
     input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "input_cfg_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_cfg_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(cfg_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), "0", "1"])
             
     # Write out Expected output to text file
     output_header = ["output_data", "output_data_last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "output_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(out_data_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), out_data_words_last_list[idx]])
