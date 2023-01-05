@@ -32,6 +32,7 @@ module tb_engine;
     logic [511:0] data_out;
     logic data_out_valid;
     logic data_out_ready;
+    logic data_out_last;
         
     message_build uut (
                   .clk (clk),
@@ -46,11 +47,13 @@ module tb_engine;
                   .cfg_valid(cfg_valid),
                   .cfg_ready(cfg_ready),
                   .data_out(data_out),
+                  .data_out_last(data_out_last),
                   .data_out_valid(data_out_valid),
                   .data_out_ready(data_out_ready));
     
     logic data_in_drive_en;
     logic cfg_drive_en;
+    logic data_out_drive_ready;
     
     logic [511:0] data_in_queue [$];
     logic data_in_last_queue    [$];
@@ -60,6 +63,10 @@ module tb_engine;
     logic [1:0] cfg_scheme_queue [$];
     logic cfg_last_queue         [$];
     logic cfg_wait_queue;
+    
+    logic [511:0] data_out_queue [$];
+    logic data_out_last_queue    [$];
+    logic data_out_wait_queue;
     
     // Handle Valid and Data for data_in
     always_ff @(posedge clk, negedge nrst) begin: data_in_valid_drive
@@ -113,6 +120,42 @@ module tb_engine;
         end
     end
     
+    logic [511:0] data_out_check;
+    logic data_out_last_check;
+    
+    // Handle Output Ready Driving
+    always_ff @(posedge clk, negedge nrst) begin: data_out_recieve
+        if (!nrst) begin
+            data_out_ready          <=   1'b0;
+        end else begin
+            // Synchronise Ready to Clock
+            if (data_out_drive_ready) begin
+                data_out_ready <= 1'b1;
+            end else begin
+                data_out_ready <= 1'b0;
+            end
+            // Check Data on Handshake
+            if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
+                if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
+                    data_out_check <= data_out_queue.pop_front();
+                    assert (data_out == data_out_check) else begin
+                        $error("data_out missmatch! recieve: %x != check: %x", data_out, data_out_check);
+                        $finish;
+                    end
+                    data_out_last_check <= data_out_last_queue.pop_front();
+                    assert (data_out_last == data_out_last_check) else begin
+                        $error("data_out_last missmatch! recieve: %x != check: %x", data_out_last, data_out_last_check);
+                        $finish;
+                    end
+                end else begin
+                    $display("Test Complete");
+                    $finish;
+                end
+            end 
+        end
+    end
+    
+    
     // File Reading Variables
     int fd; // File descriptor Handle
     
@@ -123,11 +166,15 @@ module tb_engine;
     logic [1:0]  input_cfg_scheme; // Temporary cfg scheme
     logic input_cfg_last;          // Temporary cfg last;
     
+    logic [511:0] output_data; // Temporary Output Data Storage
+    logic output_data_last;    // Temporary Output Data Last
+    
     initial begin
         $dumpfile("engine_sim.vcd");
         $dumpvars(0, tb_engine);
         data_in_drive_en = 0;
         cfg_drive_en = 0;
+        data_out_drive_ready = 0;
         
         // Read input data into Queue
         fd = $fopen("../stimulus/input_data_builder_stim.csv", "r");
@@ -146,11 +193,17 @@ module tb_engine;
         end
         $fclose(fd);
         
-        cfg_size = 0;
-        cfg_scheme = 0;
-        cfg_valid = 0;
+        // Read output data into Queue
+        fd = $fopen("../stimulus/output_data_builder_stim.csv", "r");
+        while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
+            data_out_queue.push_back(output_data);
+            data_out_last_queue.push_back(output_data_last);
+        end
+        $fclose(fd);
         
-        data_out_ready = 1;
+        // Initialise First Checking Values
+        data_out_check = data_out_queue.pop_front();      
+        data_out_last_check = data_out_last_queue.pop_front();
         
         #20 nrst  = 1;
         #20 nrst  = 0;
@@ -158,12 +211,9 @@ module tb_engine;
         #20 data_in_drive_en = 1;
        
         // Write some data into the config register
-        # 30 
-        cfg_drive_en = 1;
+        # 30 cfg_drive_en = 1;
         
-        #1200
-        $display("Test Complete");
-        $finish;
+        # 30 data_out_drive_ready = 1;
     end
     
     initial begin
