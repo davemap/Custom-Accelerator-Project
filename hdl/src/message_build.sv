@@ -29,7 +29,7 @@ module message_build (
     logic [8:0]  data_word_rem, next_data_word_rem;      // Remainder number of bits after 512 division
     logic [63:0] cfg_size_reg, next_cfg_size;
     logic [2:0]  state, next_state;                      // State Machine State
-    logic [53:0] data_word_count, next_data_word_count; 
+    logic [54:0] data_word_count, next_data_word_count; 
     
     logic next_data_in_ready, next_cfg_ready, next_data_out_valid, next_data_out_last;
     logic [511:0] next_data_out;
@@ -49,10 +49,10 @@ module message_build (
     // Combine Last Data (after being masked) with end marker and size
     assign last_data_word = (data_in & last_word_mask) | end_marker;
     
-    logic [53:0] word_extract;
+    logic [54:0] word_extract;
     logic [8:0]  rem_extract;
     
-    assign word_extract = cfg_size[63:10];
+    assign word_extract = cfg_size[63:9];
     assign rem_extract  = cfg_size[8:0];
     
     always_ff @(posedge clk, negedge nrst) begin
@@ -65,7 +65,7 @@ module message_build (
             data_out_valid  <= 1'b0;
             data_out_last   <= 1'b0;
             data_out        <= 512'd0;
-            data_word_count <= 54'd0;
+            data_word_count <= 55'd0;
         end else begin
             state           <= next_state;
             data_in_ready   <= next_data_in_ready;
