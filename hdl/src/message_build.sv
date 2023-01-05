@@ -44,7 +44,7 @@ module message_build (
     
     // Create Position Marker to show end of data message (place a "1")
     // - only if not a multiple of 512
-    assign end_marker = |data_word_rem ? 1 << (512 - data_word_rem) : 512'd0;  
+    assign end_marker = |data_word_rem ? 1 << (512 - data_word_rem - 1) : 512'd0;  // BUG HERE!
     
     // Combine Last Data (after being masked) with end marker and size
     assign last_data_word = (data_in & last_word_mask) | end_marker;

@@ -124,6 +124,7 @@ module tb_message_build;
     logic data_out_last_check;
     logic check_output;
     logic test_end;
+    int packet_num;
     
     // Handle Output Ready Driving
     always_ff @(posedge clk, negedge nrst) begin: data_out_recieve
@@ -138,36 +139,31 @@ module tb_message_build;
             end else begin
                 data_out_ready <= 1'b0;
             end
-            // Check Data on Handshake
-            if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
-                check_output <= 1'b1;
-                if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
-                    data_out_check <= data_out_queue.pop_front();
-                    data_out_last_check <= data_out_last_queue.pop_front();
-                end else begin
-                    test_end <= 1'b1;
-                end
-            end else begin
-                check_output <= 1'b0;
-            end
         end
     end
     
     // Handle Output Data Verification
     always @(posedge clk) begin
-        if (check_output == 1'b1) begin
-            assert (data_out == data_out_check) else begin
-                $error("data_out missmatch! recieve: %x != check: %x", data_out, data_out_check);
+        // Check Data on Handshake
+        if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
+            if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
+                data_out_check <= data_out_queue.pop_front();
+                data_out_last_check <= data_out_last_queue.pop_front();
+                assert (data_out == data_out_check) else begin
+                    $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+                    $finish;
+                end
+                assert (data_out_last == data_out_last_check) else begin
+                    $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+                    $finish;
+                end
+                if (data_out_last_check == 1'b1) begin
+                    packet_num <= packet_num + 1;
+                end
+            end else begin
+                $display("Test Passes");
                 $finish;
             end
-            assert (data_out_last == data_out_last_check) else begin
-                $error("data_out_last missmatch! recieve: %x != check: %x", data_out_last, data_out_last_check);
-                $finish;
-            end
-        end
-        if (test_end == 1'b1) begin
-            $display("Test Passes");
-            $finish;
         end
     end
     

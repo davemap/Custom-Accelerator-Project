@@ -11,16 +11,20 @@
 
 import os, sys, random, math, csv
 
-def main(argv):
+def main():
     # Check Environment Variables set
     if not "SHA_2_ACC_DIR" in os.environ:
         print("Sourceme file at root of repository has not been sourced. Please source this file and try again.")
         quit()
     # Read in Descriptor File
     # - contains number of packets of data to generate and random seed
-    # input_file = argv[1]
-    seed = 1 # Needs to be loaded in from file
-    packets = 1
+    stim_file = os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "model_builder_stim.csv"
+    with open(stim_file, "r") as stim:
+        csvreader = csv.reader(stim, delimiter=",")
+        stim_list = list(csvreader)
+    
+    seed = int(stim_list[0][0])
+    packets = int(stim_list[0][1])
     random.seed(seed)
     
     print(f"Generating {packets} packets using seed: {seed}")
@@ -47,7 +51,6 @@ def main(argv):
         out_data_words = chunked_data_words.copy()
         out_data_words_last = []
         last_len = len(chunked_data_words[-1])
-        # print(chunked_data_words[-1])
         if (last_len == 512):
             out_data_words.append("1" + "0"*447 + cfg_size_str)
         else:
@@ -103,4 +106,4 @@ def chunkstring(string, length):
     return array
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
