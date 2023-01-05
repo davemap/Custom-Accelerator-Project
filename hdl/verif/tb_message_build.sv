@@ -11,7 +11,7 @@
 `timescale 1ns/1ns
 `include "message_build.sv"
 
-module tb_engine;
+module tb_message_build;
     
     logic clk;
     logic nrst;
@@ -171,7 +171,7 @@ module tb_engine;
     
     initial begin
         $dumpfile("engine_sim.vcd");
-        $dumpvars(0, tb_engine);
+        $dumpvars(0, tb_message_build);
         data_in_drive_en = 0;
         cfg_drive_en = 0;
         data_out_drive_ready = 0;
