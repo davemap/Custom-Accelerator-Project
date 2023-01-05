@@ -17,6 +17,7 @@ module tb_engine;
     logic nrst;
     // Data In data and Handshaking
     logic [511:0] data_in;
+    logic data_in_last;
     logic data_in_valid;
     logic data_in_ready;
     
@@ -37,6 +38,7 @@ module tb_engine;
                   .data_in(data_in),
                   .data_in_valid(data_in_valid),
                   .data_in_ready(data_in_ready),
+                  .data_in_last(data_in_last),
                   .cfg_size(cfg_size),
                   .cfg_scheme(cfg_scheme),
                   .cfg_valid(cfg_valid),
@@ -47,6 +49,7 @@ module tb_engine;
     
     logic data_in_drive_en;
     logic [511:0] data_in_queue [$];
+    logic data_in_last_queue [$];
     logic data_in_wait_queue;
     
     // Handle Valid and Data for data_in
@@ -54,13 +57,15 @@ module tb_engine;
         if (!nrst) begin
             data_in                 <= 512'd0;
             data_in_valid           <=   1'b0;
+            data_in_last            <=   1'b0;
             data_in_wait_queue      <=   1'b1;
         end else if (data_in_drive_en) begin
             if (((data_in_valid == 1'b1) && (data_in_ready == 1'b1)) ||
                  (data_in_wait_queue == 1'b1)) begin
                 // Data transfer just completed or transfers already up to date
-                if (data_in_queue.size() > 0) begin
-                    data_in <= data_in_queue.pop_front();
+                if ((data_in_queue.size() > 0) && (data_in_last_queue.size() > 0)) begin
+                    data_in            <= data_in_queue.pop_front();
+                    data_in_last       <= data_in_last_queue.pop_front();
                     data_in_valid      <= 1'b1;
                     data_in_wait_queue <= 1'b0;
                 end else begin
@@ -72,28 +77,23 @@ module tb_engine;
         end
     end
     
-    logic [511:0] temp_data ;
-    
     int fd; // File descriptor handle
-    string str1,str2,str3,str4,str5;
+    logic [511:0] input_data;
+    logic input_data_last;
     
     initial begin
         $dumpfile("engine_sim.vcd");
         $dumpvars(0, tb_engine);
-        fd = $fopen("input_builder_stim.csv", "r");
-        
-        $fscanf(fd, "%s,%s,%s,%s,%s", str1, str2, str3, str4, str5);
-        $fclose(fd);
         data_in_drive_en = 0;
         
-        for (int idx_1 = 0; idx_1 < 20; idx_1 = idx_1 + 1) begin
-            for (int idx = 1; idx < 5; idx = idx + 1) begin
-                data_in_queue.push_back({$urandom(),$urandom(),$urandom(),$urandom(),$urandom(),$urandom(),
-                                         $urandom(),$urandom(),$urandom(),$urandom(),$urandom(),$urandom(),
-                                         $urandom(),$urandom(),$urandom(),$urandom()});
-            end
+        // Read input data into Queue
+        fd = $fopen("input_data_builder_stim.csv", "r");
+        while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
+            data_in_queue.push_back(input_data);
+            data_in_last_queue.push_back(input_data_last);
         end
-    
+        $fclose(fd);
+        
         cfg_size = 0;
         cfg_scheme = 0;
         cfg_valid = 0;

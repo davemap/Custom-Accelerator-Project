@@ -60,28 +60,22 @@ def main(argv):
         input_header = ["input_data", "input_data_last"]
         with open("input_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
             writer = csv.writer(f)
-            # Write Header Row
-            writer.writerow(input_header)
             for idx, word in enumerate(in_data_words):
-                writer.writerow([word, in_data_words_last[idx]])
+                writer.writerow(["{0:x}".format(int(word, 2)), in_data_words_last[idx]])
                 
         # Ouptut Input Data Stimulus to Text File
         input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
         with open("input_cfg_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
             writer = csv.writer(f)
-            # Write Header Row
-            writer.writerow(input_header)
             for idx, word in enumerate(in_data_words):
-                writer.writerow([cfg_size_str, "00", "1"])
+                writer.writerow(["{0:x}".format(int(cfg_size_str, 2)), "00", "1"])
                 
         # Output Expected output to text file
         output_header = ["output_data", "output_data_last"]
         with open("output_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
             writer = csv.writer(f)
-            # Write Header Row
-            writer.writerow(output_header)
             for idx, word in enumerate(out_data_words):
-                writer.writerow([word, out_data_words_last[idx]])
+                writer.writerow(["{0:x}".format(int(word, 2)), out_data_words_last[idx]])
 
 def chunkstring(string, length):
     array_len = math.ceil(len(string)/length)
