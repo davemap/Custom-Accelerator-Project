@@ -24,6 +24,7 @@ module tb_engine;
     // Config data and Handshaking
     logic [63:0] cfg_size;
     logic [1:0] cfg_scheme;
+    logic cfg_last;
     logic cfg_valid;
     logic cfg_ready;
     
@@ -41,6 +42,7 @@ module tb_engine;
                   .data_in_last(data_in_last),
                   .cfg_size(cfg_size),
                   .cfg_scheme(cfg_scheme),
+                  .cfg_last(cfg_last),
                   .cfg_valid(cfg_valid),
                   .cfg_ready(cfg_ready),
                   .data_out(data_out),
@@ -48,9 +50,16 @@ module tb_engine;
                   .data_out_ready(data_out_ready));
     
     logic data_in_drive_en;
+    logic cfg_drive_en;
+    
     logic [511:0] data_in_queue [$];
-    logic data_in_last_queue [$];
+    logic data_in_last_queue    [$];
     logic data_in_wait_queue;
+    
+    logic [63:0] cfg_size_queue  [$];
+    logic [1:0] cfg_scheme_queue [$];
+    logic cfg_last_queue         [$];
+    logic cfg_wait_queue;
     
     // Handle Valid and Data for data_in
     always_ff @(posedge clk, negedge nrst) begin: data_in_valid_drive
@@ -77,20 +86,63 @@ module tb_engine;
         end
     end
     
-    int fd; // File descriptor handle
-    logic [511:0] input_data;
-    logic input_data_last;
+    // Handle Valid and Data for cfg
+    always_ff @(posedge clk, negedge nrst) begin: cfg_valid_drive
+        if (!nrst) begin
+            cfg_size            <=  64'd0;
+            cfg_scheme          <=   2'd0;
+            cfg_valid           <=   1'b0;
+            cfg_last            <=   1'b0;
+            cfg_wait_queue      <=   1'b1;
+        end else if (cfg_drive_en) begin
+            if (((cfg_valid == 1'b1) && (cfg_ready == 1'b1)) ||
+                 (cfg_wait_queue == 1'b1)) begin
+                // cfg transfer just completed or transfers already up to date
+                if ((cfg_size_queue.size() > 0) && (cfg_scheme_queue.size() > 0 ) && (cfg_last_queue.size() > 0)) begin
+                    cfg_size       <= cfg_size_queue.pop_front();
+                    cfg_scheme     <= cfg_scheme_queue.pop_front();
+                    cfg_last       <= cfg_last_queue.pop_front();
+                    cfg_valid      <= 1'b1;
+                    cfg_wait_queue <= 1'b0;
+                end else begin
+                    // No data currently avaiable in queue to write but transfers up to date
+                    cfg_wait_queue <= 1'b1;
+                    cfg_valid      <= 1'b0;
+                end
+            end
+        end
+    end
+    
+    // File Reading Variables
+    int fd; // File descriptor Handle
+    
+    logic [511:0] input_data; // Temporary Input Data Storage
+    logic input_data_last;    // Temporary Input Data Last
+    
+    logic [63:0] input_cfg_size;   // Temporary cfg size 
+    logic [1:0]  input_cfg_scheme; // Temporary cfg scheme
+    logic input_cfg_last;          // Temporary cfg last;
     
     initial begin
         $dumpfile("engine_sim.vcd");
         $dumpvars(0, tb_engine);
         data_in_drive_en = 0;
+        cfg_drive_en = 0;
         
         // Read input data into Queue
         fd = $fopen("../stimulus/input_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
+        end
+        $fclose(fd);
+        
+        // Read input cfg into Queue
+        fd = $fopen("../stimulus/input_cfg_builder_stim.csv", "r");
+        while ($fscanf (fd, "%x,%x,%b", input_cfg_size, input_cfg_scheme, input_cfg_last) == 3) begin
+            cfg_size_queue.push_back(input_cfg_size);
+            cfg_scheme_queue.push_back(input_cfg_scheme);
+            cfg_last_queue.push_back(input_cfg_last);
         end
         $fclose(fd);
         
@@ -107,9 +159,7 @@ module tb_engine;
        
         // Write some data into the config register
         # 30 
-        cfg_size = 448;
-        cfg_scheme = 2;
-        cfg_valid = 1;
+        cfg_drive_en = 1;
         
         #1200
         $display("Test Complete");

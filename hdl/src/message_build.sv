@@ -15,6 +15,7 @@ module message_build (
     // Config data and Handshaking
     input  logic [63:0] cfg_size,
     input  logic [1:0]  cfg_scheme,
+    input  logic cfg_last,
     input  logic cfg_valid,
     output logic cfg_ready,
     

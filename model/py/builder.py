@@ -24,12 +24,19 @@ def main(argv):
     random.seed(seed)
     
     print(f"Generating {packets} packets using seed: {seed}")
+    cfg_words_list = []
+    in_data_words_list = []
+    in_data_words_last_list = []
+    out_data_words_list = []
+    out_data_words_last_list = []
+    
     for i in range(packets):
         # Generate expected output in 512 bit chunks
         cfg_size = random.randint(0,pow(2,14))
         cfg_size_bin = "{0:b}".format(cfg_size)
         # Pad Size to 64 bits
         cfg_size_str = "0"*(64-len(cfg_size_bin)) + str(cfg_size_bin)
+        
         # Generate Random Data using Size
         data = "{0:b}".format(random.getrandbits(cfg_size))
         
@@ -59,27 +66,33 @@ def main(argv):
         for i in range(len(out_data_words) - 1):
             out_data_words_last.append("0")
         out_data_words_last.append("1")
+        
+        cfg_words_list.append(cfg_size_str)
+        in_data_words_list += in_data_words
+        in_data_words_last_list += in_data_words_last
+        out_data_words_list += out_data_words
+        out_data_words_last_list += out_data_words_last
 
-        # Ouptut Input Data Stimulus to Text File
-        input_header = ["input_data", "input_data_last"]
-        with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "input_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
-            writer = csv.writer(f)
-            for idx, word in enumerate(in_data_words):
-                writer.writerow(["{0:x}".format(int(word, 2)), in_data_words_last[idx]])
-                
-        # Ouptut Input Data Stimulus to Text File
-        input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
-        with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "input_cfg_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
-            writer = csv.writer(f)
-            for idx, word in enumerate(in_data_words):
-                writer.writerow(["{0:x}".format(int(cfg_size_str, 2)), "00", "1"])
-                
-        # Output Expected output to text file
-        output_header = ["output_data", "output_data_last"]
-        with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "output_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
-            writer = csv.writer(f)
-            for idx, word in enumerate(out_data_words):
-                writer.writerow(["{0:x}".format(int(word, 2)), out_data_words_last[idx]])
+    # Write out Input Data Stimulus to Text File
+    input_header = ["input_data", "input_data_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "input_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(in_data_words_list):
+            writer.writerow(["{0:x}".format(int(word, 2)), in_data_words_last_list[idx]])
+            
+    # Write out Cfg Stimulus to Text File
+    input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "input_cfg_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(cfg_words_list):
+            writer.writerow(["{0:x}".format(int(word, 2)), "0", "1"])
+            
+    # Write out Expected output to text file
+    output_header = ["output_data", "output_data_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/" + "output_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(out_data_words_list):
+            writer.writerow(["{0:x}".format(int(word, 2)), out_data_words_last_list[idx]])
 
 def chunkstring(string, length):
     array_len = math.ceil(len(string)/length)
