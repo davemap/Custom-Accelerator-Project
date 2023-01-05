@@ -43,6 +43,7 @@ def main():
         
         # Generate Random Data using Size
         data = "{0:b}".format(random.getrandbits(cfg_size))
+        data = "0"*(cfg_size - len(data)) + data # Pad Data to length of config (Python like to concatenate values)
         
         chunked_data_words = chunkstring(str(data),512)
         in_data_words = chunked_data_words.copy()
@@ -51,6 +52,7 @@ def main():
         out_data_words = chunked_data_words.copy()
         out_data_words_last = []
         last_len = len(chunked_data_words[-1])
+        # print(f"{chunked_data_words[-1]} {last_len}")
         if (last_len == 512):
             out_data_words.append("1" + "0"*447 + cfg_size_str)
         else:
