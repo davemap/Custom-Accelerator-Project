@@ -19,10 +19,10 @@ def main(argv):
     packets = 1
     random.seed(seed)
     
+    print(f"Generating {packets} packets using seed: {seed}")
     for i in range(packets):
         # Generate expected output in 512 bit chunks
         cfg_size = random.randint(0,pow(2,14))
-        print(cfg_size)
         cfg_size_bin = "{0:b}".format(cfg_size)
         # Pad Size to 64 bits
         cfg_size_str = "0"*(64-len(cfg_size_bin)) + str(cfg_size_bin)
@@ -30,16 +30,12 @@ def main(argv):
         data = "{0:b}".format(random.getrandbits(cfg_size))
         
         chunked_data_words = chunkstring(str(data),512)
-        print(len(chunked_data_words))
-        print(len(chunked_data_words[-1]))
         in_data_words = chunked_data_words.copy()
         in_data_words[-1] = in_data_words[-1] + "0"*(512-len(in_data_words[-1]))
-        print(in_data_words[-1])
         in_data_words_last = []
         out_data_words = chunked_data_words.copy()
         out_data_words_last = []
         last_len = len(chunked_data_words[-1])
-        print(last_len)
         if (last_len == 512):
             out_data_words.append("1" + "0"*447 + cfg_size_str)
         else:
@@ -61,17 +57,26 @@ def main(argv):
         out_data_words_last.append("1")
 
         # Ouptut Input Data Stimulus to Text File
-        input_header = ["cfg_size", "cfg_scheme", "cfg_last", "data_in", "data_in_last"]
-        with open("input_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+        input_header = ["input_data", "input_data_last"]
+        with open("input_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
             writer = csv.writer(f)
             # Write Header Row
             writer.writerow(input_header)
             for idx, word in enumerate(in_data_words):
-                writer.writerow([cfg_size_str, "00", "1", word, in_data_words_last[idx]])
+                writer.writerow([word, in_data_words_last[idx]])
+                
+        # Ouptut Input Data Stimulus to Text File
+        input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
+        with open("input_cfg_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+            writer = csv.writer(f)
+            # Write Header Row
+            writer.writerow(input_header)
+            for idx, word in enumerate(in_data_words):
+                writer.writerow([cfg_size_str, "00", "1"])
                 
         # Output Expected output to text file
-        output_header = ["data_in", "data_in_last"]
-        with open("output_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
+        output_header = ["output_data", "output_data_last"]
+        with open("output_data_builder_stim.csv", "w", encoding="UTF8", newline='') as f:
             writer = csv.writer(f)
             # Write Header Row
             writer.writerow(output_header)
