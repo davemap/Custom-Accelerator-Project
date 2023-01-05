@@ -87,7 +87,7 @@ module tb_engine;
         data_in_drive_en = 0;
         
         // Read input data into Queue
-        fd = $fopen("input_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/input_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
