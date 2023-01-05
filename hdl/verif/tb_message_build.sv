@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic SHA-2 Engine Testbench
+// SoC Labs Basic SHA-2 Message Builder Testbench
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
