@@ -47,6 +47,7 @@ def main(argv):
         out_data_words = chunked_data_words.copy()
         out_data_words_last = []
         last_len = len(chunked_data_words[-1])
+        # print(chunked_data_words[-1])
         if (last_len == 512):
             out_data_words.append("1" + "0"*447 + cfg_size_str)
         else:

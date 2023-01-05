@@ -44,7 +44,7 @@ module message_build (
     
     // Create Position Marker to show end of data message (place a "1")
     // - only if not a multiple of 512
-    assign end_marker = |data_word_rem ? 1 << (512 - data_word_rem - 1) : 512'd0;  
+    assign end_marker = |data_word_rem ? 1 << (512 - data_word_rem) : 512'd0;  
     
     // Combine Last Data (after being masked) with end marker and size
     assign last_data_word = (data_in & last_word_mask) | end_marker;
@@ -107,7 +107,6 @@ module message_build (
                     if (!(data_out_valid && !data_out_ready)) begin
                         // If data out handshake has been seen, drop valid
                         next_data_out_valid = 1'b0;
-                        next_data_out_last  = 1'b0;
                     end
                     // If there is no Valid data at the output or there is a valid transfer happening on this clock cycle
                     if (cfg_valid == 1'b1) begin
@@ -144,6 +143,7 @@ module message_build (
                             // Write Input Data to Output 
                             next_data_out       = data_in;
                             next_data_out_valid = 1'b1;
+                            next_data_out_last  = 1'b0;
                             if (next_data_word_count == 1) begin
                                 // Last Input Data Word
                                 next_state = 3'd3;
