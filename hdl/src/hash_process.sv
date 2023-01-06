@@ -311,17 +311,10 @@ module hash_process (
                         // If data out handshake has been seen, drop valid
                         next_data_out_valid = 1'b0;
                     end
-                    next_H[0] = a + H[0];
-                    next_H[1] = b + H[1];
-                    next_H[2] = c + H[2];
-                    next_H[3] = d + H[3];
-                    next_H[4] = e + H[4];
-                    next_H[5] = f + H[5];
-                    next_H[6] = g + H[6];
-                    next_H[7] = h + H[7];
                     if (last_block) begin
                         if (!data_out_valid) begin // No Data waiting at output
-                            next_data_out       = {next_H[0], next_H[1], next_H[2], next_H[3], next_H[4], next_H[5], next_H[6], next_H[7]};
+                            // Output updated H values
+                            next_data_out       = {a + H[0], b + H[1], c + H[2], d + H[3], e + H[4], f + H[5], g + H[6], h + H[7]};
                             next_data_out_last  = 1'b1;
                             next_data_out_valid = 1'b1;
                             // Next State Logic
@@ -336,46 +329,23 @@ module hash_process (
                             next_H[5]          = 32'h9b05688c;
                             next_H[6]          = 32'h1f83d9ab;
                             next_H[7]          = 32'h5be0cd19;
-                        end else begin
-                            // Still Waiting for previous data to be recieved
-                            next_state = 3'd4;
-                            next_data_in_ready = 1'b0;
                         end
                     end else begin
+                        // Update H values for next message block
+                        next_H[0] = a + H[0];
+                        next_H[1] = b + H[1];
+                        next_H[2] = c + H[2];
+                        next_H[3] = d + H[3];
+                        next_H[4] = e + H[4];
+                        next_H[5] = f + H[5];
+                        next_H[6] = g + H[6];
+                        next_H[7] = h + H[7];
                         // Next State Logic
                         next_data_in_ready = 1'b1;
                         next_state = 3'd1;
                     end
                 end
                 
-            3'd4: begin // Output Handling
-                    if (!(data_out_valid && !data_out_ready)) begin
-                        // If data out handshake has been seen, drop valid
-                        next_data_out_valid = 1'b0;
-                    end
-                    if (!data_out_valid) begin // No Data waiting at output
-                        next_data_out       = {next_H[0], next_H[1], next_H[2], next_H[3], next_H[4], next_H[5], next_H[6], next_H[7]};
-                        next_data_out_last  = 1'b1;
-                        next_data_out_valid = 1'b1;
-                        // Next State Logic
-                        next_state = 3'd1;
-                        next_data_in_ready = 1'b1;
-                        // Initialise Hash Value Registers
-                        next_H[0]          = 32'h6a09e667;
-                        next_H[1]          = 32'hbb67ae85;
-                        next_H[2]          = 32'h3c6ef372;
-                        next_H[3]          = 32'ha54ff53a;
-                        next_H[4]          = 32'h510e527f;
-                        next_H[5]          = 32'h9b05688c;
-                        next_H[6]          = 32'h1f83d9ab;
-                        next_H[7]          = 32'h5be0cd19;
-                    end else begin
-                        // Still Waiting for previous data to be recieved
-                        next_state = 3'd4;
-                        next_data_in_ready = 1'b0;
-                    end
-                end
-            
             default: begin
                     next_state = 3'd0;
                 end
