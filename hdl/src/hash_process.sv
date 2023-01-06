@@ -8,7 +8,7 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-`include "sha_2_pkg.sv"
+`include "hashing_functions.sv"
 
 
 module hash_process (
@@ -32,7 +32,7 @@ module hash_process (
     input  logic data_out_ready
 );
 
-    import sha_2_pkg::*;
+    import hashing_functions::*;
 
     // Message Chunks
     logic [31:0] M [15:0];
