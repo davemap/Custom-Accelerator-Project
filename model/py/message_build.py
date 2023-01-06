@@ -11,7 +11,7 @@
 
 import os, sys, random, math, csv
 import subprocess
-from hashlib import sha256
+import platform
 
 def main():
     # Check Environment Variables set
@@ -82,10 +82,14 @@ def main():
         out_data_words_list += out_data_words
         out_data_words_last_list += out_data_words_last
         intval = int(data, 2)
-        cmd = f"echo -n {data} | shasum -a 256 -0"
-        hash_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-        hash_val = (str(hash_process.communicate()[0]).split()[0][2:])
-        # hash_val = subprocess.getoutput(["echo", "-n", data ,"|", "shasum", "-a",  "256", "-0"])
+        hash_val = 0
+        if (platform.system() == "Darwin"):
+            cmd = f"echo -n {data} | shasum -a 256 -0"
+            hash_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            hash_val = (str(hash_process.communicate()[0]).split()[0][2:])
+        else:
+            print("Platform not supported yet")
+            exit()
         # print(hash_val)
         hash_list.append(hash_val)
 
