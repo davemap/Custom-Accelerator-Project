@@ -234,7 +234,7 @@ module hash_process (
         
         // Override
         case (state)
-            3'd0: begin // Initialise Hash Registers -- this state may be able to be removed (reset values could be changed to these values)
+            3'd0: begin // Initialise Hash Registers
                     if (!(data_out_valid && !data_out_ready)) begin
                         // If data out handshake has been seen, drop valid
                         next_data_out_valid = 1'b0;
