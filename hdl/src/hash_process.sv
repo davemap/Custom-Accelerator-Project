@@ -228,6 +228,9 @@ module hash_process (
         for (int i=0; i < 64; i++) begin
             next_W[i] = W[i];
         end
+        // Logic for Temporary Words
+        T1 = h + bsig1(e) + ch(e,f,g) + K[hash_iter] + W[hash_iter];
+        T2 = bsig0(a) + maj(a,b,c);
         
         // Override
         case (state)
@@ -257,12 +260,12 @@ module hash_process (
                     if (data_in_valid && data_in_ready) begin
                         // Valid Handshake and data can be processed
                         // Use the Message chunks to populate the message schedule
-                        for (logic [31:0] t = 0; t < 16; t++) begin
-                            next_W[t] = M[t];
-                        end
-                        for (logic [31:0] t = 16; t < 64; t++) begin
-                            next_W[t] = ssig1_next_W[t-2] + next_W[t-32'd7] + ssig0_next_W[t-15] + next_W[t-32'd16];
-                            // next_W[t] = next_W[t-32'd7] + ssig0(t-15) + next_W[t-32'd16];
+                        for (logic [31:0] t = 0; t < 64; t++) begin
+                            if (t < 16) begin
+                                next_W[t] = M[t];
+                            end else begin
+                                next_W[t] = ssig1_next_W[t-2] + next_W[t-32'd7] + ssig0_next_W[t-15] + next_W[t-32'd16];
+                            end
                         end
                         // Set Working Variables
                         next_a = H[0];
@@ -288,8 +291,6 @@ module hash_process (
                         next_data_out_valid = 1'b0;
                     end
                     // Perform Hash Function
-                    T1 = h + bsig1(e) + ch(e,f,g) + K[hash_iter] + W[hash_iter];
-                    T2 = bsig0(a) + maj(a,b,c);
                     next_a = T1 + T2;
                     next_b = a;
                     next_c = b;
@@ -373,6 +374,10 @@ module hash_process (
                         next_state = 3'd4;
                         next_data_in_ready = 1'b0;
                     end
+                end
+            
+            default: begin
+                    next_state = 3'd0;
                 end
         endcase
     end
