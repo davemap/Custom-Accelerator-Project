@@ -9,9 +9,9 @@
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 `timescale 1ns/1ns
-`include "message_build.sv"
+`include "hash_process.sv"
 
-module tb_message_build;
+module tb_hash_process;
     
     logic clk;
     logic nrst;
@@ -47,7 +47,6 @@ module tb_message_build;
                   .data_out_ready(data_out_ready));
     
     logic data_in_drive_en;
-    logic cfg_drive_en;
     logic data_out_drive_ready;
     
     logic [511:0] data_in_queue [$];
@@ -149,14 +148,24 @@ module tb_message_build;
     logic output_data_last;    // Temporary Output Data Last
     
     initial begin
-        $dumpfile("engine_sim.vcd");
-        $dumpvars(0, tb_message_build);
+        $dumpfile("hash_process.vcd");
+        $dumpvars(0, tb_hash_process);
+        for (int i = 0; i < 16; i++) begin
+            $dumpvars(0, tb_hash_process.uut.M[i]);
+        end
+        for (int i = 0; i < 8; i++) begin
+            $dumpvars(0, tb_hash_process.uut.H[i]);
+            $dumpvars(0, tb_hash_process.uut.next_H[i]);
+        end
+        for (int i = 0; i < 64; i++) begin
+            $dumpvars(0, tb_hash_process.uut.W[i]);
+            $dumpvars(0, tb_hash_process.uut.next_W[i]);
+        end
         data_in_drive_en = 0;
-        cfg_drive_en = 0;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/input_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/input_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
@@ -164,7 +173,7 @@ module tb_message_build;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/output_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/output_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
@@ -181,9 +190,12 @@ module tb_message_build;
         #20 data_in_drive_en = 1;
        
         // Write some data into the config register
-        # 30 cfg_drive_en = 1;
         
         # 30 data_out_drive_ready = 1;
+        
+        # 200000
+        $display("Test Complete");
+        $finish;
     end
     
     initial begin
