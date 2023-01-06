@@ -34,18 +34,13 @@ module tb_message_build;
     logic data_out_ready;
     logic data_out_last;
         
-    message_build uut (
+    hash_process uut (
                   .clk (clk),
                   .nrst(nrst),
                   .data_in(data_in),
                   .data_in_valid(data_in_valid),
                   .data_in_ready(data_in_ready),
                   .data_in_last(data_in_last),
-                  .cfg_size(cfg_size),
-                  .cfg_scheme(cfg_scheme),
-                  .cfg_last(cfg_last),
-                  .cfg_valid(cfg_valid),
-                  .cfg_ready(cfg_ready),
                   .data_out(data_out),
                   .data_out_last(data_out_last),
                   .data_out_valid(data_out_valid),
@@ -88,33 +83,6 @@ module tb_message_build;
                     // No data currently avaiable in queue to write but transfers up to date
                     data_in_wait_queue <= 1'b1;
                     data_in_valid      <= 1'b0;
-                end
-            end
-        end
-    end
-    
-    // Handle Valid and Data for cfg
-    always_ff @(posedge clk, negedge nrst) begin: cfg_valid_drive
-        if (!nrst) begin
-            cfg_size            <=  64'd0;
-            cfg_scheme          <=   2'd0;
-            cfg_valid           <=   1'b0;
-            cfg_last            <=   1'b0;
-            cfg_wait_queue      <=   1'b1;
-        end else if (cfg_drive_en) begin
-            if (((cfg_valid == 1'b1) && (cfg_ready == 1'b1)) ||
-                 (cfg_wait_queue == 1'b1)) begin
-                // cfg transfer just completed or transfers already up to date
-                if ((cfg_size_queue.size() > 0) && (cfg_scheme_queue.size() > 0 ) && (cfg_last_queue.size() > 0)) begin
-                    cfg_size       <= cfg_size_queue.pop_front();
-                    cfg_scheme     <= cfg_scheme_queue.pop_front();
-                    cfg_last       <= cfg_last_queue.pop_front();
-                    cfg_valid      <= 1'b1;
-                    cfg_wait_queue <= 1'b0;
-                end else begin
-                    // No data currently avaiable in queue to write but transfers up to date
-                    cfg_wait_queue <= 1'b1;
-                    cfg_valid      <= 1'b0;
                 end
             end
         end
@@ -181,31 +149,22 @@ module tb_message_build;
     logic output_data_last;    // Temporary Output Data Last
     
     initial begin
-        $dumpfile("message_build.vcd");
+        $dumpfile("engine_sim.vcd");
         $dumpvars(0, tb_message_build);
         data_in_drive_en = 0;
         cfg_drive_en = 0;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/input_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
         end
         $fclose(fd);
         
-        // Read input cfg into Queue
-        fd = $fopen("../stimulus/testbench/input_cfg_builder_stim.csv", "r");
-        while ($fscanf (fd, "%x,%x,%b", input_cfg_size, input_cfg_scheme, input_cfg_last) == 3) begin
-            cfg_size_queue.push_back(input_cfg_size);
-            cfg_scheme_queue.push_back(input_cfg_scheme);
-            cfg_last_queue.push_back(input_cfg_last);
-        end
-        $fclose(fd);
-        
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/output_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
