@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# SoC Labs Basic SHA-2 Message Builder Python Reference
+# SoC Labs Basic SHA-2 Hashing Model Python Reference
 # A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 #
 # Contributors
