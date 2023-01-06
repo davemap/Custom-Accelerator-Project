@@ -146,17 +146,19 @@ module tb_message_build;
     always @(posedge clk) begin
         // Check Data on Handshake
         if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
+            assert (data_out == data_out_check) else begin
+                $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+                $finish;
+            end
+            // $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            assert (data_out_last == data_out_last_check) else begin
+                $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+                $finish;
+            end
+            // $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
-                assert (data_out == data_out_check) else begin
-                    $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
-                    $finish;
-                end
-                assert (data_out_last == data_out_last_check) else begin
-                    $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
-                    $finish;
-                end
                 if (data_out_last_check == 1'b1) begin
                     packet_num <= packet_num + 1;
                 end

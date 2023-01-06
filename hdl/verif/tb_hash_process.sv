@@ -29,7 +29,7 @@ module tb_hash_process;
     logic cfg_ready;
     
     // Data Out data and Handshaking
-    logic [511:0] data_out;
+    logic [255:0] data_out;
     logic data_out_valid;
     logic data_out_ready;
     logic data_out_last;
@@ -58,7 +58,7 @@ module tb_hash_process;
     logic cfg_last_queue         [$];
     logic cfg_wait_queue;
     
-    logic [511:0] data_out_queue [$];
+    logic [255:0] data_out_queue [$];
     logic data_out_last_queue    [$];
     logic data_out_wait_queue;
     
@@ -87,7 +87,7 @@ module tb_hash_process;
         end
     end
     
-    logic [511:0] data_out_check;
+    logic [255:0] data_out_check;
     logic data_out_last_check;
     logic check_output;
     logic test_end;
@@ -113,17 +113,19 @@ module tb_hash_process;
     always @(posedge clk) begin
         // Check Data on Handshake
         if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
+            assert (data_out == data_out_check) else begin
+                $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+                $finish;
+            end
+            $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            assert (data_out_last == data_out_last_check) else begin
+                $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+                $finish;
+            end
+            $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
-                assert (data_out == data_out_check) else begin
-                    $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
-                    $finish;
-                end
-                assert (data_out_last == data_out_last_check) else begin
-                    $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
-                    $finish;
-                end
                 if (data_out_last_check == 1'b1) begin
                     packet_num <= packet_num + 1;
                 end
@@ -144,7 +146,7 @@ module tb_hash_process;
     logic [1:0]  input_cfg_scheme; // Temporary cfg scheme
     logic input_cfg_last;          // Temporary cfg last;
     
-    logic [511:0] output_data; // Temporary Output Data Storage
+    logic [255:0] output_data; // Temporary Output Data Storage
     logic output_data_last;    // Temporary Output Data Last
     
     initial begin
@@ -160,12 +162,13 @@ module tb_hash_process;
         for (int i = 0; i < 64; i++) begin
             $dumpvars(0, tb_hash_process.uut.W[i]);
             $dumpvars(0, tb_hash_process.uut.next_W[i]);
+            $dumpvars(0, tb_hash_process.uut.ssig1_next_W[i]);
         end
         data_in_drive_en = 0;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/output_data_builder_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
@@ -173,7 +176,7 @@ module tb_hash_process;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/output_data_hash_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
@@ -192,10 +195,6 @@ module tb_hash_process;
         // Write some data into the config register
         
         # 30 data_out_drive_ready = 1;
-        
-        # 200000
-        $display("Test Complete");
-        $finish;
     end
     
     initial begin

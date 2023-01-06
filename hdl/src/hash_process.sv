@@ -26,7 +26,7 @@ module hash_process (
     output logic data_in_ready,
     
     // Data Out data and Handshaking
-    output logic [511:0] data_out,
+    output logic [255:0] data_out,
     output logic data_out_last,
     output logic data_out_valid,
     input  logic data_out_ready
@@ -41,7 +41,7 @@ module hash_process (
     genvar i;
     generate
         for (i = 0; i < 16; i++) begin
-            assign M[i] = data_in[(32*(i+1))-1:32*i];
+            assign M[i] = data_in[(32*((15-i)+1))-1:32*(15-i)];
         end
     endgenerate
     
@@ -56,12 +56,13 @@ module hash_process (
     // Working Registers
     logic [31:0] a,b,c,d,e,f,g,h;
     logic [31:0] next_a,next_b,next_c,next_d,next_e,next_f,next_g,next_h;
+    
+    // Working Combinatorial Words
     logic [31:0] T1, T2;
-    logic [31:0] next_T1, next_T2;
     
     // State Machine Registers
     logic [2:0] state, next_state;
-    logic [511:0] next_data_out;
+    logic [255:0] next_data_out;
     logic next_data_in_ready, next_data_out_valid, next_data_out_last;
     logic [5:0] hash_iter, next_hash_iter;
     logic last_block, next_last_block;
@@ -135,10 +136,12 @@ module hash_process (
     assign K[63] = 32'hc67178f2;
     
     // ssig1 next_W assignments - issues using functions with arrayed objects in ivlog
+    logic [31:0] ssig0_next_W [63:0];
     logic [31:0] ssig1_next_W [63:0];
     
     generate
         for (i = 0; i < 64; i ++) begin
+            assign ssig0_next_W[i] = ((next_W[i] << 25) | (next_W[i] >> 7)) ^ ((next_W[i] << 14) | (next_W[i] >> 18)) ^ (next_W[i] >> 3);
             assign ssig1_next_W[i] = ((next_W[i] << 15) | (next_W[i] >> 17)) ^ ((next_W[i] << 13) | (next_W[i] >> 19)) ^ (next_W[i] >> 10);
         end
     endgenerate
@@ -152,7 +155,7 @@ module hash_process (
             data_in_ready   <= 1'b0;
             data_out_valid  <= 1'b0;
             data_out_last   <= 1'b0;
-            data_out        <= 512'd0;
+            data_out        <= 256'd0;
             // Reset Working Registers
             a <= 32'd0;
             b <= 32'd0;
@@ -170,9 +173,6 @@ module hash_process (
             for (int i=0; i < 64; i++) begin
                 W[i] <= 32'd0;
             end
-            // Reset Temporary Registers
-            T1 <= 32'd0;
-            T2 <= 32'd0;
         end else begin
             state           <= next_state;
             hash_iter       <= next_hash_iter;
@@ -198,9 +198,6 @@ module hash_process (
             for (int i=0; i < 64; i++) begin
                 W[i] <= next_W[i];
             end
-            // Set Temporary Registers
-            T1 <= next_T1;
-            T2 <= next_T2;
         end    
     end
     
@@ -231,9 +228,6 @@ module hash_process (
         for (int i=0; i < 64; i++) begin
             next_W[i] = W[i];
         end
-        // Set Temporary Registers
-        next_T1 = T1;
-        next_T2 = T2;
         
         // Override
         case (state)
@@ -267,7 +261,7 @@ module hash_process (
                             next_W[t] = M[t];
                         end
                         for (logic [31:0] t = 16; t < 64; t++) begin
-                            next_W[t] = ssig1_next_W[t-2] + next_W[t-32'd7] + ssig0(t-15) + next_W[t-32'd16];
+                            next_W[t] = ssig1_next_W[t-2] + next_W[t-32'd7] + ssig0_next_W[t-15] + next_W[t-32'd16];
                             // next_W[t] = next_W[t-32'd7] + ssig0(t-15) + next_W[t-32'd16];
                         end
                         // Set Working Variables
@@ -294,8 +288,8 @@ module hash_process (
                         next_data_out_valid = 1'b0;
                     end
                     // Perform Hash Function
-                    next_T1 = h + bsig1(e) + ch(e,f,g) + K[hash_iter] + W[hash_iter];
-                    next_T2 = bsig0(a) + maj(a,b,c);;
+                    T1 = h + bsig1(e) + ch(e,f,g) + K[hash_iter] + W[hash_iter];
+                    T2 = bsig0(a) + maj(a,b,c);
                     next_a = T1 + T2;
                     next_b = a;
                     next_c = b;
@@ -326,7 +320,7 @@ module hash_process (
                     next_H[7] = h + H[7];
                     if (last_block) begin
                         if (!data_out_valid) begin // No Data waiting at output
-                            next_data_out       = {next_H[7], next_H[6], next_H[5], next_H[4], next_H[3], next_H[2], next_H[1], next_H[0]};
+                            next_data_out       = {next_H[0], next_H[1], next_H[2], next_H[3], next_H[4], next_H[5], next_H[6], next_H[7]};
                             next_data_out_last  = 1'b1;
                             next_data_out_valid = 1'b1;
                             // Next State Logic
@@ -359,7 +353,7 @@ module hash_process (
                         next_data_out_valid = 1'b0;
                     end
                     if (!data_out_valid) begin // No Data waiting at output
-                        next_data_out       = {next_H[7], next_H[6], next_H[5], next_H[4], next_H[3], next_H[2], next_H[1], next_H[0]};
+                        next_data_out       = {next_H[0], next_H[1], next_H[2], next_H[3], next_H[4], next_H[5], next_H[6], next_H[7]};
                         next_data_out_last  = 1'b1;
                         next_data_out_valid = 1'b1;
                         // Next State Logic

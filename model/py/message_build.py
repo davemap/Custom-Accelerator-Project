@@ -10,6 +10,8 @@
 #-----------------------------------------------------------------------------
 
 import os, sys, random, math, csv
+import subprocess
+from hashlib import sha256
 
 def main():
     # Check Environment Variables set
@@ -33,10 +35,11 @@ def main():
     in_data_words_last_list = []
     out_data_words_list = []
     out_data_words_last_list = []
+    hash_list = []
     
     for i in range(packets):
         # Generate expected output in 512 bit chunks
-        cfg_size = random.randint(0,pow(2,14))
+        cfg_size = math.ceil(random.randint(0,pow(2,14))/8)*8
         cfg_size_bin = "{0:b}".format(cfg_size)
         # Pad Size to 64 bits
         cfg_size_str = "0"*(64-len(cfg_size_bin)) + str(cfg_size_bin)
@@ -78,6 +81,13 @@ def main():
         in_data_words_last_list += in_data_words_last
         out_data_words_list += out_data_words
         out_data_words_last_list += out_data_words_last
+        intval = int(data, 2)
+        cmd = f"echo -n {data} | shasum -a 256 -0"
+        hash_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        hash_val = (str(hash_process.communicate()[0]).split()[0][2:])
+        # hash_val = subprocess.getoutput(["echo", "-n", data ,"|", "shasum", "-a",  "256", "-0"])
+        # print(hash_val)
+        hash_list.append(hash_val)
 
     # Write out Input Data Stimulus to Text File
     input_header = ["input_data", "input_data_last"]
@@ -99,6 +109,13 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(out_data_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), out_data_words_last_list[idx]])
+    
+    # Write out hash value to text file
+    output_header = ["output_data", "output_data_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_data_hash_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(hash_list):
+            writer.writerow([word, "1"])
 
 def chunkstring(string, length):
     array_len = math.ceil(len(string)/length)
