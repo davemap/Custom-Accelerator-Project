@@ -23,13 +23,6 @@ module tb_sha256_hash_compression;
     logic data_in_valid;
     logic data_in_ready;
     
-    // Config data and Handshaking
-    logic [63:0] cfg_size;
-    logic [1:0] cfg_scheme;
-    logic cfg_last;
-    logic cfg_valid;
-    logic cfg_ready;
-    
     // Data Out data and Handshaking
     logic [255:0] data_out;
     logic data_out_valid;
@@ -56,11 +49,6 @@ module tb_sha256_hash_compression;
     logic [511:0] data_in_queue [$];
     logic data_in_last_queue    [$];
     logic data_in_wait_queue;
-    
-    logic [63:0] cfg_size_queue  [$];
-    logic [1:0] cfg_scheme_queue [$];
-    logic cfg_last_queue         [$];
-    logic cfg_wait_queue;
     
     logic [255:0] data_out_queue [$];
     logic data_out_last_queue    [$];
@@ -146,10 +134,6 @@ module tb_sha256_hash_compression;
     logic [511:0] input_data; // Temporary Input Data Storage
     logic input_data_last;    // Temporary Input Data Last
     
-    logic [63:0] input_cfg_size;   // Temporary cfg size 
-    logic [1:0]  input_cfg_scheme; // Temporary cfg scheme
-    logic input_cfg_last;          // Temporary cfg last;
-    
     logic [255:0] output_data; // Temporary Output Data Storage
     logic output_data_last;    // Temporary Output Data Last
     
@@ -202,8 +186,6 @@ module tb_sha256_hash_compression;
         #20 nrst  = 1;
         #20 data_in_drive_en = 1;
        
-        // Write some data into the config register
-        
         # 30 data_out_drive_ready = 1;
     end
     

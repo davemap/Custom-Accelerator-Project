@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic SHA-2 Message Builder Testbench
+// SoC Labs Basic SHA-2 Engine Testbench
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -31,32 +31,32 @@ module tb_sha256_engine;
     logic cfg_ready;
     
     // Data Out data and Handshaking
-    logic [511:0] data_out;
+    logic [255:0] data_out;
     logic data_out_valid;
     logic data_out_ready;
     logic data_out_last;
         
-    message_build uut (
-                  .clk (clk),
-                  .nrst(nrst),
-                  .en  (en),
-                  .sync_rst(sync_rst),
-                  .data_in(data_in),
-                  .data_in_valid(data_in_valid),
-                  .data_in_ready(data_in_ready),
-                  .data_in_last(data_in_last),
-                  .cfg_size(cfg_size),
-                  .cfg_scheme(cfg_scheme),
-                  .cfg_last(cfg_last),
-                  .cfg_valid(cfg_valid),
-                  .cfg_ready(cfg_ready),
-                  .data_out(data_out),
-                  .data_out_last(data_out_last),
-                  .data_out_valid(data_out_valid),
-                  .data_out_ready(data_out_ready));
+    sha256_engine uut (
+        .clk            (clk),
+        .nrst           (nrst),
+        .en             (en),
+        .sync_rst       (sync_rst),
+        .data_in        (data_in),
+        .data_in_valid  (data_in_valid),
+        .data_in_ready  (data_in_ready),
+        .data_in_last   (data_in_last),
+        .cfg_size       (cfg_size),
+        .cfg_scheme     (cfg_scheme),
+        .cfg_last       (cfg_last),
+        .cfg_valid      (cfg_valid),
+        .cfg_ready      (cfg_ready),
+        .data_out       (data_out),
+        .data_out_last  (data_out_last),
+        .data_out_valid (data_out_valid),
+        .data_out_ready (data_out_ready)
+    );
     
     logic data_in_drive_en;
-    logic cfg_drive_en;
     logic data_out_drive_ready;
     
     logic [511:0] data_in_queue [$];
@@ -68,7 +68,7 @@ module tb_sha256_engine;
     logic cfg_last_queue         [$];
     logic cfg_wait_queue;
     
-    logic [511:0] data_out_queue [$];
+    logic [255:0] data_out_queue [$];
     logic data_out_last_queue    [$];
     logic data_out_wait_queue;
     
@@ -96,7 +96,7 @@ module tb_sha256_engine;
             end
         end
     end
-    
+
     // Handle Valid and Data for cfg
     always_ff @(posedge clk, negedge nrst) begin: cfg_valid_drive
         if (!nrst) begin
@@ -124,11 +124,11 @@ module tb_sha256_engine;
         end
     end
     
-    logic [511:0] data_out_check;
+    logic [255:0] data_out_check;
     logic data_out_last_check;
     logic check_output;
     logic test_end;
-    int packet_num;
+    int   packet_num;
     
     // Handle Output Ready Driving
     always_ff @(posedge clk, negedge nrst) begin: data_out_recieve
@@ -154,12 +154,12 @@ module tb_sha256_engine;
                 $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
                 $finish;
             end
-            // $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
             assert (data_out_last == data_out_last_check) else begin
                 $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
                 $finish;
             end
-            // $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+            $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
@@ -183,12 +183,24 @@ module tb_sha256_engine;
     logic [1:0]  input_cfg_scheme; // Temporary cfg scheme
     logic input_cfg_last;          // Temporary cfg last;
     
-    logic [511:0] output_data; // Temporary Output Data Storage
+    logic [255:0] output_data; // Temporary Output Data Storage
     logic output_data_last;    // Temporary Output Data Last
     
     initial begin
-        $dumpfile("message_build.vcd");
-        $dumpvars(0, tb_message_build);
+        $dumpfile("sha256_engine.vcd");
+        $dumpvars(0, tb_sha256_engine);
+        for (int i = 0; i < 16; i++) begin
+            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.M[i]);
+        end
+        for (int i = 0; i < 8; i++) begin
+            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.H[i]);
+            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.next_H[i]);
+        end
+        for (int i = 0; i < 64; i++) begin
+            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.W[i]);
+            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.next_W[i]);
+            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.ssig1_next_W[i]);
+        end
         data_in_drive_en = 0;
         cfg_drive_en = 0;
         data_out_drive_ready = 0;
@@ -211,7 +223,7 @@ module tb_sha256_engine;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/inout_message_block_stim_ref.csv", "r");
+        fd = $fopen("../stimulus/testbench/output_hash_ref.csv", "r");
         while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
@@ -222,8 +234,8 @@ module tb_sha256_engine;
         data_out_check = data_out_queue.pop_front();      
         data_out_last_check = data_out_last_queue.pop_front();
         
-        // Defaultly enable Message Builder
-        en  = 1;
+        // Enable Hash Compression
+        en = 1;
         
         // Defaultly set Sync Reset Low
         sync_rst  = 0;

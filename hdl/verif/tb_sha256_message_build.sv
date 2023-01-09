@@ -128,7 +128,7 @@ module tb_sha256_message_build;
     logic data_out_last_check;
     logic check_output;
     logic test_end;
-    int packet_num;
+    int   packet_num;
     
     // Handle Output Ready Driving
     always_ff @(posedge clk, negedge nrst) begin: data_out_recieve
