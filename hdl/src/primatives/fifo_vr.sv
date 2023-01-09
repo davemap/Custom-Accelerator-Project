@@ -8,7 +8,7 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-module vr_fifo #(
+module fifo_vr #(
     parameter DEPTH  = 4,                 // FIFO Row Depth
     parameter DATA_W = 32,                // FIFO Row Width
     parameter PTR_W  = $clog2(DEPTH) + 1  // Read/Write Pointer Width
