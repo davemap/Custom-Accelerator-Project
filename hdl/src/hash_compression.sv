@@ -11,7 +11,7 @@
 `include "hashing_functions.sv"
 
 
-module hash_process (
+module hash_compression (
     input logic clk,
     input logic nrst,
     input logic en,

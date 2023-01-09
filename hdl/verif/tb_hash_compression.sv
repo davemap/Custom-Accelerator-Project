@@ -9,9 +9,9 @@
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 `timescale 1ns/1ns
-`include "hash_process.sv"
+`include "hash_compression.sv"
 
-module tb_hash_process;
+module tb_hash_compression;
     
     logic clk;
     logic nrst;
@@ -34,7 +34,7 @@ module tb_hash_process;
     logic data_out_ready;
     logic data_out_last;
         
-    hash_process uut (
+    hash_compression uut (
                   .clk (clk),
                   .nrst(nrst),
                   .data_in(data_in),
@@ -150,19 +150,19 @@ module tb_hash_process;
     logic output_data_last;    // Temporary Output Data Last
     
     initial begin
-        $dumpfile("hash_process.vcd");
-        $dumpvars(0, tb_hash_process);
+        $dumpfile("hash_compression.vcd");
+        $dumpvars(0, tb_hash_compression);
         for (int i = 0; i < 16; i++) begin
-            $dumpvars(0, tb_hash_process.uut.M[i]);
+            $dumpvars(0, tb_hash_compression.uut.M[i]);
         end
         for (int i = 0; i < 8; i++) begin
-            $dumpvars(0, tb_hash_process.uut.H[i]);
-            $dumpvars(0, tb_hash_process.uut.next_H[i]);
+            $dumpvars(0, tb_hash_compression.uut.H[i]);
+            $dumpvars(0, tb_hash_compression.uut.next_H[i]);
         end
         for (int i = 0; i < 64; i++) begin
-            $dumpvars(0, tb_hash_process.uut.W[i]);
-            $dumpvars(0, tb_hash_process.uut.next_W[i]);
-            $dumpvars(0, tb_hash_process.uut.ssig1_next_W[i]);
+            $dumpvars(0, tb_hash_compression.uut.W[i]);
+            $dumpvars(0, tb_hash_compression.uut.next_W[i]);
+            $dumpvars(0, tb_hash_compression.uut.ssig1_next_W[i]);
         end
         data_in_drive_en = 0;
         data_out_drive_ready = 0;
