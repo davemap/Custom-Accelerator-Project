@@ -99,6 +99,7 @@ module sha256_engine (
     message_build message_block_builder (
         .clk            (clk),
         .nrst           (nrst),
+        .en             (en),
         .sync_rst       (sync_rst),
         .data_in        (data_in_buffered),
         .data_in_valid  (data_in_valid_buffered),
@@ -119,6 +120,7 @@ module sha256_engine (
     hash_compression hash_calculator (
         .clk            (clk),
         .nrst           (nrst),
+        .en             (en),
         .sync_rst       (sync_rst),
         .data_in        (message_block),
         .data_in_valid  (message_block_valid),

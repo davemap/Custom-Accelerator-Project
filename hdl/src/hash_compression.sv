@@ -173,7 +173,7 @@ module hash_compression (
             for (int i=0; i < 64; i++) begin
                 W[i] <= 32'd0;
             end
-        end else begin
+        end else if (en == 1'b1) begin
             state           <= next_state;
             hash_iter       <= next_hash_iter;
             last_block      <= next_last_block;
@@ -198,7 +198,10 @@ module hash_compression (
             for (int i=0; i < 64; i++) begin
                 W[i] <= next_W[i];
             end
-        end    
+        end else begin
+            data_in_ready   <= 1'b0;
+            data_out_valid  <= 1'b0;
+        end
     end
     
     // State Machine Combinatorial Logic

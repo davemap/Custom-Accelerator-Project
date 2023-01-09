@@ -79,7 +79,7 @@ module message_build (
             data_out        <= 512'd0;
             data_word_count <= 55'd0;
             extra_word      <= 1'b0;
-        end else begin
+        end else if (en == 1'b1) begin
             state           <= next_state;
             data_in_ready   <= next_data_in_ready;
             cfg_ready       <= next_cfg_ready;
@@ -90,7 +90,10 @@ module message_build (
             data_out        <= next_data_out;
             data_word_count <= next_data_word_count;
             extra_word      <= next_extra_word;
-        end    
+        end else begin
+            data_in_ready   <= 1'b0;
+            data_out_valid  <= 1'b0;
+        end
     end
     
     always_comb begin

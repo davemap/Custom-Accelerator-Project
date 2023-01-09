@@ -15,6 +15,7 @@ module tb_hash_compression;
     
     logic clk;
     logic nrst;
+    logic en;
     logic sync_rst;
     // Data In data and Handshaking
     logic [511:0] data_in;
@@ -38,6 +39,7 @@ module tb_hash_compression;
     hash_compression uut (
                   .clk (clk),
                   .nrst(nrst),
+                  .en  (en),
                   .sync_rst(sync_rst),
                   .data_in(data_in),
                   .data_in_valid(data_in_valid),
@@ -188,6 +190,9 @@ module tb_hash_compression;
         // Initialise First Checking Values
         data_out_check = data_out_queue.pop_front();      
         data_out_last_check = data_out_last_queue.pop_front();
+        
+        // Enable Hash Compression
+        en = 1;
         
         // Defaultly set Sync Reset Low
         sync_rst  = 0;
