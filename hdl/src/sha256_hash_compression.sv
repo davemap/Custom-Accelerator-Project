@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic SHA-2 Hash Processing Module
+// SoC Labs Basic SHA-256 Hash Processing Module
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -8,10 +8,10 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-`include "hashing_functions.sv"
+`include "sha256_hashing_functions.sv"
 
 
-module hash_compression (
+module sha256_hash_compression (
     input logic clk,
     input logic nrst,
     input logic en,
@@ -32,7 +32,7 @@ module hash_compression (
     input  logic data_out_ready
 );
 
-    import hashing_functions::*;
+    import sha256_hashing_functions::*;
 
     // Message Chunks
     logic [31:0] M [15:0];

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic SHA-2 Message Builder Module
+// SoC Labs Basic SHA-256 Message Builder Module
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -8,7 +8,7 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-module message_build (
+module sha256_message_build (
     input logic clk,
     input logic nrst,
     input logic en,

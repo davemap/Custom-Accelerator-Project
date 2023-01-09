@@ -8,6 +8,9 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
+`include "sha256_hash_compression.sv"
+`include "sha256_message_build.sv"
+`include "fifo_vr.sv"
 
 module sha256_engine (
     // Clocking Signals
@@ -96,7 +99,7 @@ module sha256_engine (
     );
     
     // Message Build (Construct Message Blocks)
-    message_build message_block_builder (
+    sha256_message_build message_block_builder (
         .clk            (clk),
         .nrst           (nrst),
         .en             (en),
@@ -117,7 +120,7 @@ module sha256_engine (
     );
     
     // Hash Compression (Peform Hash Calculation)
-    hash_compression hash_calculator (
+    sha256_hash_compression hash_calculator (
         .clk            (clk),
         .nrst           (nrst),
         .en             (en),

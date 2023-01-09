@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic SHA-2 Engine function and constants SV Package
+// SoC Labs Basic SHA-256 Engine function and constants SV Package
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -9,7 +9,7 @@
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 
-package hashing_functions;
+package sha256_hashing_functions;
     parameter data_width = 32;
     
     // SHA-2 Functions

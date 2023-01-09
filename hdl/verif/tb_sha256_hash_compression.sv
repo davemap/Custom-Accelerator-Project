@@ -9,9 +9,9 @@
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 `timescale 1ns/1ns
-`include "message_build.sv"
+`include "sha256_hash_compression.sv"
 
-module tb_message_build;
+module tb_sha256_hash_compression;
     
     logic clk;
     logic nrst;
@@ -31,12 +31,12 @@ module tb_message_build;
     logic cfg_ready;
     
     // Data Out data and Handshaking
-    logic [511:0] data_out;
+    logic [255:0] data_out;
     logic data_out_valid;
     logic data_out_ready;
     logic data_out_last;
         
-    message_build uut (
+    sha256_hash_compression uut (
                   .clk (clk),
                   .nrst(nrst),
                   .en  (en),
@@ -45,18 +45,12 @@ module tb_message_build;
                   .data_in_valid(data_in_valid),
                   .data_in_ready(data_in_ready),
                   .data_in_last(data_in_last),
-                  .cfg_size(cfg_size),
-                  .cfg_scheme(cfg_scheme),
-                  .cfg_last(cfg_last),
-                  .cfg_valid(cfg_valid),
-                  .cfg_ready(cfg_ready),
                   .data_out(data_out),
                   .data_out_last(data_out_last),
                   .data_out_valid(data_out_valid),
                   .data_out_ready(data_out_ready));
     
     logic data_in_drive_en;
-    logic cfg_drive_en;
     logic data_out_drive_ready;
     
     logic [511:0] data_in_queue [$];
@@ -68,7 +62,7 @@ module tb_message_build;
     logic cfg_last_queue         [$];
     logic cfg_wait_queue;
     
-    logic [511:0] data_out_queue [$];
+    logic [255:0] data_out_queue [$];
     logic data_out_last_queue    [$];
     logic data_out_wait_queue;
     
@@ -97,34 +91,7 @@ module tb_message_build;
         end
     end
     
-    // Handle Valid and Data for cfg
-    always_ff @(posedge clk, negedge nrst) begin: cfg_valid_drive
-        if (!nrst) begin
-            cfg_size            <=  64'd0;
-            cfg_scheme          <=   2'd0;
-            cfg_valid           <=   1'b0;
-            cfg_last            <=   1'b0;
-            cfg_wait_queue      <=   1'b1;
-        end else if (cfg_drive_en) begin
-            if (((cfg_valid == 1'b1) && (cfg_ready == 1'b1)) ||
-                 (cfg_wait_queue == 1'b1)) begin
-                // cfg transfer just completed or transfers already up to date
-                if ((cfg_size_queue.size() > 0) && (cfg_scheme_queue.size() > 0 ) && (cfg_last_queue.size() > 0)) begin
-                    cfg_size       <= cfg_size_queue.pop_front();
-                    cfg_scheme     <= cfg_scheme_queue.pop_front();
-                    cfg_last       <= cfg_last_queue.pop_front();
-                    cfg_valid      <= 1'b1;
-                    cfg_wait_queue <= 1'b0;
-                end else begin
-                    // No data currently avaiable in queue to write but transfers up to date
-                    cfg_wait_queue <= 1'b1;
-                    cfg_valid      <= 1'b0;
-                end
-            end
-        end
-    end
-    
-    logic [511:0] data_out_check;
+    logic [255:0] data_out_check;
     logic data_out_last_check;
     logic check_output;
     logic test_end;
@@ -154,12 +121,12 @@ module tb_message_build;
                 $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
                 $finish;
             end
-            // $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
             assert (data_out_last == data_out_last_check) else begin
                 $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
                 $finish;
             end
-            // $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+            $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
@@ -183,35 +150,37 @@ module tb_message_build;
     logic [1:0]  input_cfg_scheme; // Temporary cfg scheme
     logic input_cfg_last;          // Temporary cfg last;
     
-    logic [511:0] output_data; // Temporary Output Data Storage
+    logic [255:0] output_data; // Temporary Output Data Storage
     logic output_data_last;    // Temporary Output Data Last
     
     initial begin
-        $dumpfile("message_build.vcd");
-        $dumpvars(0, tb_message_build);
+        $dumpfile("sha256_hash_compression.vcd");
+        $dumpvars(0, tb_sha256_hash_compression);
+        for (int i = 0; i < 16; i++) begin
+            $dumpvars(0, tb_sha256_hash_compression.uut.M[i]);
+        end
+        for (int i = 0; i < 8; i++) begin
+            $dumpvars(0, tb_sha256_hash_compression.uut.H[i]);
+            $dumpvars(0, tb_sha256_hash_compression.uut.next_H[i]);
+        end
+        for (int i = 0; i < 64; i++) begin
+            $dumpvars(0, tb_sha256_hash_compression.uut.W[i]);
+            $dumpvars(0, tb_sha256_hash_compression.uut.next_W[i]);
+            $dumpvars(0, tb_sha256_hash_compression.uut.ssig1_next_W[i]);
+        end
         data_in_drive_en = 0;
-        cfg_drive_en = 0;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_data_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/inout_message_block_stim_ref.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
         end
         $fclose(fd);
         
-        // Read input cfg into Queue
-        fd = $fopen("../stimulus/testbench/input_cfg_stim.csv", "r");
-        while ($fscanf (fd, "%x,%x,%b", input_cfg_size, input_cfg_scheme, input_cfg_last) == 3) begin
-            cfg_size_queue.push_back(input_cfg_size);
-            cfg_scheme_queue.push_back(input_cfg_scheme);
-            cfg_last_queue.push_back(input_cfg_last);
-        end
-        $fclose(fd);
-        
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/inout_message_block_stim_ref.csv", "r");
+        fd = $fopen("../stimulus/testbench/output_hash_ref.csv", "r");
         while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
@@ -222,8 +191,8 @@ module tb_message_build;
         data_out_check = data_out_queue.pop_front();      
         data_out_last_check = data_out_last_queue.pop_front();
         
-        // Defaultly enable Message Builder
-        en  = 1;
+        // Enable Hash Compression
+        en = 1;
         
         // Defaultly set Sync Reset Low
         sync_rst  = 0;
@@ -234,7 +203,6 @@ module tb_message_build;
         #20 data_in_drive_en = 1;
        
         // Write some data into the config register
-        # 30 cfg_drive_en = 1;
         
         # 30 data_out_drive_ready = 1;
     end
