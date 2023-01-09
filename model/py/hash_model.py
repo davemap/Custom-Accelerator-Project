@@ -12,6 +12,8 @@
 import os, sys, random, math, csv
 import subprocess
 import platform
+import binascii
+import hashlib
 
 def main():
     # Check Environment Variables set
@@ -83,14 +85,8 @@ def main():
         out_data_words_last_list += out_data_words_last
         intval = int(data, 2)
         hash_val = 0
-        if (platform.system() == "Darwin"):
-            cmd = f"echo -n {data} | shasum -a 256 -0"
-            hash_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-            hash_val = (str(hash_process.communicate()[0]).split()[0][2:])
-        else:
-            print("Platform not supported yet")
-            exit()
-        # print(hash_val)
+        h=int(data, 2).to_bytes((len(data) + 7) // 8, byteorder='big')
+        hash_val = binascii.hexlify(hashlib.sha256(h).digest()).decode()
         hash_list.append(hash_val)
 
     # Write out Input Data Stimulus to Text File

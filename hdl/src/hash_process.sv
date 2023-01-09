@@ -140,7 +140,7 @@ module hash_process (
     logic [31:0] ssig1_next_W [63:0];
     
     generate
-        for (i = 0; i < 64; i ++) begin
+        for (i=0; i < 64; i++) begin
             assign ssig0_next_W[i] = ((next_W[i] << 25) | (next_W[i] >> 7)) ^ ((next_W[i] << 14) | (next_W[i] >> 18)) ^ (next_W[i] >> 3);
             assign ssig1_next_W[i] = ((next_W[i] << 15) | (next_W[i] >> 17)) ^ ((next_W[i] << 13) | (next_W[i] >> 19)) ^ (next_W[i] >> 10);
         end
