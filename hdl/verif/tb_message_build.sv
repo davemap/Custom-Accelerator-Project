@@ -190,7 +190,7 @@ module tb_message_build;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/input_data_stim.csv", "r");
         while ($fscanf (fd, "%x,%b", input_data, input_data_last) == 2) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
@@ -198,7 +198,7 @@ module tb_message_build;
         $fclose(fd);
         
         // Read input cfg into Queue
-        fd = $fopen("../stimulus/testbench/input_cfg_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/input_cfg_stim.csv", "r");
         while ($fscanf (fd, "%x,%x,%b", input_cfg_size, input_cfg_scheme, input_cfg_last) == 3) begin
             cfg_size_queue.push_back(input_cfg_size);
             cfg_scheme_queue.push_back(input_cfg_scheme);
@@ -207,7 +207,7 @@ module tb_message_build;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_data_builder_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/inout_message_block_stim_ref.csv", "r");
         while ($fscanf (fd, "%x,%b", output_data, output_data_last) == 2) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
