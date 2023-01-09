@@ -154,12 +154,12 @@ module tb_sha256_message_build;
                 $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
                 $finish;
             end
-            // $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
             assert (data_out_last == data_out_last_check) else begin
                 $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
                 $finish;
             end
-            // $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+            $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();

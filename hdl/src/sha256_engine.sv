@@ -57,6 +57,11 @@ module sha256_engine (
     logic message_block_valid;
     logic message_block_ready;
     
+    logic [511:0] message_block_buffered;
+    logic message_block_last_buffered;
+    logic message_block_valid_buffered;
+    logic message_block_ready_buffered;
+    
     logic [255:0] hash;
     logic hash_last;
     logic hash_valid;
@@ -89,9 +94,9 @@ module sha256_engine (
         .en             (en),
         .sync_rst       (sync_rst),
         .data_in        ({cfg_size, cfg_scheme}),
-        .data_in_valid  (cfg_in_valid),
-        .data_in_ready  (cfg_in_ready),
-        .data_in_last   (cfg_in_last),
+        .data_in_valid  (cfg_valid),
+        .data_in_ready  (cfg_ready),
+        .data_in_last   (cfg_last),
         .data_out       ({cfg_size_buffered,cfg_scheme_buffered}),
         .data_out_last  (cfg_last_buffered),
         .data_out_valid (cfg_valid_buffered),
@@ -119,8 +124,10 @@ module sha256_engine (
         .data_out_ready (message_block_ready)
     );
     
-    // Hash Compression (Peform Hash Calculation)
-    sha256_hash_compression hash_calculator (
+    // Intermediate FIFO
+    fifo_vr #(16,  // Depth
+              512 // Data Width 
+    ) message_block_buffer (
         .clk            (clk),
         .nrst           (nrst),
         .en             (en),
@@ -129,6 +136,23 @@ module sha256_engine (
         .data_in_valid  (message_block_valid),
         .data_in_ready  (message_block_ready),
         .data_in_last   (message_block_last),
+        .data_out       (message_block_buffered),
+        .data_out_last  (message_block_last_buffered),
+        .data_out_valid (message_block_valid_buffered),
+        .data_out_ready (message_block_ready_buffered)
+    );
+    
+
+    // Hash Compression (Peform Hash Calculation)
+    sha256_hash_compression hash_calculator (
+        .clk            (clk),
+        .nrst           (nrst),
+        .en             (en),
+        .sync_rst       (sync_rst),
+        .data_in        (message_block_buffered),
+        .data_in_valid  (message_block_valid_buffered),
+        .data_in_ready  (message_block_ready_buffered),
+        .data_in_last   (message_block_last_buffered),
         .data_out       (hash),
         .data_out_last  (hash_last),
         .data_out_valid (hash_valid),
