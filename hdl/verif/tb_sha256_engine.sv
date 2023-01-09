@@ -69,6 +69,10 @@ module tb_sha256_engine;
     logic cfg_last_queue         [$];
     logic cfg_wait_queue;
     
+    logic [511:0] message_block_queue [$];
+    logic message_block_last_queue    [$];
+    logic message_block_wait_queue;
+    
     logic [255:0] data_out_queue [$];
     logic data_out_last_queue    [$];
     logic data_out_wait_queue;
@@ -131,6 +135,10 @@ module tb_sha256_engine;
     logic test_end;
     int   packet_num;
     
+    logic [511:0] message_block_data_out_check;
+    logic message_block_data_out_last_check;
+    int   message_block_packet_num;
+    
     // Handle Output Ready Driving
     always_ff @(posedge clk, negedge nrst) begin: data_out_recieve
         if (!nrst) begin
@@ -172,6 +180,26 @@ module tb_sha256_engine;
                 $finish;
             end
         end
+        // Check Message Block Handshake
+        if ((message_builder_out_data_valid == 1'b1) && (message_builder_out_data_ready == 1'b1)) begin
+            assert (message_builder_out_data == message_block_data_out_check) else begin
+                $error("message block missmatch! packet %d | recieve: %x != check: %x", message_block_packet_num, data_out, message_block_data_out_check);
+                $finish;
+            end
+            $display("message block match! packet %d | recieve: %x != check: %x", message_block_packet_num, message_builder_out_data, message_block_data_out_check);
+            assert (message_builder_out_data_last == message_block_data_out_last_check) else begin
+                $error("message block last missmatch! packet %d | recieve: %x != check: %x", message_block_packet_num, message_builder_out_data_last, message_block_data_out_last_check);
+                $finish;
+            end
+            $display("message block last match! packet %d | recieve: %x != check: %x", message_block_packet_num, message_builder_out_data_last, message_block_data_out_last_check);
+            if ((message_block_queue.size() > 0) && (message_block_last_queue.size() > 0)) begin
+                message_block_data_out_check <= message_block_queue.pop_front();
+                message_block_data_out_last_check <= message_block_last_queue.pop_front();
+                if (message_block_data_out_last_check == 1'b1) begin
+                    message_block_packet_num <= message_block_packet_num + 1;
+                end
+            end
+        end
     end
     
     // File Reading Variables
@@ -187,21 +215,32 @@ module tb_sha256_engine;
     logic [255:0] output_data; // Temporary Output Data Storage
     logic output_data_last;    // Temporary Output Data Last
     
+    logic [511:0] message_block_data; // Temporary Message Block Data Storage
+    logic message_block_data_last;    // Temporary Message Block Data Last
+    
+    logic [511:0] message_builder_out_data;
+    logic  message_builder_out_data_last;
+    
+    assign message_builder_out_data = tb_sha256_engine.uut.message_block;
+    assign message_builder_out_data_last = tb_sha256_engine.uut.message_block_last;
+    assign message_builder_out_data_valid = tb_sha256_engine.uut.message_block_valid;
+    assign message_builder_out_data_ready = tb_sha256_engine.uut.message_block_ready;
+    
     initial begin
         $dumpfile("sha256_engine.vcd");
         $dumpvars(0, tb_sha256_engine);
-        for (int i = 0; i < 16; i++) begin
-            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.M[i]);
-        end
-        for (int i = 0; i < 8; i++) begin
-            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.H[i]);
-            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.next_H[i]);
-        end
-        for (int i = 0; i < 64; i++) begin
-            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.W[i]);
-            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.next_W[i]);
-            $dumpvars(0, tb_sha256_engine.uut.hash_calculator.ssig1_next_W[i]);
-        end
+        // for (int i = 0; i < 16; i++) begin
+        //     $dumpvars(0, tb_sha256_engine.uut.hash_calculator.M[i]);
+        // end
+        // for (int i = 0; i < 8; i++) begin
+        //     $dumpvars(0, tb_sha256_engine.uut.hash_calculator.H[i]);
+        //     $dumpvars(0, tb_sha256_engine.uut.hash_calculator.next_H[i]);
+        // end
+        // for (int i = 0; i < 64; i++) begin
+        //     $dumpvars(0, tb_sha256_engine.uut.hash_calculator.W[i]);
+        //     $dumpvars(0, tb_sha256_engine.uut.hash_calculator.next_W[i]);
+        //     $dumpvars(0, tb_sha256_engine.uut.hash_calculator.ssig1_next_W[i]);
+        // end
         data_in_drive_en = 0;
         cfg_drive_en = 0;
         data_out_drive_ready = 0;
@@ -231,9 +270,20 @@ module tb_sha256_engine;
         end
         $fclose(fd);
         
+        // Read Message Block data into Queue
+        fd = $fopen("../stimulus/testbench/inout_message_block_stim_ref.csv", "r");
+        while ($fscanf (fd, "%x,%b", message_block_data, message_block_data_last) == 2) begin
+            message_block_queue.push_back(message_block_data);
+            message_block_last_queue.push_back(message_block_data_last);
+        end
+        $fclose(fd);
+        
         // Initialise First Checking Values
         data_out_check = data_out_queue.pop_front();      
         data_out_last_check = data_out_last_queue.pop_front();
+        
+        message_block_data_out_check = message_block_queue.pop_front();      
+        message_block_data_out_last_check = message_block_last_queue.pop_front();
         
         // Enable Hash Compression
         en = 1;
