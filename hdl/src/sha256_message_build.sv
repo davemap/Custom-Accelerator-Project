@@ -123,12 +123,18 @@ module sha256_message_build (
                     end
                     // If there is no Valid data at the output or there is a valid transfer happening on this clock cycle
                     if (cfg_valid == 1'b1) begin
+                        // Check for already existing valid data at output
+                        if (data_out_valid && !data_out_ready) begin
+                            next_data_in_ready = 1'b0;
+                        end else begin
+                            next_data_in_ready = 1'b1;
+                        end
                         // Handshake to Acknowledge Config Has been Read
                         next_cfg_size        = cfg_size;
                         next_cfg_ready       = 1'b0;
-                        next_data_in_ready   = 1'b1;
                         next_data_word_count = word_extract + {53'd0, |rem_extract}; // Divide by 512 and round up
                         next_data_word_rem   = rem_extract;
+                        // Next State Logic
                         if (next_data_word_count > 1) begin
                             next_state = 3'd2;
                         end else begin
@@ -152,6 +158,7 @@ module sha256_message_build (
                         if (data_in_valid && data_in_ready) begin
                             // Valid Handshake and data can be processed
                             // Data Processing Algorithm
+                            next_data_in_ready   = 1'b0;
                             next_data_word_count = data_word_count - 1;
                             // Write Input Data to Output 
                             next_data_out       = data_in;
