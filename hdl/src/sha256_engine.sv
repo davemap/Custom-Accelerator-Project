@@ -63,39 +63,39 @@ module sha256_engine (
     logic hash_ready;
     
     // Data-in FIFO
-    fifo_vr #( DEPTH  = 16,
-               DATA_W = 512
+    fifo_vr #(16, // Depth
+              512 // Data Width 
     ) data_in_buffer (
-        .clk        (clk),
-        .nrst       (nrst),
-        .en         (en),
-        .sync_rst   (sync_rst),
-        .in         (data_in),
-        .in_valid   (data_in_valid),
-        .in_ready   (data_in_ready),
-        .in_last    (data_in_last),
-        .out        (data_in_buffered),
-        .out_last   (data_in_last_buffered;),
-        .out_valid  (data_in_valid_buffered),
-        .out_ready  (data_in_ready_buffered)
+        .clk            (clk),
+        .nrst           (nrst),
+        .en             (en),
+        .sync_rst       (sync_rst),
+        .data_in        (data_in),
+        .data_in_valid  (data_in_valid),
+        .data_in_ready  (data_in_ready),
+        .data_in_last   (data_in_last),
+        .data_out       (data_in_buffered),
+        .data_out_last  (data_in_last_buffered),
+        .data_out_valid (data_in_valid_buffered),
+        .data_out_ready (data_in_ready_buffered)
     );
     
     // Configuration FIFO
-    fifo_vr #( DEPTH  = 8, // Should be recieving less configuration words than data words
-               DATA_W = 66
+    fifo_vr #(8, // Depth
+              66 // Data Width 
     ) cfg_buffer (
-        .clk        (clk),
-        .nrst       (nrst),
-        .en         (en),
-        .sync_rst   (sync_rst),
-        .in         ({cfg_size, cfg_scheme}),
-        .in_valid   (cfg_in_valid),
-        .in_ready   (cfg_in_ready),
-        .in_last    (cfg_in_last),
-        .out        ({cfg_size_buffered,cfg_scheme_buffered}),
-        .out_last   (cfg_last_buffered;),
-        .out_valid  (cfg_valid_buffered),
-        .out_ready  (cfg_ready_buffered)
+        .clk            (clk),
+        .nrst           (nrst),
+        .en             (en),
+        .sync_rst       (sync_rst),
+        .data_in        ({cfg_size, cfg_scheme}),
+        .data_in_valid  (cfg_in_valid),
+        .data_in_ready  (cfg_in_ready),
+        .data_in_last   (cfg_in_last),
+        .data_out       ({cfg_size_buffered,cfg_scheme_buffered}),
+        .data_out_last  (cfg_last_buffered),
+        .data_out_valid (cfg_valid_buffered),
+        .data_out_ready (cfg_ready_buffered)
     );
     
     // Message Build (Construct Message Blocks)
@@ -136,21 +136,21 @@ module sha256_engine (
     );
     
     // Data-out FIFO
-    fifo_vr #( DEPTH  = 4,
-               DATA_W = 256
+    fifo_vr #(4,  // Depth
+              256 // Data Width 
     ) data_out_buffer (
-        .clk        (clk),
-        .nrst       (nrst),
-        .en         (en),
-        .sync_rst   (sync_rst),
-        .in         (hash),
-        .in_valid   (hash_valid),
-        .in_ready   (hash_ready),
-        .in_last    (hash_last),
-        .out        (data_out),
-        .out_last   (data_out_last),
-        .out_valid  (data_out_valid),
-        .out_ready  (data_out_ready)
+        .clk            (clk),
+        .nrst           (nrst),
+        .en             (en),
+        .sync_rst       (sync_rst),
+        .data_in        (hash),
+        .data_in_valid  (hash_valid),
+        .data_in_ready  (hash_ready),
+        .data_in_last   (hash_last),
+        .data_out       (data_out),
+        .data_out_last  (data_out_last),
+        .data_out_valid (data_out_valid),
+        .data_out_ready (data_out_ready)
     );
     
 endmodule

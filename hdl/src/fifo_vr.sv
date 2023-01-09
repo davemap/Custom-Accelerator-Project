@@ -21,23 +21,23 @@ module fifo_vr #(
     input logic sync_rst,
     
     // In (Write) Control
-    input  logic [DATA_W-1:0] in_data,
-    input  logic in_last,
-    input  logic in_valid,
-    output logic in_ready,
+    input  logic [DATA_W-1:0] data_in,
+    input  logic data_in_last,
+    input  logic data_in_valid,
+    output logic data_in_ready,
     
     // Out (Read) Control
-    output logic [DATA_W-1:0] out_data,
-    output logic out_last,
-    input  logic out_ready,
-    output logic out_valid
+    output logic [DATA_W-1:0] data_out,
+    output logic data_out_last,
+    input  logic data_out_ready,
+    output logic data_out_valid
 );
 
-    logic in_shake;    // Successful Write Handshake
-    logic out_shake;   // Successful Read Handshake
+    logic data_in_shake;    // Successful Write Handshake
+    logic data_out_shake;   // Successful Read Handshake
     
-    assign in_shake  = (in_valid  == 1'b1) && (in_ready  == 1'b1);
-    assign out_shake = (out_valid == 1'b1) && (out_ready == 1'b1);
+    assign data_in_shake  = (data_in_valid  == 1'b1) && (data_in_ready  == 1'b1);
+    assign data_out_shake = (data_out_valid == 1'b1) && (data_out_ready == 1'b1);
     
     logic [DATA_W:0]   fifo [DEPTH-1:0]; // FIFO Memory Structure
     logic [PTR_W-1:0]  write_ptr;        // FIFO Write Pointer
@@ -59,7 +59,7 @@ module fifo_vr #(
     // WriteValid: WritePtr - ReadPtr < 3'd4
     // ReadValid:  WritePtr - ReadPtr - 1 < 3'd4
     
-    assign {out_data,out_last} = fifo [read_ptr[PTR_W-2:0]]; // Output Data is dereferenced value of the Read Pointer
+    assign {data_out,data_out_last} = fifo [read_ptr[PTR_W-2:0]]; // Output Data is dereferenced value of the Read Pointer
     
     always_ff @(posedge clk, negedge nrst) begin
         if ((!nrst) || sync_rst) begin
@@ -68,82 +68,82 @@ module fifo_vr #(
             // - Control taken low
             write_ptr    <= 0;
             read_ptr     <= 0;
-            in_ready     <= 1'b0;
-            out_valid    <= 1'b0;
+            data_in_ready     <= 1'b0;
+            data_out_valid    <= 1'b0;
         end else if (en == 1'b1) begin
             // Enable signal is High
             // Write Logic
             if (ptr_dif < DEPTH) begin 
                 // Empty Rows in FIFO in FIFO
-                if (in_shake) begin 
+                if (data_in_shake) begin 
                     // Successful Handshake store data in FIFO and increment Write Pointer 
-                    fifo [write_ptr[PTR_W-2:0]] <= {in_data,in_last};
+                    fifo [write_ptr[PTR_W-2:0]] <= {data_in,data_in_last};
                     write_ptr                   <= write_ptr + 1;
-                    if ((ptr_dif + (1 - out_shake)) < DEPTH) begin 
+                    if ((ptr_dif + (1 - data_out_shake)) < DEPTH) begin 
                         // Still space in FIFO after latest write
                         // If theres a successful read on this clock cycle, 
                         // there will be an additional space in the FIFO next clock cycle
                         // (number of pieces of data in the FIFO won't have changed)
-                        in_ready <= 1'b1;
+                        data_in_ready <= 1'b1;
                     end else begin 
                         // FIFO is now full
-                        in_ready <= 1'b0;
+                        data_in_ready <= 1'b0;
                     end
                 end else begin 
                     // Unsuccessful handshake but space in FIFO
                     // If there's write space now, next cc it will be the same or more 
                     // (more if a succesful read has been carried out in this cc)
-                    in_ready <= 1'b1;
+                    data_in_ready <= 1'b1;
                 end
             end else begin
-                if ((ptr_dif - out_shake) < DEPTH) begin 
+                if ((ptr_dif - data_out_shake) < DEPTH) begin 
                     // If there is a successful read this clock cycle, 
                     // there will be space for another piece of data in the FIFO 
                     // (number of pieces of data in FIFO will have decremented by 1) 
-                    in_ready <= 1'b1;
+                    data_in_ready <= 1'b1;
                 end else begin 
                     // FIFO still Full
-                    in_ready <= 1'b0;
+                    data_in_ready <= 1'b0;
                 end
             end
             // Read Logic
             if ((ptr_dif - 1) < DEPTH) begin 
                 // Data in FIFO - atleast one Piece of Data in FIFO
                 // -> the  "-1" causes dif of 0 to wrap where (dif - 1) becomes > DEPTH
-                if (out_shake) begin 
+                if (data_out_shake) begin 
                     // Successful Handshake Increment Read Pointer
                     read_ptr <= read_ptr + 1;
-                    if (((ptr_dif - 1) + (in_shake - 1)) < DEPTH) begin 
+                    if (((ptr_dif - 1) + (data_in_shake - 1)) < DEPTH) begin 
                         // Still Data in FIFO after latest Read
                         // If there is a successful write this clock cycle, 
                         // there will be one more piece of data in the FIFO 
                         // (number of pieces of data in FIFO wont have changed) 
-                        out_valid <= 1'b1;
+                        data_out_valid <= 1'b1;
                     end else begin 
                         // FIFO empty after latest Read
-                        out_valid <= 1'b0;
+                        data_out_valid <= 1'b0;
                     end
                 end else begin 
                     // Unsuccessful handshake but Data in FIFO
                     // If there's read data now, next cc it will be the same or more 
                     // (more if a succesful write has been carried out in this cc)
-                    out_valid <= 1'b1;
+                    data_out_valid <= 1'b1;
                 end
             end else begin
-                if (((ptr_dif - 1) + in_shake) < DEPTH) begin 
+                if (((ptr_dif - 1) + data_in_shake) < DEPTH) begin 
                     // If there is a successful write this clock cycle, 
                     // there will be one more piece of data in the FIFO 
                     // (number of pieces of data in FIFO will have incremented by 1) 
-                    out_valid <= 1'b1;
+                    data_out_valid <= 1'b1;
                 end else begin 
                     // FIFO still empty
-                    out_valid <= 1'b0;
+                    data_out_valid <= 1'b0;
                 end
             end
         end else begin
             // If Enable is Low, set Control Low
-            in_ready  <= 1'b0;
-            out_valid <= 1'b0;
+            data_in_ready  <= 1'b0;
+            data_out_valid <= 1'b0;
         end
     end
     

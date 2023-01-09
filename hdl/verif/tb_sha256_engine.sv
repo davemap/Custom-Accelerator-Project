@@ -57,6 +57,7 @@ module tb_sha256_engine;
     );
     
     logic data_in_drive_en;
+    logic cfg_drive_en;
     logic data_out_drive_ready;
     
     logic [511:0] data_in_queue [$];
