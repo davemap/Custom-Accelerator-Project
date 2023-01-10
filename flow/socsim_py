@@ -1,0 +1,14 @@
+#-----------------------------------------------------------------------------
+# SoC Labs socsim script to run required simulation
+# A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+#
+# Contributors
+#
+# David Mapstone (d.a.mapstone@soton.ac.uk)
+#
+# Copyright  2022, SoC Labs (www.soclabs.org)
+#-----------------------------------------------------------------------------
+
+#!/usr/bin/env bash
+
+python3 $SHA_2_ACC_DIR"/flow/socsim_py.py" $@
