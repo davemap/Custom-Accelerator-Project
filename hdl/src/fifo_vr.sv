@@ -79,7 +79,7 @@ module fifo_vr #(
                     // Successful Handshake store data in FIFO and increment Write Pointer 
                     fifo [write_ptr[PTR_W-2:0]] <= {data_in,data_in_last};
                     write_ptr                   <= write_ptr + 1;
-                    if ((ptr_dif + {2'b0,(1'b1 - data_out_shake)}) < DEPTH) begin 
+                    if ((ptr_dif + {{(PTR_W-1){1'b0}},(1'b1 - data_out_shake)}) < DEPTH) begin 
                         // Still space in FIFO after latest write
                         // If theres a successful read on this clock cycle, 
                         // there will be an additional space in the FIFO next clock cycle
@@ -96,7 +96,7 @@ module fifo_vr #(
                     data_in_ready <= 1'b1;
                 end
             end else begin
-                if ((ptr_dif - {2'b0, data_out_shake}) < DEPTH) begin 
+                if ((ptr_dif - {{(PTR_W-1){1'b0}}, data_out_shake}) < DEPTH) begin 
                     // If there is a successful read this clock cycle, 
                     // there will be space for another piece of data in the FIFO 
                     // (number of pieces of data in FIFO will have decremented by 1) 
@@ -113,7 +113,7 @@ module fifo_vr #(
                 if (data_out_shake) begin 
                     // Successful Handshake Increment Read Pointer
                     read_ptr <= read_ptr + 1;
-                    if (((ptr_dif - 1) + {2'b0,(data_in_shake - 1'b1)}) < DEPTH) begin 
+                    if (((ptr_dif - 1) + {{(PTR_W-1){1'b0}},(data_in_shake - 1'b1)}) < DEPTH) begin 
                         // Still Data in FIFO after latest Read
                         // If there is a successful write this clock cycle, 
                         // there will be one more piece of data in the FIFO 
@@ -130,7 +130,7 @@ module fifo_vr #(
                     data_out_valid <= 1'b1;
                 end
             end else begin
-                if (((ptr_dif - 1) + {2'b0,data_in_shake}) < DEPTH) begin 
+                if (((ptr_dif - 1) + {{(PTR_W-1){1'b0}},data_in_shake}) < DEPTH) begin 
                     // If there is a successful write this clock cycle, 
                     // there will be one more piece of data in the FIFO 
                     // (number of pieces of data in FIFO will have incremented by 1) 
