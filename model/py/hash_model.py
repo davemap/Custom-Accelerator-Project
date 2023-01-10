@@ -48,8 +48,15 @@ def main():
         # Generate Gapping and Stalling Values
         #   Gapping - Period to wait before taking Input Valid High
         #   Stalling - Period to wait before taking Output Read High
-        cfg_words_gap_list.append(random.randrange(0,gap_limit))
-        hash_stall_list.append(random.randrange(0,stall_limit))
+        if gap_limit > 0:
+            cfg_words_gap_list.append(random.randrange(0,gap_limit))
+        else:
+            cfg_words_gap_list.append(0)
+        
+        if stall_limit > 0:
+            hash_stall_list.append(random.randrange(0,stall_limit))
+        else:
+            hash_stall_list.append(0)
         
         # Generate expected output in 512 bit chunks
         cfg_size = math.ceil(random.randint(0,pow(2,14))/8)*8
@@ -87,13 +94,22 @@ def main():
         
         for i in range(len(in_data_words)):
             in_data_words_last.append("0")  
-            in_data_words_gap.append(random.randrange(0,gap_limit))
+            if gap_limit > 0:
+                in_data_words_gap.append(random.randrange(0,gap_limit))
+            else:
+                in_data_words_gap.append(0)
         in_data_words_last[-1] = "1"
         
         for i in range(len(message_block)):
             message_block_last.append("0")
-            message_block_stall.append(random.randrange(0,stall_limit))
-            message_block_gap.append(random.randrange(0,gap_limit))
+            if stall_limit > 0:
+                message_block_stall.append(random.randrange(0,stall_limit))
+            else:
+                message_block_stall.append(0)
+            if gap_limit > 0:
+                message_block_gap.append(random.randrange(0,gap_limit))
+            else:
+                message_block_gap.append(0)
         message_block_last[-1] = "1"
         
         cfg_words_list.append(cfg_size_str)

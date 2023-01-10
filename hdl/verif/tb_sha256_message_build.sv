@@ -81,15 +81,27 @@ module tb_sha256_message_build;
             data_in                 <= 512'd0;
             data_in_valid           <=   1'b0;
             data_in_last            <=   1'b0;
+            data_in_gap             <=   0;
             data_in_wait_queue      <=   1'b1;
         end else if (data_in_drive_en) begin
+            if (data_in_gap > 0) begin
+                data_in_gap <= data_in_gap -1;
+                data_in_valid <= 1'b0;
+            end else begin
+                data_in_valid <= 1'b1;
+            end
             if (((data_in_valid == 1'b1) && (data_in_ready == 1'b1)) ||
                  (data_in_wait_queue == 1'b1)) begin
                 // Data transfer just completed or transfers already up to date
-                if ((data_in_queue.size() > 0) && (data_in_last_queue.size() > 0)) begin
+                if ((data_in_queue.size() > 0) && (data_in_last_queue.size() > 0) && (data_in_gap_queue.size() > 0)) begin
                     data_in            <= data_in_queue.pop_front();
                     data_in_last       <= data_in_last_queue.pop_front();
-                    data_in_valid      <= 1'b1;
+                    if (data_in_gap_queue[0] == 0) begin
+                        data_in_valid  <= 1'b1;
+                    end else begin
+                        data_in_valid  <= 1'b0;
+                    end
+                    data_in_gap        <= data_in_gap_queue.pop_front();
                     data_in_wait_queue <= 1'b0;
                 end else begin
                     // No data currently avaiable in queue to write but transfers up to date
@@ -107,16 +119,28 @@ module tb_sha256_message_build;
             cfg_scheme          <=   2'd0;
             cfg_valid           <=   1'b0;
             cfg_last            <=   1'b0;
+            cfg_gap          <=   0;
             cfg_wait_queue      <=   1'b1;
         end else if (cfg_drive_en) begin
+            if (cfg_gap > 0) begin
+                cfg_gap <= cfg_gap -1;
+                cfg_valid <= 1'b0;
+            end else begin
+                cfg_valid <= 1'b1;
+            end
             if (((cfg_valid == 1'b1) && (cfg_ready == 1'b1)) ||
                  (cfg_wait_queue == 1'b1)) begin
                 // cfg transfer just completed or transfers already up to date
-                if ((cfg_size_queue.size() > 0) && (cfg_scheme_queue.size() > 0 ) && (cfg_last_queue.size() > 0)) begin
+                if ((cfg_size_queue.size() > 0) && (cfg_scheme_queue.size() > 0 ) && (cfg_last_queue.size() > 0) && (cfg_gap_queue.size() > 0)) begin
                     cfg_size       <= cfg_size_queue.pop_front();
                     cfg_scheme     <= cfg_scheme_queue.pop_front();
                     cfg_last       <= cfg_last_queue.pop_front();
-                    cfg_valid      <= 1'b1;
+                    if (cfg_gap_queue[0] == 0) begin
+                        cfg_valid  <= 1'b1;
+                    end else begin
+                        cfg_valid  <= 1'b0;
+                    end
+                    cfg_gap        <= cfg_gap_queue.pop_front();
                     cfg_wait_queue <= 1'b0;
                 end else begin
                     // No data currently avaiable in queue to write but transfers up to date
@@ -129,6 +153,8 @@ module tb_sha256_message_build;
     
     logic [511:0] data_out_check;
     logic data_out_last_check;
+    int   data_in_gap;
+    int   cfg_gap;
     int   data_out_stall;
     
     int   packet_num;
@@ -145,9 +171,13 @@ module tb_sha256_message_build;
                 // Wait for handshake before updating stall value
                 if ((data_out_valid == 1'b1) && (data_out_ready == 1'b1)) begin
                     if (data_out_stall_queue.size() > 0) begin
+                        if (data_out_stall_queue[0] == 0) begin
+                            data_out_ready <= 1'b1;
+                        end else begin
+                            data_out_ready <= 1'b0;
+                        end
                         data_out_stall <= data_out_stall_queue.pop_front();
                     end
-                    data_out_ready <= 1'b0;
                 // Keep Ready Asserted until handshake seen
                 end else begin
                     data_out_ready <= 1'b1;
