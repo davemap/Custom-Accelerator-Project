@@ -111,7 +111,7 @@ module tb_sha256_message_build;
             end
         end
     end
-    
+
     // Handle Valid and Data for cfg
     always_ff @(posedge clk, negedge nrst) begin: cfg_valid_drive
         if (!nrst) begin
