@@ -119,7 +119,7 @@ module tb_sha256_message_build;
             cfg_scheme          <=   2'd0;
             cfg_valid           <=   1'b0;
             cfg_last            <=   1'b0;
-            cfg_gap          <=   0;
+            cfg_gap              <=   0;
             cfg_wait_queue      <=   1'b1;
         end else if (cfg_drive_en) begin
             if (cfg_gap > 0) begin
@@ -196,12 +196,12 @@ module tb_sha256_message_build;
                 $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
                 $finish;
             end
-            $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            if ($test$plusargs ("DEBUG")) $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
             assert (data_out_last == data_out_last_check) else begin
                 $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
                 $finish;
             end
-            $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+            if ($test$plusargs ("DEBUG")) $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check      <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
@@ -272,7 +272,7 @@ module tb_sha256_message_build;
         data_out_stall      = data_out_stall_queue.pop_front();
         
         // Defaultly enable Message Builder
-        en  = 1;
+        en = 1;
         
         // Defaultly set Sync Reset Low
         sync_rst  = 0;
