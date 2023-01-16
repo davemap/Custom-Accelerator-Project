@@ -68,7 +68,7 @@ module sha256_id_issue (
         
         // Override
         case (state)
-            1'd0: begin // Get Packet ID Seed
+            1'd0: begin
                     next_id_out_cfg_valid   = 1'b1;
                     next_id_out_buf_valid   = 1'b1;
                     next_state              = 1'd1;

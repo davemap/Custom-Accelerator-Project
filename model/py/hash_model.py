@@ -32,8 +32,11 @@ def main():
     random.seed(seed)
     
     print(f"Generating {packets} packets using seed: {seed}")
-    cfg_words_list = []
-    cfg_words_gap_list = []
+    in_cfg_words_list = []
+    in_cfg_words_gap_list = []
+    sync_cfg_size_list = []
+    sync_cfg_id_list = []
+    sync_cfg_stall_list = []
     in_data_words_list = []
     in_data_words_last_list = []
     in_data_words_gap_list = []
@@ -44,9 +47,7 @@ def main():
     hash_list = []
     hash_stall_list = []
     # ID Lists
-    id_seed_list = []
-    id_use_seed_list = []
-    id_seed_gap_list = [] # Doesn't work in this scenario - ID counter increments when id seed is gapping
+    id_gap_list = []
     expected_id_list = []
     expected_id_stall_list = []
     
@@ -56,14 +57,18 @@ def main():
         #   Gapping - Period to wait before taking Input Valid High
         #   Stalling - Period to wait before taking Output Read High
         if gap_limit > 0:
-            cfg_words_gap_list.append(random.randrange(0,gap_limit))
+            id_gap_list.append(random.randrange(0,gap_limit))
+            in_cfg_words_gap_list.append(random.randrange(0,gap_limit))
         else:
-            cfg_words_gap_list.append(0)
+            id_gap_list.append(0)
+            in_cfg_words_gap_list.append(0)
         
         if stall_limit > 0:
             hash_stall_list.append(random.randrange(0,stall_limit))
+            sync_cfg_stall_list.append(random.randrange(0,stall_limit))
         else:
             hash_stall_list.append(0)
+            sync_cfg_stall_list.append(0)
         
         # Generate expected output in 512 bit chunks
         cfg_size = math.ceil(random.randint(0,pow(2,14))/8)*8
@@ -80,12 +85,9 @@ def main():
         else:
             id_stall_value = 0
         
-        if gap_limit > 0:
-            id_seed_gap_list.append(random.randrange(0,gap_limit))
-        else:
-            id_seed_gap_list.append(0)
-        
         expected_id_list.append(id_value)
+        sync_cfg_id_list.append(id_value)
+
         
         # Reference Values
         id_value += 1
@@ -138,7 +140,8 @@ def main():
                 message_block_gap.append(0)
         message_block_last[-1] = "1"
         
-        cfg_words_list.append(cfg_size_str)
+        in_cfg_words_list.append(cfg_size_str)
+        sync_cfg_size_list.append(cfg_size_str)
         in_data_words_list       += in_data_words
         in_data_words_last_list  += in_data_words_last
         in_data_words_gap_list   += in_data_words_gap
@@ -154,10 +157,10 @@ def main():
 
     # Write out Input ID Seed to Text File
     input_header = ["id_seed", "use_seed", "last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_id_seed_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_id_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
-        for idx, word in enumerate(id_seed_list):
-            writer.writerow([word, id_use_seed_list[idx], "1"])
+        for idx, word in enumerate(expected_id_list):
+            writer.writerow([expected_id_list[idx], "1", id_gap_list[idx]])
             
     # Write out Output ID Values to Text File
     input_header = ["expected_id_value, id_last, stall_value"]
@@ -177,8 +180,15 @@ def main():
     input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_cfg_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
-        for idx, word in enumerate(cfg_words_list):
-            writer.writerow(["{0:x}".format(int(word, 2)), "0", "1", cfg_words_gap_list[idx]])
+        for idx, word in enumerate(in_cfg_words_list):
+            writer.writerow(["{0:x}".format(int(word, 2)), "0", "1", in_cfg_words_gap_list[idx]])
+        
+    # Write out Cfg sync reference to Text File
+    input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_cfg_sync_ref.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(sync_cfg_size_list):
+            writer.writerow(["{0:x}".format(int(word, 2)), "0", sync_cfg_id_list[idx], "1", sync_cfg_stall_list[idx]])
             
     # Write out Expected output to text file
     output_header = ["output_data", "output_data_last"]
