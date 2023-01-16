@@ -10,6 +10,7 @@
 //-----------------------------------------------------------------------------
 `include "sha256_hash_compression.sv"
 `include "sha256_message_build.sv"
+`include "sha256_id_issue.sv"
 `include "fifo_vr.sv"
 
 module sha256_engine (
@@ -51,6 +52,8 @@ module sha256_engine (
     logic cfg_last_buffered;
     logic cfg_valid_buffered;
     logic cfg_ready_buffered;
+    
+    logic [5:0] id_val;
     
     logic [511:0] message_block;
     logic message_block_last;
@@ -103,6 +106,21 @@ module sha256_engine (
         .data_out_ready (cfg_ready_buffered)
     );
     
+    sha256_id_issue id_issue (
+        .clk(clk),
+        .nrst(nrst),
+        .en(en),
+        .sync_rst(sync_rst),
+        .seed_in(6'd0),
+        .seed_in_last(1'b1),
+        .seed_in_valid(1'b0),
+        .seed_in_ready(),
+        .id_out(id_val),
+        .id_out_last(),
+        .id_out_valid(),
+        .id_out_ready(1'b1)
+    );
+    
     // Message Build (Construct Message Blocks)
     sha256_message_build message_block_builder (
         .clk            (clk),
@@ -153,28 +171,28 @@ module sha256_engine (
         .data_in_valid  (message_block_valid_buffered),
         .data_in_ready  (message_block_ready_buffered),
         .data_in_last   (message_block_last_buffered),
-        .data_out       (hash),
-        .data_out_last  (hash_last),
-        .data_out_valid (hash_valid),
-        .data_out_ready (hash_ready)
-    );
-    
-    // Data-out FIFO
-    fifo_vr #(4,  // Depth
-              256 // Data Width 
-    ) data_out_buffer (
-        .clk            (clk),
-        .nrst           (nrst),
-        .en             (en),
-        .sync_rst       (sync_rst),
-        .data_in        (hash),
-        .data_in_valid  (hash_valid),
-        .data_in_ready  (hash_ready),
-        .data_in_last   (hash_last),
         .data_out       (data_out),
         .data_out_last  (data_out_last),
         .data_out_valid (data_out_valid),
         .data_out_ready (data_out_ready)
     );
+    
+    // // Data-out FIFO
+    // fifo_vr #(4,  // Depth
+    //           256 // Data Width 
+    // ) data_out_buffer (
+    //     .clk            (clk),
+    //     .nrst           (nrst),
+    //     .en             (en),
+    //     .sync_rst       (sync_rst),
+    //     .data_in        (hash),
+    //     .data_in_valid  (hash_valid),
+    //     .data_in_ready  (hash_ready),
+    //     .data_in_last   (hash_last),
+    //     .data_out       (data_out),
+    //     .data_out_last  (data_out_last),
+    //     .data_out_valid (data_out_valid),
+    //     .data_out_ready (data_out_ready)
+    // );
     
 endmodule

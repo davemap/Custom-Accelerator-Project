@@ -43,7 +43,14 @@ def main():
     message_block_stall_list = []
     hash_list = []
     hash_stall_list = []
+    # ID Lists
+    id_seed_list = []
+    id_use_seed_list = []
+    id_seed_gap_list = [] # Doesn't work in this scenario - ID counter increments when id seed is gapping
+    expected_id_list = []
+    expected_id_stall_list = []
     
+    id_value = 0
     for i in range(packets):
         # Generate Gapping and Stalling Values
         #   Gapping - Period to wait before taking Input Valid High
@@ -68,6 +75,25 @@ def main():
         data = "{0:b}".format(random.getrandbits(cfg_size))
         data = "0"*(cfg_size - len(data)) + data # Pad Data to length of config (Python like to concatenate values)
         
+        if stall_limit > 0:
+            id_stall_value = random.randrange(0,stall_limit)
+        else:
+            id_stall_value = 0
+        
+        if gap_limit > 0:
+            id_seed_gap_list.append(random.randrange(0,gap_limit))
+        else:
+            id_seed_gap_list.append(0)
+        
+        expected_id_list.append(id_value)
+        
+        # Reference Values
+        id_value += 1
+            
+        if id_value >= 64:
+            id_value = id_value - 64
+        
+        expected_id_stall_list.append(id_stall_value)
         
         chunked_data_words = chunkstring(str(data),512)
         in_data_words = chunked_data_words.copy()
@@ -126,6 +152,20 @@ def main():
         hash_val = binascii.hexlify(hashlib.sha256(h).digest()).decode()
         hash_list.append(hash_val)
 
+    # Write out Input ID Seed to Text File
+    input_header = ["id_seed", "use_seed", "last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_id_seed_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(id_seed_list):
+            writer.writerow([word, id_use_seed_list[idx], "1"])
+            
+    # Write out Output ID Values to Text File
+    input_header = ["expected_id_value, id_last, stall_value"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_id_ref.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(expected_id_list):
+            writer.writerow([word, "1", expected_id_stall_list[idx]])
+    
     # Write out Input Data Stimulus to Text File
     input_header = ["input_data", "input_data_last"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_data_stim.csv", "w", encoding="UTF8", newline='') as f:
@@ -160,7 +200,7 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
             writer.writerow([word, "1", hash_stall_list[idx]])
-
+    
 def chunkstring(string, length):
     array_len = math.ceil(len(string)/length)
     array = []
