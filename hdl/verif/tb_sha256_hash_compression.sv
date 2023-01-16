@@ -66,7 +66,7 @@ module tb_sha256_hash_compression;
             data_in_gap             <=   0;
             data_in_wait_queue      <=   1'b1;
         end else if (data_in_drive_en) begin
-            if (data_in_gap > 0) begin
+            if (data_in_gap > 1) begin
                 data_in_gap <= data_in_gap -1;
                 data_in_valid <= 1'b0;
             end else begin
@@ -107,7 +107,7 @@ module tb_sha256_hash_compression;
         // Check Override Control on Ready
         if (data_out_drive_ready) begin
             // Count down to zero before enabling Ready
-            if (data_out_stall > 0) begin
+            if (data_out_stall > 1) begin
                 data_out_stall <= data_out_stall - 1;
                 data_out_ready <= 1'b0;
             end else begin
@@ -139,12 +139,12 @@ module tb_sha256_hash_compression;
                 $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
                 $finish;
             end
-            if ($test$plusargs ("DEBUG")) $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            if ($test$plusargs ("DEBUG")) $display("data_out match! packet %d | recieve: %x == check: %x", packet_num, data_out, data_out_check);
             assert (data_out_last == data_out_last_check) else begin
                 $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
                 $finish;
             end
-            if ($test$plusargs ("DEBUG")) $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+            if ($test$plusargs ("DEBUG")) $display("data_out_last match! packet %d | recieve: %x == check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check      <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();

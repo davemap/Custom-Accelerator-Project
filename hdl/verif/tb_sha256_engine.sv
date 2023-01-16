@@ -89,7 +89,7 @@ module tb_sha256_engine;
             data_in_gap             <=   0;
             data_in_wait_queue      <=   1'b1;
         end else if (data_in_drive_en) begin
-            if (data_in_gap > 0) begin
+            if (data_in_gap > 1) begin
                 data_in_gap <= data_in_gap -1;
                 data_in_valid <= 1'b0;
             end else begin
@@ -127,7 +127,7 @@ module tb_sha256_engine;
             cfg_gap              <=   0;
             cfg_wait_queue      <=   1'b1;
         end else if (cfg_drive_en) begin
-            if (cfg_gap > 0) begin
+            if (cfg_gap > 1) begin
                 cfg_gap <= cfg_gap -1;
                 cfg_valid <= 1'b0;
             end else begin
@@ -173,7 +173,7 @@ module tb_sha256_engine;
         // Check Override Control on Ready
         if (data_out_drive_ready) begin
             // Count down to zero before enabling Ready
-            if (data_out_stall > 0) begin
+            if (data_out_stall > 1) begin
                 data_out_stall <= data_out_stall - 1;
                 data_out_ready <= 1'b0;
             end else begin
@@ -205,12 +205,12 @@ module tb_sha256_engine;
                 $error("data_out missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
                 $finish;
             end
-            if ($test$plusargs ("DEBUG")) $display("data_out match! packet %d | recieve: %x != check: %x", packet_num, data_out, data_out_check);
+            if ($test$plusargs ("DEBUG")) $display("data_out match! packet %d | recieve: %x == check: %x", packet_num, data_out, data_out_check);
             assert (data_out_last == data_out_last_check) else begin
                 $error("data_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
                 $finish;
             end
-            if ($test$plusargs ("DEBUG")) $display("data_out_last match! packet %d | recieve: %x != check: %x", packet_num, data_out_last, data_out_last_check);
+            if ($test$plusargs ("DEBUG")) $display("data_out_last match! packet %d | recieve: %x == check: %x", packet_num, data_out_last, data_out_last_check);
             if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check      <= data_out_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
@@ -229,12 +229,12 @@ module tb_sha256_engine;
                 $error("message block missmatch! packet %d | recieve: %x != check: %x", message_block_packet_num, data_out, message_block_data_out_check);
                 $finish;
             end
-            if ($test$plusargs ("DEBUG")) $display("message block match! packet %d | recieve: %x != check: %x", message_block_packet_num, message_builder_out_data, message_block_data_out_check);
+            if ($test$plusargs ("DEBUG")) $display("message block match! packet %d | recieve: %x == check: %x", message_block_packet_num, message_builder_out_data, message_block_data_out_check);
             assert (message_builder_out_data_last == message_block_data_out_last_check) else begin
                 $error("message block last missmatch! packet %d | recieve: %x != check: %x", message_block_packet_num, message_builder_out_data_last, message_block_data_out_last_check);
                 $finish;
             end
-            if ($test$plusargs ("DEBUG")) $display("message block last match! packet %d | recieve: %x != check: %x", message_block_packet_num, message_builder_out_data_last, message_block_data_out_last_check);
+            if ($test$plusargs ("DEBUG")) $display("message block last match! packet %d | recieve: %x == check: %x", message_block_packet_num, message_builder_out_data_last, message_block_data_out_last_check);
             if ((message_block_queue.size() > 0) && (message_block_last_queue.size() > 0)) begin
                 message_block_data_out_check      <= message_block_queue.pop_front();
                 message_block_data_out_last_check <= message_block_last_queue.pop_front();
