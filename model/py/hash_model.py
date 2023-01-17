@@ -41,6 +41,7 @@ def main():
     in_data_words_last_list = []
     in_data_words_gap_list = []
     message_block_list = []
+    message_block_id_list = []
     message_block_last_list = []
     message_block_gap_list = []
     message_block_stall_list = []
@@ -87,6 +88,7 @@ def main():
         
         expected_id_list.append(id_value)
         sync_cfg_id_list.append(id_value)
+        old_id_value = id_value
 
         
         # Reference Values
@@ -97,15 +99,16 @@ def main():
         
         expected_id_stall_list.append(id_stall_value)
         
-        chunked_data_words = chunkstring(str(data),512)
-        in_data_words = chunked_data_words.copy()
-        in_data_words[-1] = in_data_words[-1] + "0"*(512-len(in_data_words[-1]))
-        in_data_words_last = []
-        in_data_words_gap = []
-        message_block = chunked_data_words.copy()
-        message_block_last = []
+        chunked_data_words  = chunkstring(str(data),512)
+        in_data_words       = chunked_data_words.copy()
+        in_data_words[-1]   = in_data_words[-1] + "0"*(512-len(in_data_words[-1]))
+        in_data_words_last  = []
+        in_data_words_gap   = []
+        message_block       = chunked_data_words.copy()
+        message_block_id    = []
+        message_block_last  = []
         message_block_stall = []
-        message_block_gap = []
+        message_block_gap   = []
         last_len = len(chunked_data_words[-1])
         # print(f"{chunked_data_words[-1]} {last_len}")
         if (last_len == 512):
@@ -130,6 +133,7 @@ def main():
         
         for i in range(len(message_block)):
             message_block_last.append("0")
+            message_block_id.append(old_id_value)
             if stall_limit > 0:
                 message_block_stall.append(random.randrange(0,stall_limit))
             else:
@@ -146,6 +150,7 @@ def main():
         in_data_words_last_list  += in_data_words_last
         in_data_words_gap_list   += in_data_words_gap
         message_block_list       += message_block
+        message_block_id_list    += message_block_id
         message_block_last_list  += message_block_last
         message_block_gap_list   += message_block_gap
         message_block_stall_list += message_block_stall
@@ -182,6 +187,13 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(in_cfg_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), "0", "1", in_cfg_words_gap_list[idx]])
+
+    # Write out Cfg Stimulus to Text File
+    input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_id", "input_cfg_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_cfg_sync_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(in_cfg_words_list):
+            writer.writerow(["{0:x}".format(int(word, 2)), "0", expected_id_list[idx] ,"1", in_cfg_words_gap_list[idx]])
         
     # Write out Cfg sync reference to Text File
     input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
@@ -191,11 +203,11 @@ def main():
             writer.writerow(["{0:x}".format(int(word, 2)), "0", sync_cfg_id_list[idx], "1", sync_cfg_stall_list[idx]])
             
     # Write out Expected output to text file
-    output_header = ["output_data", "output_data_last"]
+    output_header = ["output_data", "output_data_id", "output_data_last"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_message_block_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(message_block_list):
-            writer.writerow(["{0:x}".format(int(word, 2)), message_block_last_list[idx], message_block_stall_list[idx]])
+            writer.writerow(["{0:x}".format(int(word, 2)), message_block_id_list[idx] ,message_block_last_list[idx], message_block_stall_list[idx]])
 
     # Write out Message Block (Input) to text file
     output_header = ["message_block_data", "message_block_data_last"]

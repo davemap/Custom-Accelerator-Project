@@ -25,24 +25,28 @@ module sha256_message_build (
     // Config data and Handshaking
     input  logic [63:0] cfg_size,
     input  logic [1:0]  cfg_scheme,
+    input  logic [5:0]  cfg_id,
     input  logic cfg_last,
     input  logic cfg_valid,
     output logic cfg_ready,
     
     // Data Out data and Handshaking
     output logic [511:0] data_out,
+    output logic [5:0]   data_out_id,
     output logic data_out_last,
     output logic data_out_valid,
     input  logic data_out_ready
 );
 
     logic [8:0]  data_word_rem, next_data_word_rem;      // Remainder number of bits after 512 division
-    logic [63:0] cfg_size_reg, next_cfg_size;
+    logic [63:0] reg_cfg_size, next_cfg_size;
+    logic [5:0]  reg_cfg_id, next_cfg_id;
     logic [2:0]  state, next_state;                      // State Machine State
     logic [54:0] data_word_count, next_data_word_count; 
     
     logic next_data_in_ready, next_cfg_ready, next_data_out_valid, next_data_out_last;
     logic [511:0] next_data_out;
+    logic [5:0]   next_data_out_id;
     
     logic [511:0] last_word_mask;
     logic [511:0] end_marker;
@@ -72,22 +76,26 @@ module sha256_message_build (
             state           <= 3'd0;
             data_in_ready   <= 1'b0;
             cfg_ready       <= 1'b1;
-            cfg_size_reg    <= 64'd0;
+            reg_cfg_size    <= 64'd0;
+            reg_cfg_id      <= 6'd0;
             data_word_rem   <= 9'd0;
             data_out_valid  <= 1'b0;
             data_out_last   <= 1'b0;
             data_out        <= 512'd0;
+            data_out_id     <= 6'd0;
             data_word_count <= 55'd0;
             extra_word      <= 1'b0;
         end else if (en == 1'b1) begin
             state           <= next_state;
-            data_in_ready   <= next_data_in_ready;
+            data_in_ready   <= next_data_in_ready; 
             cfg_ready       <= next_cfg_ready;
-            cfg_size_reg    <= next_cfg_size;
+            reg_cfg_size    <= next_cfg_size;
+            reg_cfg_id      <= next_cfg_id;
             data_word_rem   <= next_data_word_rem;
             data_out_valid  <= next_data_out_valid;
             data_out_last   <= next_data_out_last;
             data_out        <= next_data_out;
+            data_out_id     <= next_data_out_id;
             data_word_count <= next_data_word_count;
             extra_word      <= next_extra_word;
         end else begin
@@ -101,11 +109,13 @@ module sha256_message_build (
         next_state           = state;
         next_data_in_ready   = data_in_ready;
         next_cfg_ready       = cfg_ready;
-        next_cfg_size        = cfg_size_reg;
+        next_cfg_size        = reg_cfg_size;
+        next_cfg_id          = reg_cfg_id;
         next_data_word_rem   = data_word_rem;
         next_data_out_valid  = data_out_valid;
         next_data_out_last   = data_out_last;
         next_data_out        = data_out;
+        next_data_out_id     = data_out_id;
         next_data_word_count = data_word_count;
         next_extra_word      = extra_word;
         
@@ -122,7 +132,7 @@ module sha256_message_build (
                         next_data_out_valid = 1'b0;
                     end
                     // If there is no Valid data at the output or there is a valid transfer happening on this clock cycle
-                    if (cfg_valid == 1'b1) begin
+                    if ((cfg_valid == 1'b1) && (cfg_ready == 1'b1)) begin
                         // Check for already existing valid data at output
                         if (data_out_valid && !data_out_ready) begin
                             next_data_in_ready = 1'b0;
@@ -130,6 +140,7 @@ module sha256_message_build (
                             next_data_in_ready = 1'b1;
                         end
                         // Handshake to Acknowledge Config Has been Read
+                        next_cfg_id          = cfg_id;
                         next_cfg_size        = cfg_size;
                         next_cfg_ready       = 1'b0;
                         next_data_word_count = word_extract + {53'd0, |rem_extract}; // Divide by 512 and round up
@@ -161,6 +172,7 @@ module sha256_message_build (
                             next_data_in_ready   = 1'b0;
                             next_data_word_count = data_word_count - 1;
                             // Write Input Data to Output 
+                            next_data_out_id    = reg_cfg_id;
                             next_data_out       = data_in;
                             next_data_out_valid = 1'b1;
                             next_data_out_last  = 1'b0;
@@ -187,6 +199,7 @@ module sha256_message_build (
                             // Valid Handshake and data can be processed
                             if ((data_word_rem - 1) > 9'd446) begin
                                 // If can't fit size in last word
+                                next_data_out_id    = reg_cfg_id;
                                 next_data_out       = last_data_word;
                                 next_data_out_valid = 1'b1;
                                 next_data_out_last  = 1'b0;
@@ -195,7 +208,8 @@ module sha256_message_build (
                                 next_data_in_ready   = 1'b0;
                             end else begin
                                 // Size can fit in last data word
-                                next_data_out        = last_data_word | {448'd0, cfg_size_reg};
+                                next_data_out_id     = reg_cfg_id;
+                                next_data_out        = last_data_word | {448'd0, reg_cfg_size};
                                 next_data_out_valid  = 1'b1;
                                 next_data_out_last   = 1'b1;
                                 next_data_word_count = data_word_count - 1;
@@ -218,7 +232,8 @@ module sha256_message_build (
                     // If there is no Valid data at the output or there is a valid transfer happening on this clock cycle
                     end else begin
                         // Size can fit in last data word
-                        next_data_out       = {~|data_word_rem, 447'd0, cfg_size_reg};
+                        next_data_out_id    = reg_cfg_id;
+                        next_data_out       = {~|data_word_rem, 447'd0, reg_cfg_size};
                         next_data_out_valid = 1'b1;
                         next_data_out_last  = 1'b1;
                         // NEXT STATE: Read Next Config
