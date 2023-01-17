@@ -19,48 +19,55 @@ module tb_sha256_hash_compression;
     logic sync_rst;
     // Data In data and Handshaking
     logic [511:0] data_in;
+    logic [5:0]   data_in_id;
     logic data_in_last;
     logic data_in_valid;
     logic data_in_ready;
     
     // Data Out data and Handshaking
     logic [255:0] data_out;
+    logic [5:0]   data_out_id;
     logic data_out_valid;
     logic data_out_ready;
     logic data_out_last;
         
     sha256_hash_compression uut (
-                  .clk (clk),
-                  .nrst(nrst),
-                  .en  (en),
-                  .sync_rst(sync_rst),
-                  .data_in(data_in),
-                  .data_in_valid(data_in_valid),
-                  .data_in_ready(data_in_ready),
-                  .data_in_last(data_in_last),
-                  .data_out(data_out),
-                  .data_out_last(data_out_last),
-                  .data_out_valid(data_out_valid),
-                  .data_out_ready(data_out_ready));
+                  .clk            (clk),
+                  .nrst           (nrst),
+                  .en             (en),
+                  .sync_rst       (sync_rst),
+                  .data_in        (data_in),
+                  .data_in_id     (data_in_id),
+                  .data_in_valid  (data_in_valid),
+                  .data_in_ready  (data_in_ready),
+                  .data_in_last   (data_in_last),
+                  .data_out       (data_out),
+                  .data_out_id    (data_out_id),
+                  .data_out_last  (data_out_last),
+                  .data_out_valid (data_out_valid),
+                  .data_out_ready (data_out_ready));
     
     logic data_in_drive_en;
     logic data_out_drive_ready;
     
-    logic [511:0] data_in_queue [$];
-    logic data_in_last_queue    [$];
-    int   data_in_gap_queue     [$];
+    logic [511:0] data_in_queue    [$];
+    logic [5:0]   data_in_id_queue [$];
+    logic data_in_last_queue       [$];
+    int   data_in_gap_queue        [$];
     logic data_in_wait_queue;
     
     
-    logic [255:0] data_out_queue [$];
-    logic data_out_last_queue    [$];
-    int   data_out_stall_queue   [$];
+    logic [255:0] data_out_queue    [$];
+    logic [5:0]   data_out_id_queue [$];
+    logic data_out_last_queue       [$];
+    int   data_out_stall_queue      [$];
     logic data_out_wait_queue;
     
     // Handle Valid and Data for data_in
     always_ff @(posedge clk, negedge nrst) begin: data_in_valid_drive
         if (!nrst) begin
             data_in                 <= 512'd0;
+            data_in_id              <=   6'd0;
             data_in_valid           <=   1'b0;
             data_in_last            <=   1'b0;
             data_in_gap             <=   0;
@@ -75,8 +82,9 @@ module tb_sha256_hash_compression;
             if (((data_in_valid == 1'b1) && (data_in_ready == 1'b1)) ||
                  (data_in_wait_queue == 1'b1)) begin
                 // Data transfer just completed or transfers already up to date
-                if ((data_in_queue.size() > 0) && (data_in_last_queue.size() > 0) && (data_in_gap_queue.size() > 0)) begin
+                if ((data_in_queue.size() > 0) && (data_in_id_queue.size() > 0) && (data_in_last_queue.size() > 0) && (data_in_gap_queue.size() > 0)) begin
                     data_in            <= data_in_queue.pop_front();
+                    data_in_id         <= data_in_id_queue.pop_front();
                     data_in_last       <= data_in_last_queue.pop_front();
                     if (data_in_gap_queue[0] == 0) begin
                         data_in_valid  <= 1'b1;
@@ -96,7 +104,9 @@ module tb_sha256_hash_compression;
     
     
     logic [255:0] data_out_check;
+    logic [5:0]   data_out_id_check;
     logic data_out_last_check;
+
     int   data_in_gap;
     int   data_out_stall;
     
@@ -145,8 +155,9 @@ module tb_sha256_hash_compression;
                 $finish;
             end
             if ($test$plusargs ("DEBUG")) $display("data_out_last match! packet %d | recieve: %x == check: %x", packet_num, data_out_last, data_out_last_check);
-            if ((data_out_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
+            if ((data_out_queue.size() > 0) && (data_out_id_queue.size() > 0) && (data_out_last_queue.size() > 0)) begin
                 data_out_check      <= data_out_queue.pop_front();
+                data_out_id_check   <= data_out_id_queue.pop_front();
                 data_out_last_check <= data_out_last_queue.pop_front();
                 if (data_out_last_check == 1'b1) begin
                     packet_num <= packet_num + 1;
@@ -161,14 +172,16 @@ module tb_sha256_hash_compression;
     // File Reading Variables
     int fd; // File descriptor Handle
     
-    logic [511:0] input_data; // Temporary Input Data Storage
-    logic input_data_last;    // Temporary Input Data Last
-    int   input_data_gap;     // Temporary Input Gap
+    logic [511:0] temp_data_in; // Temporary Input Data Storage
+    logic [5:0]   temp_data_in_id; // Temporary Input Data Storage
+    logic temp_data_in_last;    // Temporary Input Data Last
+    int   temp_data_in_gap;     // Temporary Input Gap
     
     
-    logic [255:0] output_data; // Temporary Output Data Storage
-    logic output_data_last;    // Temporary Output Data Last
-    int  output_data_stall;    // Temporary Output Stall 
+    logic [255:0] temp_data_out; // Temporary Output Data Storage
+    logic [5:0]   temp_data_out_id; // Temporary Output Data Storage
+    logic temp_data_out_last;    // Temporary Output Data Last
+    int  temp_data_out_stall;    // Temporary Output Stall 
     
     initial begin
         $dumpfile("sha256_hash_compression.vcd");
@@ -192,24 +205,27 @@ module tb_sha256_hash_compression;
         
         // Read input data into Queue
         fd = $fopen("../stimulus/testbench/input_message_block_stim.csv", "r");
-        while ($fscanf (fd, "%x,%b,%d", input_data, input_data_last, input_data_gap) == 3) begin
-            data_in_queue.push_back(input_data);
-            data_in_last_queue.push_back(input_data_last);
-            data_in_gap_queue.push_back(input_data_gap);
+        while ($fscanf (fd, "%x,%d,%b,%d", temp_data_in, temp_data_in_id, temp_data_in_last, temp_data_in_gap) == 4) begin
+            data_in_queue.push_back(temp_data_in);
+            data_in_id_queue.push_back(temp_data_in_id);
+            data_in_last_queue.push_back(temp_data_in_last);
+            data_in_gap_queue.push_back(temp_data_in_gap);
         end
         $fclose(fd);
         
         // Read output data into Queue
         fd = $fopen("../stimulus/testbench/output_hash_ref.csv", "r");
-        while ($fscanf (fd, "%x,%b,%d", output_data, output_data_last, output_data_stall) == 3) begin
-            data_out_queue.push_back(output_data);
-            data_out_last_queue.push_back(output_data_last);
-            data_out_stall_queue.push_back(output_data_stall);
+        while ($fscanf (fd, "%x,%d,%b,%d", temp_data_out, temp_data_out_id, temp_data_out_last, temp_data_out_stall) == 4) begin
+            data_out_queue.push_back(temp_data_out);
+            data_out_id_queue.push_back(temp_data_out_id);
+            data_out_last_queue.push_back(temp_data_out_last);
+            data_out_stall_queue.push_back(temp_data_out_stall);
         end
         $fclose(fd);
         
         // Initialise First Checking Values
         data_out_check      = data_out_queue.pop_front();      
+        data_out_id_check   = data_out_id_queue.pop_front();      
         data_out_last_check = data_out_last_queue.pop_front();
         data_out_stall      = data_out_stall_queue.pop_front();
         

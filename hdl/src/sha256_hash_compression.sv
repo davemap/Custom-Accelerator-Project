@@ -21,12 +21,14 @@ module sha256_hash_compression (
     
     // Data In data and Handshaking
     input  logic [511:0] data_in,
+    input  logic [5:0]   data_in_id,
     input  logic data_in_last,
     input  logic data_in_valid,
     output logic data_in_ready,
     
     // Data Out data and Handshaking
     output logic [255:0] data_out,
+    output logic [5:0]   data_out_id,
     output logic data_out_last,
     output logic data_out_valid,
     input  logic data_out_ready
@@ -61,12 +63,15 @@ module sha256_hash_compression (
     logic [31:0] T1, T2;
     
     // State Machine Registers
-    logic [2:0] state, next_state;
+    logic [2:0]   state, next_state;
     logic [255:0] next_data_out;
+    logic [5:0]   next_data_out_id;
     logic next_data_in_ready, next_data_out_valid, next_data_out_last;
-    logic [5:0] hash_iter, next_hash_iter;
+    logic [5:0]   hash_iter, next_hash_iter;
     logic last_block, next_last_block;
     
+    logic [5:0]   next_id, reg_id;
+
     // // SHA-2 Constants
     logic [31:0] K [63:0];
 
@@ -156,6 +161,8 @@ module sha256_hash_compression (
             data_out_valid  <= 1'b0;
             data_out_last   <= 1'b0;
             data_out        <= 256'd0;
+            data_out_id     <= 6'd0;
+            reg_id          <= 6'd0;
             // Reset Working Registers
             a <= 32'd0;
             b <= 32'd0;
@@ -181,6 +188,8 @@ module sha256_hash_compression (
             data_out_valid  <= next_data_out_valid;
             data_out_last   <= next_data_out_last;
             data_out        <= next_data_out;
+            data_out_id     <= next_data_out_id;
+            reg_id          <= next_id;
             // Set Working Registers
             a <= next_a;
             b <= next_b;
@@ -214,6 +223,8 @@ module sha256_hash_compression (
         next_data_out_valid  = data_out_valid;
         next_data_out_last   = data_out_last;
         next_data_out        = data_out;
+        next_data_out_id     = data_out_id;
+        next_id              = reg_id;
         // Set next Working Registers
         next_a = a;
         next_b = b;
@@ -283,6 +294,8 @@ module sha256_hash_compression (
                         next_state      = 3'd2;
                         next_hash_iter  = 6'd0;
                         next_last_block = data_in_last;
+                        // Store ID Value
+                        next_id         = data_in_id;
                         // Drop Ready Signal to confirm handshake
                         next_data_in_ready = 1'b0;
                     end
@@ -317,6 +330,7 @@ module sha256_hash_compression (
                     if (last_block) begin
                         if (!data_out_valid) begin // No Data waiting at output
                             // Output updated H values
+                            next_data_out_id    = reg_id;
                             next_data_out       = {a + H[0], b + H[1], c + H[2], d + H[3], e + H[4], f + H[5], g + H[6], h + H[7]};
                             next_data_out_last  = 1'b1;
                             next_data_out_valid = 1'b1;
