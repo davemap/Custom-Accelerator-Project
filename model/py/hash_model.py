@@ -49,7 +49,10 @@ def main():
     # Hash Output List Initialisation
     hash_list       = []
     hash_id_list    = []
+    hash_gap_list   = []
     hash_stall_list = []
+    hash_err_list   = []
+
     # ID Lists
     id_gap_list = []
     expected_id_list = []
@@ -63,6 +66,7 @@ def main():
         if gap_limit > 0:
             id_gap_list.append(random.randrange(0,gap_limit))
             in_cfg_words_gap_list.append(random.randrange(0,gap_limit))
+            hash_gap_list.append(random.randrange(0,gap_limit))
         else:
             id_gap_list.append(0)
             in_cfg_words_gap_list.append(0)
@@ -91,6 +95,7 @@ def main():
         
         expected_id_list.append(id_value)
         sync_cfg_id_list.append(id_value)
+        hash_id_list.append(id_value)
         old_id_value = id_value
 
         
@@ -163,8 +168,11 @@ def main():
         hash_val = binascii.hexlify(hashlib.sha256(h).digest()).decode()
         hash_list.append(hash_val)
 
+        # TODO: Calculate whether Hash is errored
+        hash_err_list.append("0")
+
     # Write out Input ID Seed to Text File
-    input_header = ["id_seed", "use_seed", "last", "gap_value"]
+    input_header = ["id_value", "last", "gap_value"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_id_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(expected_id_list):
@@ -225,6 +233,22 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
             writer.writerow([word, expected_id_list[idx], "1", hash_stall_list[idx]])
+    
+    # Write out Validator Hash Input to text file
+    output_header = ["hash_in", "hash_in_id", "hash_last", "gap_value"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_hash_in_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(hash_list):
+            writer.writerow([word, hash_id_list[idx], "1", hash_gap_list[idx]])
+    
+    # Write out hash out (include error) value to text file
+    output_header = ["hash", "hash_err", "hash_last", "stall_value"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_hash_out_ref.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(hash_list):
+            writer.writerow([word, hash_err_list[idx], "1", hash_stall_list[idx]])
+
+    
     
 def chunkstring(string, length):
     array_len = math.ceil(len(string)/length)
