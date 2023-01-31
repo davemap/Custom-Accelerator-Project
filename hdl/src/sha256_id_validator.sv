@@ -55,6 +55,8 @@ module sha256_id_validator (
     logic [5:0]   hash_buf_id, id_buf;
     logic [5:0]   next_hash_buf_id, next_id_buf;
 
+    logic [5:0]   hash_out_id, next_hash_out_id; //Debug
+
     // Status
     logic [1:0]   next_status_err;
     logic [9:0]   next_status_packet_count;
@@ -87,6 +89,7 @@ module sha256_id_validator (
             hash_buf             <= 256'd0;
             hash_buf_id          <=   6'd0;
             id_buf               <=   6'd0;
+            hash_out_id         <=   6'd0;
             status_err           <=   2'b0;
             status_packet_count  <=  10'd0;
         end else if (en == 1'b1) begin
@@ -100,6 +103,7 @@ module sha256_id_validator (
             hash_buf            <= next_hash_buf;
             hash_buf_id         <= next_hash_buf_id;
             id_buf              <= next_id_buf;
+            hash_out_id         <= next_hash_out_id;
             status_packet_count <= next_status_packet_count;
         end else begin
             hash_out_valid   <= 1'b0;
@@ -122,6 +126,7 @@ module sha256_id_validator (
         next_id_buf              = id_buf;
         next_status_err          = status_err;
         next_status_packet_count = status_packet_count;
+        next_hash_out_id         = hash_out_id;
         
         // Override
         case (state)
@@ -178,23 +183,26 @@ module sha256_id_validator (
                                 next_hash_in_ready   = 1'b0;
                             end
                             // ID's don't match
-                            if ((id_in_buf > hash_in_id)||(~id_in_buf_msb & hash_in_id_msb)) begin
+                            if ((id_in_buf > hash_in_id)||((~id_in_buf_msb & hash_in_id_msb) && (id_in_buf < 6'd10))) begin
                                 // If ID Buffer ID > Hash ID - ID Buffer Error
                                 // Pop an additional hash
                                 // Ensure another ID in Buf isn't popped
+                                next_hash_out_id     = hash_in_id;
                                 next_id_in_buf_ready = 1'b0;
                                 next_state           = 2'd3;
                                 next_hash_out_err    = 1'b1;
                                 next_status_err      = next_status_err | 2'b10; 
-                            end else if ((id_in_buf < hash_in_id)||(id_in_buf_msb & ~hash_in_id_msb)) begin
+                            end else if ((id_in_buf < hash_in_id)||((id_in_buf_msb & ~hash_in_id_msb) && (hash_in_id < 6'd10))) begin
                                 // If ID Buffer ID < Hash ID - Lost Packet Error
                                 // Pop an additional value from the ID Buffer FIFO
                                 // Ensure another Hash isn't popped
+                                next_hash_out_id   = id_in_buf;
                                 next_hash_in_ready = 1'b0;
                                 next_state         = 2'd2;
                                 next_hash_out_err  = 1'b1;
                                 next_status_err    = next_status_err | 2'b01;
                             end else begin
+                                next_hash_out_id  = hash_in_id;
                                 next_hash_out_err = 1'b0;
                                 next_state        = 2'd1;
                             end
@@ -219,6 +227,7 @@ module sha256_id_validator (
                             // Put Hash On Output
                             next_status_packet_count = status_packet_count + 1;
                             next_hash_out            = hash_buf;
+                            next_id_buf              = id_in_buf;
                             next_hash_out_last       = 1'b1;
                             next_hash_out_valid      = 1'b1;
                             if (!hash_out_valid && hash_out_ready) begin 
@@ -231,23 +240,26 @@ module sha256_id_validator (
                                 next_hash_in_ready   = 1'b0;
                             end
                             // ID's don't match
-                            if ((id_in_buf > hash_buf_id)||(~id_in_buf_msb & hash_buf_id_msb)) begin
+                            if ((id_in_buf > hash_buf_id)||((~id_in_buf_msb & hash_buf_id_msb) && (id_in_buf < 6'd10))) begin
                                 // If ID Buffer ID > Hash ID - ID Buffer Error
                                 // Pop an additional hash
                                 // Ensure another ID in Buf isn't popped
+                                next_hash_out_id     = hash_buf_id;
                                 next_id_in_buf_ready = 1'b0;
                                 next_state           = 2'd3;
                                 next_hash_out_err    = 1'b1;
                                 next_status_err      = next_status_err | 2'b10; 
-                            end else if ((id_in_buf < hash_buf_id)||(id_in_buf_msb & ~hash_buf_id_msb)) begin
+                            end else if ((id_in_buf < hash_buf_id)||((id_in_buf_msb & ~hash_buf_id_msb) && (6'd10 > hash_buf_id))) begin
                                 // If ID Buffer ID < Hash ID - Lost Packet Error
                                 // Pop an additional value from the ID Buffer FIFO
                                 // Ensure another Hash isn't popped
+                                next_hash_out_id   = id_in_buf;
                                 next_hash_in_ready = 1'b0;
                                 next_state         = 2'd2;
                                 next_hash_out_err  = 1'b1;
                                 next_status_err    = next_status_err | 2'b01;
                             end else begin
+                                next_hash_out_id  = hash_buf_id;
                                 next_hash_out_err = 1'b0;
                                 next_state        = 2'd1;
                             end
@@ -269,6 +281,8 @@ module sha256_id_validator (
                         // Has ID Buf Input Handshaked?
                         if (hash_in_ready && hash_in_valid) begin
                             // Put Hash On Output
+                            next_hash_buf            = hash_in;
+                            next_hash_buf_id         = hash_in_id;
                             next_status_packet_count = status_packet_count + 1;
                             next_hash_out            = hash_in;
                             next_hash_out_last       = 1'b1;
@@ -283,24 +297,27 @@ module sha256_id_validator (
                                 next_hash_in_ready   = 1'b0;
                             end
                             // ID's don't match
-                            if ((id_buf > hash_in_id)||(~id_buf_msb & hash_in_id_msb)) begin
+                            if ((id_buf > hash_in_id)||((~id_buf_msb & hash_in_id_msb) && (id_buf < 6'd10))) begin
                                 // If ID Buffer ID > Hash ID - ID Buffer Error
                                 // Pop an additional hash
                                 // Ensure another ID in Buf isn't popped
+                                next_hash_out_id     = hash_in_id;
                                 next_id_in_buf_ready = 1'b0;
                                 next_state           = 2'd3;
                                 next_hash_out_err    = 1'b1;
                                 next_status_err      = next_status_err | 2'b10; 
-                            end else if ((id_buf < hash_in_id)||(id_buf_msb & ~hash_in_id_msb)) begin
+                            end else if ((id_buf < hash_in_id)||((id_buf_msb & ~hash_in_id_msb) && (6'd10 > hash_in_id))) begin
                                 // If ID Buffer ID < Hash ID - Lost Packet Error
                                 // Pop an additional value from the ID Buffer FIFO
                                 // Ensure another Hash isn't popped
+                                next_hash_out_id   = id_buf;
                                 next_hash_in_ready = 1'b0;
                                 next_state         = 2'd2;
                                 next_hash_out_err  = 1'b1;
                                 next_status_err    = next_status_err | 2'b01;
                             end else begin
                                 // ID's Match
+                                next_hash_out_id  = hash_in_id;
                                 next_state        = 2'd1;
                                 next_hash_out_err = 1'b0;
                             end

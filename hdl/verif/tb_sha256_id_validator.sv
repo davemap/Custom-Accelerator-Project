@@ -281,7 +281,7 @@ module tb_sha256_id_validator;
         hash_out_drive_ready = 0;
         
         // Read input data into Queuein
-        fd = $fopen("../stimulus/testbench/input_id_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/input_validator_id_stim.csv", "r");
         while ($fscanf (fd, "%d,%b,%d", temp_id_in_buf, temp_id_in_buf_last, temp_id_in_buf_gap) == 3) begin
             id_in_buf_queue.push_back(temp_id_in_buf);
             id_in_buf_last_queue.push_back(temp_id_in_buf_last);

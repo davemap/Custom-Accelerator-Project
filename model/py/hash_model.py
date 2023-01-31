@@ -47,6 +47,7 @@ def main():
     message_block_stall_list = []
 
     # Hash Output List Initialisation
+    hash_val = 0
     hash_list       = []
     hash_id_list    = []
     hash_gap_list   = []
@@ -59,6 +60,20 @@ def main():
     expected_id_stall_list = []
     
     id_value = 0
+    id_validator_buf_value = 0
+    id_validator_hash_value = 0
+    id_validator_buf_no_wrap_value = 0
+    id_validator_hash_no_wrap_value = 0
+
+    id_validator_buf_list = []
+    id_validator_hash_list = []
+    id_validator_buf_no_wrap_list = []
+    id_validator_hash_no_wrap_list = []
+    id_validator_hash_stall_list = []
+    val_hash_list = []
+
+    prev_packet_hash_err = False
+
     for i in range(packets):
         # Generate Gapping and Stalling Values
         #   Gapping - Period to wait before taking Input Valid High
@@ -97,8 +112,11 @@ def main():
         sync_cfg_id_list.append(id_value)
         hash_id_list.append(id_value)
         old_id_value = id_value
+        id_validator_buf_list.append(id_validator_buf_value)
+        id_validator_hash_list.append(id_validator_hash_value)
+        id_validator_buf_no_wrap_list.append(id_validator_buf_no_wrap_value)
+        id_validator_hash_no_wrap_list.append(id_validator_hash_no_wrap_value)
 
-        
         # Reference Values
         id_value += 1
             
@@ -106,6 +124,9 @@ def main():
             id_value = id_value - 64
         
         expected_id_stall_list.append(id_stall_value)
+        
+        
+        
         
         chunked_data_words  = chunkstring(str(data),512)
         in_data_words       = chunked_data_words.copy()
@@ -163,21 +184,85 @@ def main():
         message_block_gap_list   += message_block_gap
         message_block_stall_list += message_block_stall
         intval = int(data, 2)
-        hash_val = 0
+        old_hash_val = hash_val
         h=int(data, 2).to_bytes((len(data) + 7) // 8, byteorder='big')
         hash_val = binascii.hexlify(hashlib.sha256(h).digest()).decode()
         hash_list.append(hash_val)
 
-        # TODO: Calculate whether Hash is errored
-        hash_err_list.append("0")
+        # while (id_validator_buf_value !=  id_validator_hash_value):
+        #     print(f"{id_validator_buf_value}, {id_validator_hash_value}")
+        #     hash_err_list.append("1")
+        #     if id_validator_buf_value > id_validator_hash_value:
+        #         # Pop another hash
+        #         # - Hash ID increases by 1 while buf ID stays the same
+        #         id_validator_hash_value += 1
+        #         id_validator_hash_list.append(id_validator_hash_value)
+        #         hash_gap_list.append(hash_gap_list[-1])
+        #     else:
+        #         # Pop another ID Buf ID
+        #         # - ID increases by extra 1 BUT hash remains the same
+        #         id_validator_buf_value += 1
+        #         val_hash_list.append(hash_val)
+        #         hash_stall_list.append(hash_stall_list[-1])
+        #         id_validator_buf_list.append(id_validator_buf_value)
+        #         id_gap_list.append(id_gap_list[-1])
+        # print(f"{id_validator_buf_value}, {id_validator_hash_value}")
+        # hash_err_list.append("0")
+        id_validator_buf_value += 1
+        id_validator_hash_value += 1
+        id_validator_buf_no_wrap_value += 1
+        id_validator_hash_no_wrap_value += 1
+        # val_hash_list.append(hash_val)
+        
+        if random.randrange(0,100) < 20:
+            id_validator_buf_value += 1
+            id_validator_buf_no_wrap_value += 1
 
+        if random.randrange(0,100) < 20:
+            id_validator_hash_value += 1
+            id_validator_hash_no_wrap_value += 1
+
+        if id_validator_buf_value >= 64:
+            id_validator_buf_value = id_validator_buf_value - 64
+        
+        if id_validator_hash_value >= 64:
+            id_validator_hash_value = id_validator_hash_value - 64
+
+    # Generate val_hash_list
+    id_validator_buf_offset = 0
+    id_validator_hash_offset = 0
+    for idx, hash in enumerate(hash_list):
+        if id_validator_buf_no_wrap_list[idx + id_validator_buf_offset] == id_validator_hash_no_wrap_list[idx + id_validator_hash_offset]:
+            hash_err_list.append("0")
+            val_hash_list.append(hash_list[idx + id_validator_hash_offset])
+        else:
+            if id_validator_buf_no_wrap_list[idx + id_validator_buf_offset] > id_validator_hash_no_wrap_list[idx + id_validator_hash_offset]:
+                # Pop another hash
+                # - Hash ID increases by 1 while buf ID stays the same
+                hash_err_list.append("1")
+                val_hash_list.append(hash_list[idx + id_validator_hash_offset])
+                id_validator_buf_offset -= 1
+            else: 
+                # Pop another ID Buf ID
+                # - ID increases by extra 1 BUT hash remains the same
+                hash_err_list.append("1")
+                val_hash_list.append(hash_list[idx + id_validator_hash_offset])
+                id_validator_hash_offset -= 1
+            
     # Write out Input ID Seed to Text File
     input_header = ["id_value", "last", "gap_value"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_id_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(expected_id_list):
             writer.writerow([expected_id_list[idx], "1", id_gap_list[idx]])
-            
+
+    # Write out Input Validator ID Seed to Text File
+    input_header = ["id_value", "last", "gap_value"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_validator_id_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(id_validator_buf_list):
+            writer.writerow([id_validator_buf_list[idx], "1", id_gap_list[idx]])
+          
     # Write out Output ID Values to Text File
     input_header = ["expected_id_value, id_last, stall_value"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_id_ref.csv", "w", encoding="UTF8", newline='') as f:
@@ -239,13 +324,13 @@ def main():
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_hash_in_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
-            writer.writerow([word, hash_id_list[idx], "1", hash_gap_list[idx]])
+            writer.writerow([word, id_validator_hash_list[idx], "1", hash_gap_list[idx]])
     
     # Write out hash out (include error) value to text file
     output_header = ["hash", "hash_err", "hash_last", "stall_value"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_hash_out_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
-        for idx, word in enumerate(hash_list):
+        for idx, word in enumerate(val_hash_list):
             writer.writerow([word, hash_err_list[idx], "1", hash_stall_list[idx]])
 
     
