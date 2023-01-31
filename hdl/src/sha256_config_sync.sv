@@ -35,7 +35,13 @@ module sha256_config_sync (
     output logic [5:0]  cfg_out_id,
     output logic cfg_out_last,
     output logic cfg_out_valid,
-    input  logic cfg_out_ready
+    input  logic cfg_out_ready,
+
+    // Status Out - Gets updated after every hash
+    // - outputs size and then clears size to 0
+    // - status regs are looking for non-zero size
+    output logic [63:0] status_size,
+    input  logic status_clear
 );
 
     logic [1:0] state, next_state;
@@ -49,6 +55,8 @@ module sha256_config_sync (
     logic        next_cfg_out_last;
     logic        next_cfg_out_valid;
 
+    logic [63:0] next_status_size;
+
     // State Machine Sequential Logic    
     always_ff @(posedge clk, negedge nrst) begin
         if ((!nrst) | sync_rst) begin
@@ -60,6 +68,7 @@ module sha256_config_sync (
             cfg_out_valid    <= 1'b0;
             cfg_in_ready     <= 1'b0;
             id_in_ready      <= 1'b0;
+            status_size      <= 64'd0;
         end else if (en == 1'b1) begin
             state            <= next_state;   
             cfg_out_size     <= next_cfg_out_size;
@@ -69,10 +78,12 @@ module sha256_config_sync (
             cfg_out_valid    <= next_cfg_out_valid;
             cfg_in_ready     <= next_cfg_in_ready;
             id_in_ready      <= next_id_in_ready;
+            status_size      <= next_status_size;
         end else begin
             cfg_out_valid    <= 1'b0;
             cfg_in_ready     <= 1'b0;
             id_in_ready      <= 1'b0;
+            status_size      <= 64'd0;
         end
     end
 
@@ -86,6 +97,7 @@ module sha256_config_sync (
         next_cfg_out_valid   = cfg_out_valid;
         next_cfg_in_ready    = cfg_in_ready;
         next_id_in_ready     = id_in_ready;
+        next_status_size     = status_size;
         
         // Override
         case (state)
@@ -96,6 +108,10 @@ module sha256_config_sync (
                 end
             
             2'd1: begin
+                    // Handle Status Signals
+                    if (status_clear) begin
+                        next_status_size = 64'd0;
+                    end
                     // Check outputs can be written to
                     if (cfg_out_valid && !cfg_out_ready) begin
                         // If data out is valid and ready is low, there is already data waiting to be transferred
@@ -113,6 +129,7 @@ module sha256_config_sync (
                             next_cfg_out_last   = cfg_in_last;
                             next_cfg_out_scheme = cfg_in_scheme;
                             next_cfg_out_size   = cfg_in_size;
+                            next_status_size    = cfg_in_size;
                             next_cfg_in_ready   = 1'b0;
                             next_state          = 2'd2;
                         end
@@ -140,6 +157,10 @@ module sha256_config_sync (
                 end
             
             2'd2: begin // Cfg already handshaked - wait for ID handshake
+                    // Handle Status Signals
+                    if (status_clear) begin
+                        next_status_size = 64'd0;
+                    end
                     // These can be overloaded later if data is written to the outputs
                     next_cfg_out_valid = 1'b0; 
                     next_cfg_in_ready  = 1'b0;
@@ -160,6 +181,10 @@ module sha256_config_sync (
                 end
 
             2'd3: begin // ID already handshaked - wait for config handshake
+                    // Handle Status Signals
+                    if (status_clear) begin
+                        next_status_size = 64'd0;
+                    end
                     // These can be overloaded later if data is written to the outputs
                     next_cfg_out_valid = 1'b0; 
                     next_cfg_in_ready  = 1'b1;
@@ -170,6 +195,7 @@ module sha256_config_sync (
                         next_cfg_out_scheme = cfg_in_scheme;
                         next_cfg_out_size   = cfg_in_size;
                         next_cfg_out_valid  = 1'b1;
+                        next_status_size    = cfg_in_size;
                         if (cfg_out_ready) begin // Guaranteeded Handshake next clock cycle
                             next_cfg_in_ready   = 1'b1;
                             next_id_in_ready    = 1'b1;
