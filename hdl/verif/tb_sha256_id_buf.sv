@@ -66,6 +66,7 @@ module tb_sha256_id_buf;
     logic        id_in_wait_queue;
 
     logic [5:0] id_out_queue        [$];
+    logic [5:0] status_id_out_queue [$];
     logic       id_out_last_queue   [$];
     int         id_out_stall_queue  [$];
     logic       id_out_wait_queue;
@@ -110,6 +111,7 @@ module tb_sha256_id_buf;
     end
     
     logic [5:0] id_out_check;
+    logic [5:0] status_id_out_check;
     logic       id_out_last_check;
 
     int id_in_gap;
@@ -164,9 +166,17 @@ module tb_sha256_id_buf;
             end
             if ($test$plusargs ("DEBUG")) $display("id_out_last match! packet %d | recieve: %x == check: %x", packet_num, id_out_last, id_out_last_check);
 
+            // Check Status Value
+            assert (status_id == status_id_out_check) else begin
+                $error("id_out_last missmatch! packet %d | recieve: %x != check: %x", packet_num, status_id, status_id_out_check);
+                $finish;
+            end
+            if ($test$plusargs ("DEBUG")) $display("status_id match! packet %d | recieve: %x == check: %x", packet_num, status_id, status_id_out_check);
+
             // Pop new values
-            if ((id_out_queue.size() > 0) && (id_out_last_queue.size() > 0)) begin
+            if ((id_out_queue.size() > 0) && (status_id_out_queue.size() > 0) && (id_out_last_queue.size() > 0)) begin
                 id_out_check          <= id_out_queue.pop_front();
+                status_id_out_check   <= status_id_out_queue.pop_front();
                 id_out_last_check     <= id_out_last_queue.pop_front();
                 if (id_out_last_check == 1'b1) begin
                     packet_num <= packet_num + 1;
@@ -185,9 +195,10 @@ module tb_sha256_id_buf;
     logic         temp_id_in_last;  // Temporary Input Data Last
     int           temp_id_in_gap;   // Temporary Input Gap
 
-    logic [5:0] temp_id_out;        // Temporary Hash Value 
-    logic         temp_id_out_last;   // Temporary Hash last;
-    int           temp_id_out_stall;  // Temporary Hash stall;
+    logic [5:0]   temp_id_out;        // Temporary ID Value 
+    logic [5:0]   temp_status_id_out; // Temporary Status ID Value 
+    logic         temp_id_out_last;   // Temporary ID last;
+    int           temp_id_out_stall;  // Temporary ID stall;
     
     initial begin
         $dumpfile("sha256_id_buf.vcd");
@@ -196,7 +207,7 @@ module tb_sha256_id_buf;
         id_out_drive_ready = 0;
         
         // Read input data into Queue in
-        fd = $fopen("../stimulus/testbench/input_validator_id_stim.csv", "r");
+        fd = $fopen("../stimulus/testbench/input_buf_id_stim.csv", "r");
         while ($fscanf (fd, "%d,%b,%d", temp_id_in, temp_id_in_last, temp_id_in_gap) == 3) begin
             id_in_queue.push_back(temp_id_in);
             id_in_last_queue.push_back(temp_id_in_last);
@@ -205,16 +216,18 @@ module tb_sha256_id_buf;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_id_out_ref.csv", "r");
-        while ($fscanf (fd, "%x,%b,%b,%d", temp_id_out, temp_id_out_last, temp_id_out_stall) == 3) begin
+        fd = $fopen("../stimulus/testbench/output_buf_id_ref.csv", "r");
+        while ($fscanf (fd, "%x,%b,%b,%d", temp_id_out, temp_id_out_last, temp_status_id_out, temp_id_out_stall) == 4) begin
             id_out_queue.push_back(temp_id_out);
             id_out_last_queue.push_back(temp_id_out_last);
+            status_id_out_queue.push_back(temp_status_id_out);
             id_out_stall_queue.push_back(temp_id_out_stall);
         end
         $fclose(fd);
         
         // Initialise First Checking Values
         id_out_check         = id_out_queue.pop_front();      
+        status_id_out_check  = status_id_out_queue.pop_front();      
         id_out_last_check    = id_out_last_queue.pop_front();      
         id_out_stall         = id_out_stall_queue.pop_front();      
         

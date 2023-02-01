@@ -8,7 +8,9 @@
 //
 // Copyright  2023, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-module sha256_id_validator (
+`include "fifo_vr.sv"
+
+module sha256_id_buf (
     input logic clk,
     input logic nrst,
     input logic en,

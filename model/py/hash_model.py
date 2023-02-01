@@ -58,7 +58,8 @@ def main():
     id_gap_list = []
     expected_id_list = []
     expected_id_stall_list = []
-    
+    id_buf_id_list = []
+
     id_value = 0
     id_validator_buf_value = 0
     id_validator_hash_value = 0
@@ -125,7 +126,7 @@ def main():
         
         expected_id_stall_list.append(id_stall_value)
         
-        
+        id_buf_id_list.append(random.randrange(0,63))
         
         
         chunked_data_words  = chunkstring(str(data),512)
@@ -256,6 +257,13 @@ def main():
         for idx, word in enumerate(expected_id_list):
             writer.writerow([expected_id_list[idx], "1", id_gap_list[idx]])
 
+    # Write out Buffer Input ID to Text File
+    input_header = ["id_value", "last", "gap_value"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_buf_id_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(id_buf_id_list):
+            writer.writerow([id_buf_id_list[idx], "1", id_gap_list[idx]])
+
     # Write out Input Validator ID Seed to Text File
     input_header = ["id_value", "last", "gap_value"]
     with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_validator_id_stim.csv", "w", encoding="UTF8", newline='') as f:
@@ -269,6 +277,13 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(expected_id_list):
             writer.writerow([word, "1", expected_id_stall_list[idx]])
+
+    # Write out Output ID Values to Text File
+    input_header = ["expected_id_value, id_last, status_id, stall_value"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_buf_id_ref.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(id_buf_id_list):
+            writer.writerow([word, "1", word, expected_id_stall_list[idx]])
     
     # Write out Input Data Stimulus to Text File
     input_header = ["input_data", "input_data_last", "gap_value"]
