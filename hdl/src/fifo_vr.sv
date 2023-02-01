@@ -30,7 +30,10 @@ module fifo_vr #(
     output logic [DATA_W-1:0] data_out,
     output logic data_out_last,
     input  logic data_out_ready,
-    output logic data_out_valid
+    output logic data_out_valid,
+
+    // Status 
+    output logic [PTR_W-1:0] status_ptr_dif
 );
 
     logic data_in_shake;    // Successful Write Handshake
@@ -45,6 +48,8 @@ module fifo_vr #(
     logic [PTR_W-1:0]  ptr_dif;          // Difference between Write and Read Pointers
     
     assign ptr_dif = write_ptr - read_ptr;
+    
+    assign status_ptr_dif = ptr_dif;
     
     // EXAMPLE: Conditions to write and read from FIFO's
     // Write Ptr  | Read Ptr  | Ptr_Dif | Valid Write | Valid Read

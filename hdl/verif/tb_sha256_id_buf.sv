@@ -217,7 +217,7 @@ module tb_sha256_id_buf;
         
         // Read output data into Queue
         fd = $fopen("../stimulus/testbench/output_buf_id_ref.csv", "r");
-        while ($fscanf (fd, "%x,%b,%b,%d", temp_id_out, temp_id_out_last, temp_status_id_out, temp_id_out_stall) == 4) begin
+        while ($fscanf (fd, "%d,%b,%d,%d", temp_id_out, temp_id_out_last, temp_status_id_out, temp_id_out_stall) == 4) begin
             id_out_queue.push_back(temp_id_out);
             id_out_last_queue.push_back(temp_id_out_last);
             status_id_out_queue.push_back(temp_status_id_out);
