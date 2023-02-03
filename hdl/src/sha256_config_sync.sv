@@ -40,8 +40,7 @@ module sha256_config_sync (
     // Status Out - Gets updated after every hash
     // - outputs size and then clears size to 0
     // - status regs are looking for non-zero size
-    output logic [63:0] status_size,
-    input  logic status_clear
+    output logic [63:0] status_size
 );
 
     logic [1:0] state, next_state;
@@ -109,9 +108,7 @@ module sha256_config_sync (
             
             2'd1: begin
                     // Handle Status Signals
-                    if (status_clear) begin
-                        next_status_size = 64'd0;
-                    end
+                    next_status_size = 64'd0;
                     // Check outputs can be written to
                     if (cfg_out_valid && !cfg_out_ready) begin
                         // If data out is valid and ready is low, there is already data waiting to be transferred
@@ -158,9 +155,7 @@ module sha256_config_sync (
             
             2'd2: begin // Cfg already handshaked - wait for ID handshake
                     // Handle Status Signals
-                    if (status_clear) begin
-                        next_status_size = 64'd0;
-                    end
+                    next_status_size = 64'd0;
                     // These can be overloaded later if data is written to the outputs
                     next_cfg_out_valid = 1'b0; 
                     next_cfg_in_ready  = 1'b0;
@@ -182,9 +177,7 @@ module sha256_config_sync (
 
             2'd3: begin // ID already handshaked - wait for config handshake
                     // Handle Status Signals
-                    if (status_clear) begin
-                        next_status_size = 64'd0;
-                    end
+                    next_status_size = 64'd0;
                     // These can be overloaded later if data is written to the outputs
                     next_cfg_out_valid = 1'b0; 
                     next_cfg_in_ready  = 1'b1;
