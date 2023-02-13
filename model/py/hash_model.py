@@ -291,6 +291,20 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(in_data_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), in_data_words_last_list[idx], in_data_words_gap_list[idx]])
+
+    # Write out Input Data 32bit AHB Stimulus to Text File
+    input_header = ["input_data_32word", "input_data_32word_last", "input_data_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_data_32bit_stim.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(in_data_words_list):
+            sub_word_count = 0
+            while sub_word_count < 16:
+                sub_word = int(word, 2) >> (32 * (15 - sub_word_count)) & 0xFFFF_FFFF
+                sub_word_last = 0
+                if sub_word_count == 15:
+                    sub_word_last = 1
+                writer.writerow(["{0:x}".format(sub_word), sub_word_last, in_data_words_last_list[idx]])
+                sub_word_count += 1 
             
     # Write out Cfg Stimulus to Text File
     input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
@@ -333,6 +347,20 @@ def main():
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
             writer.writerow([word, expected_id_list[idx], "1", hash_stall_list[idx]])
+    
+    # Write out hash value to text file
+    output_header = ["output_data", "output_sub_word_last", "output_data_last"]
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_hash_32bit_ref.csv", "w", encoding="UTF8", newline='') as f:
+        writer = csv.writer(f)
+        for idx, word in enumerate(hash_list):
+            sub_word_count = 0
+            while sub_word_count < 8:
+                sub_word = int(word, 16) >> (32 * (7 - sub_word_count)) & 0xFFFF_FFFF
+                sub_word_last = 0
+                if sub_word_count == 7:
+                    sub_word_last = 1
+                writer.writerow(["{0:x}".format(sub_word), sub_word_last, "1"])
+                sub_word_count += 1 
     
     # Write out Validator Hash Input to text file
     output_header = ["hash_in", "hash_in_id", "hash_last", "gap_value"]
