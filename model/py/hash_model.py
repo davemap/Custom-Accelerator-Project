@@ -19,19 +19,20 @@ def main():
         print("Sourceme file at root of repository has not been sourced. Please source this file and try again.")
         quit()
     # Read in Descriptor File
-    # - contains number of packets of data to generate and random seed
+    # - contains number of payloads of data to generate and random seed
     stim_file = os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/model/" + "model_stim.csv"
     with open(stim_file, "r") as stim:
         csvreader = csv.reader(stim, delimiter=",")
         stim_list = list(csvreader)
     
-    seed        = int(stim_list[0][0])
-    packets     = int(stim_list[0][1])
-    gap_limit   = int(stim_list[0][2])
-    stall_limit = int(stim_list[0][3])
+    seed              = int(stim_list[0][0])
+    payloads          = int(stim_list[0][1])
+    payload_size_bits = int(stim_list[0][2])
+    gap_limit         = int(stim_list[0][3])
+    stall_limit       = int(stim_list[0][4])
     random.seed(seed)
     
-    print(f"Generating {packets} packets using seed: {seed}")
+    print(f"Generating {payloads} payloads using seed: {seed}")
     in_cfg_words_list = []
     in_cfg_words_gap_list = []
     sync_cfg_size_list = []
@@ -73,9 +74,9 @@ def main():
     id_validator_hash_stall_list = []
     val_hash_list = []
 
-    prev_packet_hash_err = False
+    prev_payload_hash_err = False
 
-    for i in range(packets):
+    for i in range(payloads):
         # Generate Gapping and Stalling Values
         #   Gapping - Period to wait before taking Input Valid High
         #   Stalling - Period to wait before taking Output Read High
@@ -95,7 +96,10 @@ def main():
             sync_cfg_stall_list.append(0)
         
         # Generate expected output in 512 bit chunks
-        cfg_size = math.ceil(random.randint(0,pow(2,14))/8)*8
+        if payload_size_bits == 0:
+            cfg_size = math.ceil(random.randint(0,pow(2,14))/8)*8
+        else:
+            cfg_size = payload_size_bits
         cfg_size_bin = "{0:b}".format(cfg_size)
         # Pad Size to 64 bits
         cfg_size_str = "0"*(64-len(cfg_size_bin)) + str(cfg_size_bin)
