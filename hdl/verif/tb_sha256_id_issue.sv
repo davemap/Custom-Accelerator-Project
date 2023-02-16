@@ -192,7 +192,7 @@ module tb_sha256_id_issue;
         id_out_buf_drive_ready = 0;
         
         // Read output cfg data into Queue
-        fd = $fopen("../stimulus/testbench/output_id_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_id_ref.csv", "r");
         while ($fscanf (fd, "%d,%b,%d", id_cfg_data, id_cfg_last, id_cfg_stall) == 3) begin
             id_out_cfg_queue.push_back(id_cfg_data);
             id_out_cfg_last_queue.push_back(id_cfg_last);
@@ -201,7 +201,7 @@ module tb_sha256_id_issue;
         $fclose(fd);
         
         // Read output buf data into Queue
-        fd = $fopen("../stimulus/testbench/output_id_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_id_ref.csv", "r");
         while ($fscanf (fd, "%d,%b,%d", id_buf_data, id_buf_last, id_buf_stall) == 3) begin
             id_out_buf_queue.push_back(id_buf_data);
             id_out_buf_last_queue.push_back(id_buf_last);

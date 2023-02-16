@@ -281,7 +281,7 @@ module tb_sha256_id_validator;
         hash_out_drive_ready = 0;
         
         // Read input data into Queuein
-        fd = $fopen("../stimulus/testbench/input_validator_id_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_validator_id_stim.csv", "r");
         while ($fscanf (fd, "%d,%b,%d", temp_id_in_buf, temp_id_in_buf_last, temp_id_in_buf_gap) == 3) begin
             id_in_buf_queue.push_back(temp_id_in_buf);
             id_in_buf_last_queue.push_back(temp_id_in_buf_last);
@@ -290,7 +290,7 @@ module tb_sha256_id_validator;
         $fclose(fd);
         
         // Read input cfg into Queue
-        fd = $fopen("../stimulus/testbench/input_hash_in_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_hash_in_stim.csv", "r");
         while ($fscanf (fd, "%x,%d,%b,%d", temp_hash_in, temp_hash_in_id, temp_hash_in_last, temp_hash_in_gap) == 4) begin
             hash_in_queue.push_back(temp_hash_in);
             hash_in_id_queue.push_back(temp_hash_in_id);
@@ -300,7 +300,7 @@ module tb_sha256_id_validator;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_hash_out_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_hash_out_ref.csv", "r");
         while ($fscanf (fd, "%x,%b,%b,%d", temp_hash_out, temp_hash_out_err, temp_hash_out_last, temp_hash_out_stall) == 4) begin
             hash_out_queue.push_back(temp_hash_out);
             hash_out_err_queue.push_back(temp_hash_out_err);

@@ -204,7 +204,7 @@ module tb_sha256_hash_compression;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_message_block_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_message_block_stim.csv", "r");
         while ($fscanf (fd, "%x,%d,%b,%d", temp_data_in, temp_data_in_id, temp_data_in_last, temp_data_in_gap) == 4) begin
             data_in_queue.push_back(temp_data_in);
             data_in_id_queue.push_back(temp_data_in_id);
@@ -214,7 +214,7 @@ module tb_sha256_hash_compression;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_hash_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_hash_ref.csv", "r");
         while ($fscanf (fd, "%x,%d,%b,%d", temp_data_out, temp_data_out_id, temp_data_out_last, temp_data_out_stall) == 4) begin
             data_out_queue.push_back(temp_data_out);
             data_out_id_queue.push_back(temp_data_out_id);

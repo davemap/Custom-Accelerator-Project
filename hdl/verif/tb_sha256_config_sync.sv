@@ -272,7 +272,7 @@ module tb_sha256_config_sync;
         cfg_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_id_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_id_stim.csv", "r");
         while ($fscanf (fd, "%d,%b,%d", temp_id_in, temp_id_in_last, temp_id_in_gap) == 3) begin
             id_in_queue.push_back(temp_id_in);
             id_in_last_queue.push_back(temp_id_in_last);
@@ -281,7 +281,7 @@ module tb_sha256_config_sync;
         $fclose(fd);
         
         // Read input cfg into Queue
-        fd = $fopen("../stimulus/testbench/input_cfg_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_cfg_stim.csv", "r");
         while ($fscanf (fd, "%x,%x,%b,%d", temp_cfg_in_size, temp_cfg_in_scheme, temp_cfg_in_last, temp_cfg_in_gap) == 4) begin
             cfg_in_size_queue.push_back(temp_cfg_in_size);
             cfg_in_scheme_queue.push_back(temp_cfg_in_scheme);
@@ -291,7 +291,7 @@ module tb_sha256_config_sync;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_cfg_sync_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_cfg_sync_ref.csv", "r");
         while ($fscanf (fd, "%x,%x,%d,%b,%d", temp_cfg_out_size, temp_cfg_out_scheme, temp_cfg_out_id, temp_cfg_out_last, temp_cfg_out_stall) == 5) begin
             cfg_out_size_queue.push_back(temp_cfg_out_size);
             cfg_out_scheme_queue.push_back(temp_cfg_out_scheme);

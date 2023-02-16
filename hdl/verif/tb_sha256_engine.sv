@@ -296,7 +296,7 @@ module tb_sha256_engine;
         data_out_drive_ready = 0;
         
         // Read input data into Queue
-        fd = $fopen("../stimulus/testbench/input_data_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_data_stim.csv", "r");
         while ($fscanf (fd, "%x,%b,%d", input_data, input_data_last, input_data_gap) == 3) begin
             data_in_queue.push_back(input_data);
             data_in_last_queue.push_back(input_data_last);
@@ -305,7 +305,7 @@ module tb_sha256_engine;
         $fclose(fd);
         
         // Read input cfg into Queue
-        fd = $fopen("../stimulus/testbench/input_cfg_stim.csv", "r");
+        fd = $fopen("../stimulus/unit/input_cfg_stim.csv", "r");
         while ($fscanf (fd, "%x,%x,%b,%d", input_cfg_size, input_cfg_scheme, input_cfg_last, input_cfg_gap) == 4) begin
             cfg_size_queue.push_back(input_cfg_size);
             cfg_scheme_queue.push_back(input_cfg_scheme);
@@ -315,7 +315,7 @@ module tb_sha256_engine;
         $fclose(fd);
         
         // Read output data into Queue
-        fd = $fopen("../stimulus/testbench/output_hash_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_hash_ref.csv", "r");
         while ($fscanf (fd, "%x,%b,%d", output_data, output_data_last, output_data_stall) == 3) begin
             data_out_queue.push_back(output_data);
             data_out_last_queue.push_back(output_data_last);
@@ -324,7 +324,7 @@ module tb_sha256_engine;
         $fclose(fd);
         
         // Read Message Block data into Queue
-        fd = $fopen("../stimulus/testbench/output_message_block_ref.csv", "r");
+        fd = $fopen("../stimulus/unit/output_message_block_ref.csv", "r");
         while ($fscanf (fd, "%x,%b,%d", message_block_data, message_block_data_last, message_block_stall) == 3) begin
             message_block_queue.push_back(message_block_data);
             message_block_last_queue.push_back(message_block_data_last);

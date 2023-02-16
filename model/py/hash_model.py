@@ -252,49 +252,49 @@ def main():
             
     # Write out Input ID Seed to Text File
     input_header = ["id_value", "last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_id_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_id_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(expected_id_list):
             writer.writerow([expected_id_list[idx], "1", id_gap_list[idx]])
 
     # Write out Buffer Input ID to Text File
     input_header = ["id_value", "last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_buf_id_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_buf_id_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(id_buf_id_list):
             writer.writerow([id_buf_id_list[idx], "1", id_gap_list[idx]])
 
     # Write out Input Validator ID Seed to Text File
     input_header = ["id_value", "last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_validator_id_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_validator_id_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(id_validator_buf_list):
             writer.writerow([id_validator_buf_list[idx], "1", id_gap_list[idx]])
           
     # Write out Output ID Values to Text File
     input_header = ["expected_id_value, id_last, stall_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_id_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "output_id_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(expected_id_list):
             writer.writerow([word, "1", expected_id_stall_list[idx]])
 
     # Write out Output ID Values to Text File
     input_header = ["expected_id_value, id_last, status_id, stall_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_buf_id_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "output_buf_id_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(id_buf_id_list):
             writer.writerow([word, "1", word, expected_id_stall_list[idx]])
     
     # Write out Input Data Stimulus to Text File
     input_header = ["input_data", "input_data_last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_data_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_data_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(in_data_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), in_data_words_last_list[idx], in_data_words_gap_list[idx]])
 
     # Write out Input Data 32bit AHB Stimulus to Text File
     input_header = ["input_data_32word", "input_data_32word_last", "input_data_last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_data_32bit_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/system/" + "input_data_32bit_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(in_data_words_list):
             sub_word_count = 0
@@ -308,49 +308,49 @@ def main():
             
     # Write out Cfg Stimulus to Text File
     input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_cfg_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_cfg_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(in_cfg_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), "0", "1", in_cfg_words_gap_list[idx]])
 
     # Write out Cfg Stimulus to Text File
     input_header = ["input_cfg_size", "input_cfg_scheme", "input_cfg_id", "input_cfg_last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_cfg_sync_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_cfg_sync_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(in_cfg_words_list):
             writer.writerow(["{0:x}".format(int(word, 2)), "0", expected_id_list[idx] ,"1", in_cfg_words_gap_list[idx]])
         
     # Write out Cfg sync reference to Text File
     input_header = ["output_cfg_size", "output_cfg_scheme", "output_cfg_id", "output_cfg_last", "stall_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_cfg_sync_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "output_cfg_sync_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(sync_cfg_size_list):
             writer.writerow(["{0:x}".format(int(word, 2)), "0", sync_cfg_id_list[idx], "1", sync_cfg_stall_list[idx]])
             
     # Write out Expected output to text file
     output_header = ["output_data", "output_data_id", "output_data_last", "stall_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_message_block_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "output_message_block_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(message_block_list):
             writer.writerow(["{0:x}".format(int(word, 2)), message_block_id_list[idx], message_block_last_list[idx], message_block_stall_list[idx]])
 
     # Write out Message Block (Input) to text file
     output_header = ["message_block_data", "message_block_id", "message_block_data_last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_message_block_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_message_block_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(message_block_list):
             writer.writerow(["{0:x}".format(int(word, 2)), message_block_id_list[idx], message_block_last_list[idx], message_block_gap_list[idx]])
     
     # Write out hash value to text file
     output_header = ["output_data", "output_id", "output_data_last", "stall_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_hash_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "output_hash_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
             writer.writerow([word, expected_id_list[idx], "1", hash_stall_list[idx]])
     
     # Write out hash value to text file
     output_header = ["output_data", "output_sub_word_last", "output_data_last"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_hash_32bit_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/system/" + "output_hash_32bit_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
             sub_word_count = 0
@@ -364,14 +364,14 @@ def main():
     
     # Write out Validator Hash Input to text file
     output_header = ["hash_in", "hash_in_id", "hash_last", "gap_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "input_hash_in_stim.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "input_hash_in_stim.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(hash_list):
             writer.writerow([word, id_validator_hash_list[idx], "1", hash_gap_list[idx]])
     
     # Write out hash out (include error) value to text file
     output_header = ["hash", "hash_err", "hash_last", "stall_value"]
-    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/testbench/" + "output_hash_out_ref.csv", "w", encoding="UTF8", newline='') as f:
+    with open(os.environ["SHA_2_ACC_DIR"] + "/simulate/stimulus/unit/" + "output_hash_out_ref.csv", "w", encoding="UTF8", newline='') as f:
         writer = csv.writer(f)
         for idx, word in enumerate(val_hash_list):
             writer.writerow([word, hash_err_list[idx], "1", hash_stall_list[idx]])
