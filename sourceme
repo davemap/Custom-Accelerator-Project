@@ -15,19 +15,30 @@ if [ -z "$SHA_2_ACC_DIR" ]; then
     # Set environment Variables for Repository
     export SHA_2_ACC_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-    # Add flow directory to Path
-    export PATH=$PATH:$SHA_2_ACC_DIR/flow
+    if [ -z "$SOC_ENV_SET" ]; then
+        # Add flow directory to Path
+        export PATH=$PATH:$SHA_2_ACC_DIR/flow
 
-    # Set Default Simulator
-    export SIMULATOR="ivlog"
+        # Set Default Simulator
+        export SIMULATOR="ivlog"
 
-    # Source Top-level sourceme
-    for d in $WRAP_ACC_DIR/../* ; do
-        if [ -d "$d" ]; then
-            if test -f "$d/sourceme"; then
-                source $d/sourceme
+        # Set Top-level Directory
+        export SOC_TOP=$SHA_2_ACC_DIR
+
+        # Set flag to say this is top level repo
+        export SOC_ENV_SET="True"
+
+        # Source Top-level sourceme
+        for d in $WRAP_ACC_DIR/../* ; do
+            if [ -d "$d" ]; then
+                if test -f "$d/sourceme"; then
+                    source $d/sourceme
+                fi
             fi
-        fi
-    done
+        done
+
+        # Clear SOC_ENV_SET Variable
+        unset SOC_ENV_SET
+    fi
 fi
 

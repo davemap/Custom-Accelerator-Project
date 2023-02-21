@@ -11,6 +11,6 @@
 
 #!/usr/bin/env bash
 
-mkdir -p $SHA_2_ACC_DIR/simulate/sim/ 
-iverilog -I $SHA_2_ACC_DIR/hdl/verif/ -I $SHA_2_ACC_DIR/hdl/src/ -g2012 -o $SHA_2_ACC_DIR/simulate/sim/$1.vvp $SHA_2_ACC_DIR/hdl/verif/tb_$1.sv
-cd $SHA_2_ACC_DIR/simulate/sim/ && vvp $1.vvp $2
+mkdir -p $SOC_TOP/simulate/sim/ 
+iverilog -I $SOC_TOP/hdl/verif/ -I $SOC_TOP/hdl/src/ -g2012 -o $SOC_TOP/simulate/sim/$1.vvp $SOC_TOP/hdl/verif/tb_$1.sv
+cd $SOC_TOP/simulate/sim/ && vvp $1.vvp $2
