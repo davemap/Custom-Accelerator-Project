@@ -303,7 +303,7 @@ def main():
         for idx, word in enumerate(in_data_words_list):
             sub_word_count = 0
             while sub_word_count < 16:
-                sub_word = int(word, 2) >> (32 * (15 - sub_word_count)) & 0xFFFF_FFFF
+                sub_word = int(word, 2) >> (32 * (sub_word_count)) & 0xFFFF_FFFF
                 sub_word_last = 0
                 if sub_word_count == 15:
                     sub_word_last = 1

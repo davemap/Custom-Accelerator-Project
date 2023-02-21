@@ -11,11 +11,23 @@
 
 #!/usr/bin/env bash
 
-# Set environment Variables for Repository
-export SHA_2_ACC_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+if [ -z "$SHA_2_ACC_DIR" ]; then
+    # Set environment Variables for Repository
+    export SHA_2_ACC_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
-# Add flow directory to Path
-export PATH=$PATH:$SHA_2_ACC_DIR/flow
+    # Add flow directory to Path
+    export PATH=$PATH:$SHA_2_ACC_DIR/flow
 
-# Set Default Simulator
-export SIMULATOR="ivlog"
+    # Set Default Simulator
+    export SIMULATOR="ivlog"
+
+    # Source Top-level sourceme
+    for d in $WRAP_ACC_DIR/../* ; do
+        if [ -d "$d" ]; then
+            if test -f "$d/sourceme"; then
+                source $d/sourceme
+            fi
+        fi
+    done
+fi
+
