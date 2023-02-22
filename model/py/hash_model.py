@@ -359,7 +359,7 @@ def main():
         for idx, word in enumerate(hash_list):
             sub_word_count = 0
             while sub_word_count < 8:
-                sub_word = int(word, 16) >> (32 * (7 - sub_word_count)) & 0xFFFF_FFFF
+                sub_word = int(word, 16) >> (32 * sub_word_count) & 0xFFFF_FFFF
                 sub_word_last = 0
                 if sub_word_count == 7:
                     sub_word_last = 1
