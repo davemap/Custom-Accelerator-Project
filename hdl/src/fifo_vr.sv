@@ -51,6 +51,11 @@ module fifo_vr #(
     
     assign status_ptr_dif = ptr_dif;
     
+    logic [PTR_W-1:0]  still_read_ptr;
+    assign still_read_ptr = ((ptr_dif - 1) + {{(PTR_W-1){1'b0}},data_in_shake}) - 1;
+
+    logic dinshake_min1;
+    assign dinshake_min1 = (data_in_shake - 1'b1);
     // EXAMPLE: Conditions to write and read from FIFO's
     // Write Ptr  | Read Ptr  | Ptr_Dif | Valid Write | Valid Read
     //    000     -    000    =   000   |      Y      |     N
@@ -75,6 +80,10 @@ module fifo_vr #(
             read_ptr     <= 0;
             data_in_ready     <= 1'b0;
             data_out_valid    <= 1'b0;
+            // Ensure FIFO Values are Known
+            for (int i = 0; i < DEPTH; i++) begin
+                fifo[i] <= 'b0;
+            end
         end else if (en == 1'b1) begin
             // Enable signal is High
             // Write Logic
@@ -117,8 +126,8 @@ module fifo_vr #(
                 // -> the  "-1" causes dif of 0 to wrap where (dif - 1) becomes > DEPTH
                 if (data_out_shake) begin 
                     // Successful Handshake Increment Read Pointer
-                    read_ptr <= read_ptr + 1;
-                    if (((ptr_dif - 1) + {{(PTR_W-1){1'b0}},(data_in_shake - 1'b1)}) < DEPTH) begin 
+                    read_ptr       <= read_ptr + 1;
+                    if (((ptr_dif - 1) + {{(PTR_W-1){1'b0}},data_in_shake}) - 1 < DEPTH) begin
                         // Still Data in FIFO after latest Read
                         // If there is a successful write this clock cycle, 
                         // there will be one more piece of data in the FIFO 
