@@ -51,11 +51,6 @@ module fifo_vr #(
     
     assign status_ptr_dif = ptr_dif;
     
-    logic [PTR_W-1:0]  still_read_ptr;
-    assign still_read_ptr = ((ptr_dif - 1) + {{(PTR_W-1){1'b0}},data_in_shake}) - 1;
-
-    logic dinshake_min1;
-    assign dinshake_min1 = (data_in_shake - 1'b1);
     // EXAMPLE: Conditions to write and read from FIFO's
     // Write Ptr  | Read Ptr  | Ptr_Dif | Valid Write | Valid Read
     //    000     -    000    =   000   |      Y      |     N

@@ -24,7 +24,7 @@ module tb_sha256_id_issue;
     
     // Concatenator Handshake
     logic id_out_cfg_valid;
-     logic id_out_cfg_ready;
+    logic id_out_cfg_ready;
     
     // ID Buffer Handshake
     logic id_out_buf_valid;
