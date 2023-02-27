@@ -8,8 +8,7 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-`include "sha256_hashing_functions.sv"
-
+`include "sha256_hashing_functions.svp"
 
 module sha256_hash_compression (
     input logic clk,

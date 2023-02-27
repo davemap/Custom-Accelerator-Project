@@ -8,10 +8,10 @@
 //
 // Copyright  2022, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-`include "sha256_hash_compression.sv"
-`include "sha256_message_build.sv"
-`include "sha256_id_issue.sv"
-`include "fifo_vr.sv"
+// `include "sha256_hash_compression.sv"
+// `include "sha256_message_build.sv"
+// `include "sha256_id_issue.sv"
+// `include "fifo_vr.sv"
 
 module sha256_hashing_stream (
     // Clocking Signals
