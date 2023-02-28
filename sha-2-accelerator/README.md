@@ -14,6 +14,7 @@ HDL contains all the verilog files. This is seperated into:
 src contains SystemVerilog design files and verif contains the SystemVerilog testbenches and verification resources.
 
 The simulate directory contains the socsim script, along with a directory called "simulators" which contains simulator-specific scripts and a "sim" directory which contains dumps and logs from simulation runs. The files in this directory should not be commited to the Git.
+
 ## Setting Up Environment
 To be able to simulate in this repository, you will first need to source the sourceme:
 ```
