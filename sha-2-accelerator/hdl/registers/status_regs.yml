@@ -1,0 +1,12 @@
+register_blocks:
+  - name: status_regs
+    byte_size: 16
+    registers:
+    - name: status_0
+      bit_fields:
+      - { name: status_id,           bit_assignment: { width: 6 }, type: ro  ,  initial_value: 0, comment: Contains last ID Value in ID Buffer }
+      - { name: status_buffered_ids, bit_assignment: { width: 3 },  type: ro  , initial_value: 0, comment: Number of IDs in ID Buffer }
+      - { name: status_err_buffer,   bit_assignment: { width: 1 },  type: ro  , initial_value: 0, comment: ID Buffer Error }
+      - { name: status_err_packet,   bit_assignment: { width: 1 },  type: ro  , initial_value: 0, comment: Dropped Packet Error }
+      - { name: status_err_clear,    bit_assignment: { width: 1 },  type: wo  , initial_value: 0, comment: Clear Error Flags }
+      - { name: status_packet_count, bit_assignment: { width: 10 }, type: ro  , initial_value: 0, comment: Number of Packets Passed Through }
