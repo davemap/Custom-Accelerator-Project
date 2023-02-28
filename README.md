@@ -1,7 +1,7 @@
 # SHA-2 Accelerator
 
 This project is an example accelerator which will be combined with the SoC Labs SoC infrastructure. 
-TEST6
+TEST7
 ## Repository Structure
 The respository is currently broken down into 2 main directories:
 - hdl
