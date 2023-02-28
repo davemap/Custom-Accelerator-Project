@@ -1,0 +1,44 @@
+#-----------------------------------------------------------------------------
+# SoC Labs Environment Setup Script
+# A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+#
+# Contributors
+#
+# David Mapstone (d.a.mapstone@soton.ac.uk)
+#
+# Copyright  2022, SoC Labs (www.soclabs.org)
+#-----------------------------------------------------------------------------
+
+#!/usr/bin/env bash
+
+if [ -z "$SHA_2_ACC_DIR" ]; then
+    # Set environment Variables for Repository
+    export SHA_2_ACC_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+    if [ -z "$SOC_ENV_SET" ]; then
+        # Add flow directory to Path
+        export PATH=$PATH:$SHA_2_ACC_DIR/flow
+
+        # Set Default Simulator
+        export SIMULATOR="ivlog"
+
+        # Set Top-level Directory
+        export SOC_TOP=$SHA_2_ACC_DIR
+
+        # Set flag to say this is top level repo
+        export SOC_ENV_SET="True"
+
+        # Source Top-level sourceme
+        for d in $WRAP_ACC_DIR/../* ; do
+            if [ -d "$d" ]; then
+                if test -f "$d/sourceme"; then
+                    source $d/sourceme
+                fi
+            fi
+        done
+
+        # Clear SOC_ENV_SET Variable
+        unset SOC_ENV_SET
+    fi
+fi
+
