@@ -40,4 +40,4 @@ for d in $SHA_2_SOC_DIR/* ; do
 done
 
 # Add Scripts to PAth
-export PATH="$PATH:/$DESIGN_ROOT/scripts"
+export PATH="$PATH:/$SHA_2_SOC_DIR/flow"
