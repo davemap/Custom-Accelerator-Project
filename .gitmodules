@@ -1,0 +1,9 @@
+[submodule "sha-2-accelerator"]
+	path = sha-2-accelerator
+	url = git@git.soton.ac.uk:soclabs/sha-2-accelerator.git
+[submodule "accelerator-wrapper"]
+	path = accelerator-wrapper
+	url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
+[submodule "nanosoc"]
+	path = nanosoc
+	url = git@git.soton.ac.uk:soclabs/nanosoc.git
