@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@git.soton.ac.uk:soclabs/sha-2-accelerator.git
 	branch = master
-	commit = 61b5490915e5753c359bb4e286c0060c6edcd452
-	parent = 86409be5fcdde03cdbcce212c6a11cc36ca364ed
+	commit = a6c13171fd70c8e4d03ac43bf8c118288d408da5
+	parent = 336a94c1d549a4f02668743350367b513db4eb7f
 	method = merge
 	cmdver = 0.4.5
