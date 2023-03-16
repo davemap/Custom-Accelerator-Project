@@ -11,7 +11,11 @@
 
 #!/usr/bin/env bash
 
+# Generate Stimulus from stimulus generation Script
+python3 $ACC_WRAPPER_DIR/flow/stimgen.py
+# Create Simulatiom Directory to Run in
 mkdir -p $SOC_TOP_DIR/simulate/sim/ 
+# Compile Simulation
 iverilog \
     -c $SOC_TOP_DIR/flist/wrapper.flist \
     -c $SOC_TOP_DIR/flist/ahb_ip.flist \
@@ -21,4 +25,5 @@ iverilog \
     -g2012 \
     -o $SOC_TOP_DIR/simulate/sim/wrapper_sha256_hashing_stream.vvp \
     $SOC_TOP_DIR/wrapper/verif/tb_wrapper_sha256_hashing_stream.sv
+# Run Simulation
 cd $SOC_TOP_DIR/simulate/sim/ && vvp wrapper_sha256_hashing_stream.vvp
