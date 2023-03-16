@@ -1,0 +1,24 @@
+//-----------------------------------------------------------------------------
+// Accelerator Wrapper CMSDK Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Accelerator CMSDK AHB VIP
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    Accelerator Module search path    =============
+-y $(SOC_TOP_DIR)/cmsdk/vip/
++incdir+$(SOC_TOP_DIR)/cmsdk/vip/
+
+$(SOC_TOP_DIR)/cmsdk/vip/cmsdk_ahb_fileread_master32.v
+$(SOC_TOP_DIR)/cmsdk/vip/cmsdk_ahb_fileread_funnel.v
+$(SOC_TOP_DIR)/cmsdk/vip/cmsdk_ahb_filereadcore.v

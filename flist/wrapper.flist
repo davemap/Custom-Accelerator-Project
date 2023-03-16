@@ -1,0 +1,23 @@
+//-----------------------------------------------------------------------------
+// Accelerator Wrapper Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Top-level Accelerator Wrapper
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    Accelerator Module search path    =============
+-y $(SOC_TOP_DIR)/wrapper/src/
++incdir+$(SOC_TOP_DIR)/wrapper/src/
+
+$(SOC_TOP_DIR)/wrapper/src/wrapper_vr_loopback.sv
+$(SOC_TOP_DIR)/hdl/wrapper/wrapper_sha256_hashing_stream.sv
