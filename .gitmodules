@@ -7,3 +7,6 @@
 [submodule "nanosoc"]
 	path = nanosoc
 	url = git@git.soton.ac.uk:soclabs/nanosoc.git
+[submodule "socsim"]
+	path = socsim
+	url = git@git.soton.ac.uk:soclabs/socsim.git
