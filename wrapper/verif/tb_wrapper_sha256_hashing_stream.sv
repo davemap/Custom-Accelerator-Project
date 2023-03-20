@@ -231,8 +231,10 @@ cmsdk_ahb_fileread_master32 #(InputFileName,
 
   .HREADYOUTS  (hreadyout0),
   .HRESPS      (hresp0),
-  .HRDATAS     (hrdata0)
+  .HRDATAS     (hrdata0),
 
+  // Input Data Request to DMAC
+  .in_data_req ()
   );
 
 

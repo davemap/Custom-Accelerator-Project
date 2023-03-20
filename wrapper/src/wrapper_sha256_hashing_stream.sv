@@ -55,7 +55,13 @@ module wrapper_sha256_hashing_stream #(
 
     output logic                  HREADYOUTS,
     output logic                  HRESPS,
-    output logic  [31:0]          HRDATAS
+    output logic  [31:0]          HRDATAS,
+
+    // Input Data Request Signal to DMAC
+    output logic                  in_data_req,
+
+    // Output Data Request Signal to DMAC
+    output logic                  out_data_req
   );
   
   // ----------------------------------------
@@ -95,9 +101,6 @@ module wrapper_sha256_hashing_stream #(
   logic         in_packet_last; 
   logic         in_packet_valid;
   logic         in_packet_ready;
-
-  // Input Data Request
-  logic         in_data_req;
 
   // Output Packet Wires
   logic [255:0] out_packet;    
@@ -237,22 +240,19 @@ module wrapper_sha256_hashing_stream #(
     .data_req          (in_data_req)
   );
 
-
-
   //----------------------------
   // Output Port
   //----------------------------
-  // Interface block to convert AHB transfers to Register transfers to engine input/output channels
-  // engine Input/Output Channels
-  wrapper_ahb_vr_interface #(
-    ADDRWIDTH
-   ) u_wrapper_ahb_interface (
+  wrapper_ahb_packet_deconstructor #(
+    ADDRWIDTH-1,
+    OUTPACKETWIDTH
+  ) u_wrapper_data_output_port (
     .hclk         (HCLK),
     .hresetn      (HRESETn),
 
     // Input slave port: 32 bit data bus interface
     .hsels        (hsel1),
-    .haddrs       (HADDRS),
+    .haddrs       (HADDRS[ADDRWIDTH-2:0]),
     .htranss      (HTRANSS),
     .hsizes       (HSIZES),
     .hwrites      (HWRITES),
@@ -263,76 +263,15 @@ module wrapper_sha256_hashing_stream #(
     .hresps       (hresp1),
     .hrdatas      (hrdata1),
 
-    // Register interface - Accelerator Engine Input
-    .input_addr        (input_addr),
-    .input_read_en     (input_read_en),
-    .input_write_en    (input_write_en),
-    .input_byte_strobe (input_byte_strobe),
-    .input_wdata       (input_wdata),
-    .input_rdata       (input_rdata),
-    .input_wready      (input_wready),
-    .input_rready      (input_rready),
-
-    // Register interface - Accelerator Engine Output
-    .output_addr        (output_addr),
-    .output_read_en     (output_read_en),
-    .output_write_en    (output_write_en),
-    .output_byte_strobe (output_byte_strobe),
-    .output_wdata       (output_wdata),
-    .output_rdata       (output_rdata),
-    .output_wready      (output_wready),
-    .output_rready      (output_rready)
-  );
-
-  wrapper_packet_deconstruct #(
-    (ADDRWIDTH - 1),  // Only half address map allocated to this device
-    256               // Ouptut Packet WIdth
-  ) u_wrapper_packet_deconstruct (
-    .hclk         (HCLK),
-    .hresetn      (HRESETn),
-
-    // Register interface
-    .addr        (output_addr),
-    .read_en     (output_read_en),
-    .write_en    (output_write_en),
-    .byte_strobe (output_byte_strobe),
-    .wdata       (output_wdata),
-    .rdata       (output_rdata),
-    .wready      (output_wready),
-    .rready      (output_rready),
-
     // Valid/Ready Interface
     .packet_data       (out_packet),
     .packet_data_last  (out_packet_last),
     .packet_data_valid (out_packet_valid),
-    .packet_data_ready (out_packet_ready)
+    .packet_data_ready (out_packet_ready),
+
+    // Input Data Request
+    .data_req          (out_data_req)
   );
-
-  // wrapper_packet_construct #(
-  //   (ADDRWIDTH - 1),  // Only half address map allocated to this device
-  //   512               // Packet Width
-  // ) u_wrapper_packet_construct (
-  //   .hclk         (HCLK),
-  //   .hresetn      (HRESETn),
-
-  //   // Register interface
-  //   .addr        (input_addr),
-  //   .read_en     (input_read_en),
-  //   .write_en    (input_write_en),
-  //   .byte_strobe (input_byte_strobe),
-  //   .wdata       (input_wdata),
-  //   .rdata       (input_rdata),
-  //   .wready      (input_wready),
-  //   .rready      (input_rready),
-
-  //   // Valid/Ready Interface
-  //   .packet_data       (in_packet),
-  //   .packet_data_last  (in_packet_last),
-  //   .packet_data_valid (in_packet_valid),
-  //   .packet_data_ready (in_packet_ready),
-
-  //   .engine_ready()
-  // );
 
   //------------------------
   // Accelerator Engine
