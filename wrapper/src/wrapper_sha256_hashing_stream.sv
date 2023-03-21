@@ -64,6 +64,11 @@ module wrapper_sha256_hashing_stream #(
     output logic                  out_data_req
   );
   
+  localparam INADDRWIDTH         = ADDRWIDTH - 1;
+  localparam OUTADDRWIDTH        = ADDRWIDTH - 1;
+
+  localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);     // Number of Bytes in Packet
+  localparam OUTPACKETSPACEWIDTH = OUTADDRWIDTH-OUTPACKETBYTEWIDTH;    // Number of Bits to represent all Packets in Address Space
   // ----------------------------------------
   // Internal wires declarations
 
@@ -97,16 +102,23 @@ module wrapper_sha256_hashing_stream #(
 
   // Internal Wiring
   // Input Packet Wires
-  logic [511:0] in_packet;    
+  logic [INPACKETWIDTH-1:0] in_packet;    
   logic         in_packet_last; 
   logic         in_packet_valid;
   logic         in_packet_ready;
 
   // Output Packet Wires
-  logic [255:0] out_packet;    
-  logic         out_packet_last; 
-  logic         out_packet_valid;
-  logic         out_packet_ready;
+  logic [OUTPACKETWIDTH-1:0]      out_packet;    
+  logic                           out_packet_last; 
+  logic [OUTPACKETSPACEWIDTH-1:0] out_packet_remain;    
+  logic                           out_packet_valid;
+  logic                           out_packet_ready;
+
+  // Block Packets Remaining Tie-off (only ever one packet per block)
+  assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
+
+  // Relative Read Address for Start of Current Block  
+  logic [OUTADDRWIDTH-1:0] block_read_addr;
 
   // Configuration Tie Off
   logic [63:0] cfg_size;
@@ -264,13 +276,17 @@ module wrapper_sha256_hashing_stream #(
     .hrdatas      (hrdata1),
 
     // Valid/Ready Interface
-    .packet_data       (out_packet),
-    .packet_data_last  (out_packet_last),
-    .packet_data_valid (out_packet_valid),
-    .packet_data_ready (out_packet_ready),
+    .packet_data        (out_packet),
+    .packet_data_last   (out_packet_last),
+    .packet_data_remain (out_packet_remain),
+    .packet_data_valid  (out_packet_valid),
+    .packet_data_ready  (out_packet_ready),
 
     // Input Data Request
-    .data_req          (out_data_req)
+    .data_req          (out_data_req),
+
+    // Read Address Interface
+   .block_read_addr           (block_read_addr)
   );
 
   //------------------------
