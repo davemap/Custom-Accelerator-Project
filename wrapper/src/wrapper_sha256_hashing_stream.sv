@@ -44,10 +44,13 @@ module wrapper_sha256_hashing_stream #(
   //----------------------------------------------------------
 
   // Input Port Parameters
-  localparam INPORTADDRWIDTH     = ADDRWIDTH - 1;
+  localparam [ADDRWIDTH-1:0] INPORTADDR      = 'h000;
+  localparam                 INPORTADDRWIDTH = ADDRWIDTH - 1;
 
   // Output Port Parameters
-  localparam OUTPORTADDRWIDTH    = ADDRWIDTH - 1;
+  localparam [ADDRWIDTH-1:0] OUTPORTADDR      = 'h800;
+  localparam                 OUTPORTADDRWIDTH = ADDRWIDTH - 1;
+
   localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);            // Number of Bytes in Packet
   localparam OUTPACKETSPACEWIDTH = OUTPORTADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
 
@@ -74,9 +77,9 @@ module wrapper_sha256_hashing_stream #(
   logic [31:0]      hrdata2;
 
   // Internal AHB Address Assignment
-  assign hsel0 = (~HADDRS[ADDRWIDTH-1]) ? 1'b1:1'b0; // Input Port Select
-  assign hsel1 = (HADDRS[ADDRWIDTH-1])  ? 1'b1:1'b0; // Output Port Select
-  assign hsel2 = (hsel0 | hsel1)        ? 1'b0:1'b1; // Default Target Select
+  assign hsel0 = ((HADDRS < OUTPORTADDR) && (HADDRS >= INPORTADDR)) ? 1'b1:1'b0; // Input Port Select
+  assign hsel1 = (HADDRS >= OUTPORTADDR) ? 1'b1:1'b0;                            // Output Port Select
+  assign hsel2 = (hsel0 | hsel1) ? 1'b0:1'b1;                                    // Default Target Select
 
   // AHB Target Multiplexer
   cmsdk_ahb_slave_mux  #(
