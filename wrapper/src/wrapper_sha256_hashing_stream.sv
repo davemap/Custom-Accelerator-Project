@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic Accelerator Wrapper for Hashing Stream
+// SoC Labs Basic Example Accelerator Wrapper
 // A joint work commissioned on behalf of SoC Labs; under Arm Academic Access license.
 //
 // Contributors
@@ -8,37 +8,12 @@
 //
 // Copyright 2023; SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// The confidential and proprietary information contained in this file may
-// only be used by a person authorised under and to the extent permitted
-// by a subsisting licensing agreement from Arm Limited or its affiliates.
-//
-//            (C) COPYRIGHT 2010-2011 Arm Limited or its affiliates.
-//                ALL RIGHTS RESERVED
-//
-// This entire notice must be reproduced on all copies of this file
-// and copies of this file may only be made by a person if such person is
-// permitted to do so under the terms of a subsisting license agreement
-// from Arm Limited or its affiliates.
-//
-//      SVN Information
-//
-//      Checked In          : $Date: 2017-10-10 15:55:38 +0100 (Tue, 10 Oct 2017) $
-//
-//      Revision            : $Revision: 371321 $
-//
-//      Release Information : Cortex-M System Design Kit-r1p1-00rel0
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// Abstract : AHB-lite example slave, support 4 32-bit register read and write,
-//            each register can be accessed by byte, half word or word.
-//            The example slave always output ready and OKAY response to the master
-//-----------------------------------------------------------------------------
 
 module wrapper_sha256_hashing_stream #(
   parameter ADDRWIDTH=12,
   parameter INPACKETWIDTH=512,
+  parameter CFGSIZEWIDTH=64,
+  parameter CFGSCHEMEWIDTH=2,
   parameter OUTPACKETWIDTH=256
   ) (
     input  logic                  HCLK,       // Clock
@@ -64,100 +39,46 @@ module wrapper_sha256_hashing_stream #(
     output logic                  out_data_req
   );
   
-  localparam INADDRWIDTH         = ADDRWIDTH - 1;
-  localparam OUTADDRWIDTH        = ADDRWIDTH - 1;
+  //----------------------------------------------------------
+  // Internal Parameters
+  //----------------------------------------------------------
 
-  localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);     // Number of Bytes in Packet
-  localparam OUTPACKETSPACEWIDTH = OUTADDRWIDTH-OUTPACKETBYTEWIDTH;    // Number of Bits to represent all Packets in Address Space
-  // ----------------------------------------
-  // Internal wires declarations
+  // Input Port Parameters
+  localparam INPORTADDRWIDTH     = ADDRWIDTH - 1;
 
-  // Register module interface signals
-  logic  [ADDRWIDTH-1:0]  in_buf_addr;
-  logic                   in_buf_read_en;
-  logic                   in_buf_write_en;
-  logic  [3:0]            in_buf_byte_strobe;
-  logic  [31:0]           in_buf_wdata;
-  logic  [31:0]           in_buf_rdata;
+  // Output Port Parameters
+  localparam OUTPORTADDRWIDTH    = ADDRWIDTH - 1;
+  localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);            // Number of Bytes in Packet
+  localparam OUTPACKETSPACEWIDTH = OUTPORTADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
 
-  // Input Port Wire Declarations
-  logic [ADDRWIDTH-2:0] input_addr;
-  logic                 input_read_en;
-  logic                 input_write_en;
-  logic [3:0]           input_byte_strobe;
-  logic [31:0]          input_wdata;
-  logic [31:0]          input_rdata;
-  logic                 input_wready;
-  logic                 input_rready;
+  //----------------------------------------------------------
+  // Internal AHB Decode Logic
+  //----------------------------------------------------------
 
-  // Output Port Wire Declarations    
-  logic [ADDRWIDTH-2:0] output_addr;       
-  logic                 output_read_en;    
-  logic                 output_write_en;   
-  logic [3:0]           output_byte_strobe;
-  logic [31:0]          output_wdata;      
-  logic [31:0]          output_rdata;      
-  logic                 output_wready;     
-  logic                 output_rready;     
-
-  // Internal Wiring
-  // Input Packet Wires
-  logic [INPACKETWIDTH-1:0] in_packet;    
-  logic         in_packet_last; 
-  logic         in_packet_valid;
-  logic         in_packet_ready;
-
-  // Output Packet Wires
-  logic [OUTPACKETWIDTH-1:0]      out_packet;    
-  logic                           out_packet_last; 
-  logic [OUTPACKETSPACEWIDTH-1:0] out_packet_remain;    
-  logic                           out_packet_valid;
-  logic                           out_packet_ready;
-
-  // Block Packets Remaining Tie-off (only ever one packet per block)
-  assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
-
-  // Relative Read Address for Start of Current Block  
-  logic [OUTADDRWIDTH-1:0] block_read_addr;
-
-  // Configuration Tie Off
-  logic [63:0] cfg_size;
-  logic [1:0]  cfg_scheme;
-  logic cfg_last;
-  logic cfg_valid;
-  logic cfg_ready;
-
-  assign cfg_size   = 64'd512;
-  assign cfg_scheme = 2'd0;
-  assign cfg_last   = 1'b1;
-  assign cfg_valid  = 1'b1;
-
-  // Engine Input AHB Signals
+  // AHB Target 0 - Engine Input Port
   logic             hsel0;
   logic             hreadyout0;
   logic             hresp0;
   logic [31:0]      hrdata0;
 
-  // Engine Output AHB Signals
+  // AHB Target 1 - Engine Output Port
   logic             hsel1;
   logic             hreadyout1;
   logic             hresp1;
   logic [31:0]      hrdata1;
 
-  // Default Target AHB Signals
+  // AHB Target 2 - Default Target
   logic             hsel2;
   logic             hreadyout2;
   logic             hresp2;
   logic [31:0]      hrdata2;
 
-  // Address Decoder
+  // Internal AHB Address Assignment
   assign hsel0 = (~HADDRS[ADDRWIDTH-1]) ? 1'b1:1'b0; // Input Port Select
   assign hsel1 = (HADDRS[ADDRWIDTH-1])  ? 1'b1:1'b0; // Output Port Select
   assign hsel2 = (hsel0 | hsel1)        ? 1'b0:1'b1; // Default Target Select
 
-  //-----------------------------------------------------------
-  // Module logic start
-  //----------------------------------------------------------
+  // AHB Target Multiplexer
   cmsdk_ahb_slave_mux  #(
     1, //PORT0_ENABLE
     1, //PORT1_ENABLE
@@ -219,9 +140,17 @@ module wrapper_sha256_hashing_stream #(
     .HRDATA      (HRDATAS)
   );
 
-  //----------------------------
-  // Input Port
-  //----------------------------
+  //----------------------------------------------------------
+  // Input Port Logic
+  //----------------------------------------------------------
+
+  // Engine Input Port Wire declarations
+  logic [INPACKETWIDTH-1:0]       in_packet;    
+  logic                           in_packet_last; 
+  logic                           in_packet_valid;
+  logic                           in_packet_ready;
+
+  // Packet Constructor Instantiation
   wrapper_ahb_packet_constructor #(
     ADDRWIDTH-1,
     INPACKETWIDTH
@@ -252,9 +181,41 @@ module wrapper_sha256_hashing_stream #(
     .data_req          (in_data_req)
   );
 
-  //----------------------------
-  // Output Port
-  //----------------------------
+  //----------------------------------------------------------
+  // Configuration Port Logic
+  //----------------------------------------------------------
+
+  // Engine Configuration Port Wire declarations
+  logic [CFGSIZEWIDTH-1:0]        cfg_size;
+  logic [CFGSCHEMEWIDTH-1:0]      cfg_scheme;
+  logic                           cfg_last;
+  logic                           cfg_valid;
+  logic                           cfg_ready;
+
+  // Engine Configuration Port Tied-off to fixed values
+  assign cfg_size   = 64'd512;
+  assign cfg_scheme = 2'd0;
+  assign cfg_last   = 1'b1;
+  assign cfg_valid  = 1'b1;
+
+  //----------------------------------------------------------
+  // Output Port Logic
+  //----------------------------------------------------------
+
+  // Engine Output Port Wire declarations
+  logic [OUTPACKETWIDTH-1:0]      out_packet;    
+  logic                           out_packet_last; 
+  logic [OUTPACKETSPACEWIDTH-1:0] out_packet_remain;    
+  logic                           out_packet_valid;
+  logic                           out_packet_ready;
+
+  // Relative Read Address for Start of Current Block  
+  logic [OUTPORTADDRWIDTH-1:0]    block_read_addr;
+
+  // Block Packets Remaining Tie-off (only ever one packet per block)
+  assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
+
+  // Packet Deconstructor Instantiation
   wrapper_ahb_packet_deconstructor #(
     ADDRWIDTH-1,
     OUTPACKETWIDTH
@@ -289,9 +250,11 @@ module wrapper_sha256_hashing_stream #(
    .block_read_addr           (block_read_addr)
   );
 
-  //------------------------
-  // Accelerator Engine
-  //------------------------
+  //----------------------------------------------------------
+  // Accelerator Engine Logic
+  //----------------------------------------------------------
+
+  // Hashing Accelerator Instatiation
   sha256_hashing_stream u_sha256_hashing_stream (
         .clk            (HCLK),
         .nrst           (HRESETn),
@@ -318,7 +281,11 @@ module wrapper_sha256_hashing_stream #(
         .data_out_ready (out_packet_ready)
     );
 
-  // Default Target
+  //----------------------------------------------------------
+  // Default AHB Target Logic
+  //----------------------------------------------------------
+
+  // AHB Default Target Instantiation
   cmsdk_ahb_default_slave  u_ahb_default_slave(
     .HCLK         (HCLK),
     .HRESETn      (HRESETn),
@@ -329,6 +296,7 @@ module wrapper_sha256_hashing_stream #(
     .HRESP        (hresp2)
   );
 
-  assign hrdata2 = {32{1'b0}}; // Default target doesn't have data
+  // Default Targets Data is tied off
+  assign hrdata2 = {32{1'b0}};
 
 endmodule
