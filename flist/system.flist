@@ -1,0 +1,22 @@
+//-----------------------------------------------------------------------------
+// Accelerator System Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Top-level Accelerator System
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    Accelerator Module search path    =============
+-y $(SOC_TOP_DIR)/system/src/
++incdir+$(SOC_TOP_DIR)/system/src/
+
+$(SOC_TOP_DIR)/system/src/nanosoc_exp.v
