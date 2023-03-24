@@ -10,7 +10,7 @@
 //-----------------------------------------------------------------------------
 
 module wrapper_sha256_hashing_stream #(
-  parameter ADDRWIDTH=12,
+  parameter AHBADDRWIDTH=12,
   parameter INPACKETWIDTH=512,
   parameter CFGSIZEWIDTH=64,
   parameter CFGSCHEMEWIDTH=2,
@@ -19,18 +19,20 @@ module wrapper_sha256_hashing_stream #(
     input  logic                  HCLK,       // Clock
     input  logic                  HRESETn,    // Reset
 
-  // AHB connection to Initiator
-    input  logic                  HSELS,
-    input  logic  [ADDRWIDTH-1:0] HADDRS,
-    input  logic  [1:0]           HTRANSS,
-    input  logic  [2:0]           HSIZES,
-    input  logic                  HWRITES,
-    input  logic                  HREADYS,
-    input  logic  [31:0]          HWDATAS,
+    // AHB connection to Initiator
+    input  logic                     HSELS,
+    input  logic  [AHBADDRWIDTH-1:0] HADDRS,
+    input  logic  [1:0]              HTRANSS,
+    input  logic  [2:0]              HSIZES,
+    input  logic                     HWRITES,
+    input  logic                     HREADYS,
+    input  logic  [31:0]             HWDATAS,
 
-    output logic                  HREADYOUTS,
-    output logic                  HRESPS,
-    output logic  [31:0]          HRDATAS,
+    output logic                     HREADYOUTS,
+    output logic                     HRESPS,
+    output logic  [31:0]             HRDATAS,
+
+    //TODO: Add APB Interface
 
     // Input Data Request Signal to DMAC
     output logic                  in_data_req,
@@ -39,20 +41,25 @@ module wrapper_sha256_hashing_stream #(
     output logic                  out_data_req
   );
   
-  //----------------------------------------------------------
-  // Internal Parameters
-  //----------------------------------------------------------
+
+  //**********************************************************
+  // Internal AHB Parameters
+  //**********************************************************
 
   // Input Port Parameters
-  localparam [ADDRWIDTH-1:0] INPORTADDR      = 'h000;
-  localparam                 INPORTADDRWIDTH = ADDRWIDTH - 1;
+  localparam [AHBADDRWIDTH-1:0] INPORTADDR         = 'h000;
+  localparam                    INPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
 
   // Output Port Parameters
-  localparam [ADDRWIDTH-1:0] OUTPORTADDR      = 'h800;
-  localparam                 OUTPORTADDRWIDTH = ADDRWIDTH - 1;
+  localparam [AHBADDRWIDTH-1:0] OUTPORTADDR         = 'h800;
+  localparam                    OUTPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
 
   localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);            // Number of Bytes in Packet
-  localparam OUTPACKETSPACEWIDTH = OUTPORTADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
+  localparam OUTPACKETSPACEWIDTH = OUTPORTAHBADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
+  
+  //**********************************************************
+  // Wrapper AHB Components
+  //**********************************************************
 
   //----------------------------------------------------------
   // Internal AHB Decode Logic
@@ -155,7 +162,7 @@ module wrapper_sha256_hashing_stream #(
 
   // Packet Constructor Instantiation
   wrapper_ahb_packet_constructor #(
-    ADDRWIDTH-1,
+    INPORTAHBADDRWIDTH,
     INPACKETWIDTH
   ) u_wrapper_data_input_port (
     .hclk         (HCLK),
@@ -163,7 +170,7 @@ module wrapper_sha256_hashing_stream #(
 
     // Input slave port: 32 bit data bus interface
     .hsels        (hsel0),
-    .haddrs       (HADDRS[ADDRWIDTH-2:0]),
+    .haddrs       (HADDRS[AHBADDRWIDTH-2:0]),
     .htranss      (HTRANSS),
     .hsizes       (HSIZES),
     .hwrites      (HWRITES),
@@ -213,14 +220,14 @@ module wrapper_sha256_hashing_stream #(
   logic                           out_packet_ready;
 
   // Relative Read Address for Start of Current Block  
-  logic [OUTPORTADDRWIDTH-1:0]    block_read_addr;
+  logic [OUTPORTAHBADDRWIDTH-1:0]    block_read_addr;
 
   // Block Packets Remaining Tie-off (only ever one packet per block)
   assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
 
   // Packet Deconstructor Instantiation
   wrapper_ahb_packet_deconstructor #(
-    ADDRWIDTH-1,
+    OUTPORTAHBADDRWIDTH,
     OUTPACKETWIDTH
   ) u_wrapper_data_output_port (
     .hclk         (HCLK),
@@ -228,7 +235,7 @@ module wrapper_sha256_hashing_stream #(
 
     // Input slave port: 32 bit data bus interface
     .hsels        (hsel1),
-    .haddrs       (HADDRS[ADDRWIDTH-2:0]),
+    .haddrs       (HADDRS[AHBADDRWIDTH-2:0]),
     .htranss      (HTRANSS),
     .hsizes       (HSIZES),
     .hwrites      (HWRITES),
@@ -252,6 +259,50 @@ module wrapper_sha256_hashing_stream #(
     // Read Address Interface
    .block_read_addr           (block_read_addr)
   );
+
+  //----------------------------------------------------------
+  // Default AHB Target Logic
+  //----------------------------------------------------------
+
+  // AHB Default Target Instantiation
+  cmsdk_ahb_default_slave  u_ahb_default_slave(
+    .HCLK         (HCLK),
+    .HRESETn      (HRESETn),
+    .HSEL         (hsel2),
+    .HTRANS       (HTRANSS),
+    .HREADY       (HREADYS),
+    .HREADYOUT    (hreadyout2),
+    .HRESP        (hresp2)
+  );
+
+  // Default Targets Data is tied off
+  assign hrdata2 = {32{1'b0}};
+
+  //**********************************************************
+  // Wrapper APB Components
+  //**********************************************************
+
+  // TODO: Instantiate APB Mux
+
+  // TODO: Instantiate APB Default Target
+
+  // TODO: Wrapper Register Blocks
+
+  //**********************************************************
+  // Wrapper Interrupt Generation
+  //**********************************************************
+
+  // TODO: Instantiate IRQ Generator
+
+  //**********************************************************
+  // Wrapper DMA Data Request Generation
+  //**********************************************************
+
+  // TODO: Write up data request logic through registers
+
+  //**********************************************************
+  // Accelerator Engine
+  //**********************************************************
 
   //----------------------------------------------------------
   // Accelerator Engine Logic
@@ -284,22 +335,5 @@ module wrapper_sha256_hashing_stream #(
         .data_out_ready (out_packet_ready)
     );
 
-  //----------------------------------------------------------
-  // Default AHB Target Logic
-  //----------------------------------------------------------
-
-  // AHB Default Target Instantiation
-  cmsdk_ahb_default_slave  u_ahb_default_slave(
-    .HCLK         (HCLK),
-    .HRESETn      (HRESETn),
-    .HSEL         (hsel2),
-    .HTRANS       (HTRANSS),
-    .HREADY       (HREADYS),
-    .HREADYOUT    (hreadyout2),
-    .HRESP        (hresp2)
-  );
-
-  // Default Targets Data is tied off
-  assign hrdata2 = {32{1'b0}};
 
 endmodule
