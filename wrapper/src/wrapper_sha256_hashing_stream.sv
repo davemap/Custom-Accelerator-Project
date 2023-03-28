@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// SoC Labs Basic Accelerator Wrapper for Hashing Stream
+// SoC Labs Basic Example Accelerator Wrapper
 // A joint work commissioned on behalf of SoC Labs; under Arm Academic Access license.
 //
 // Contributors
@@ -8,180 +8,307 @@
 //
 // Copyright 2023; SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// The confidential and proprietary information contained in this file may
-// only be used by a person authorised under and to the extent permitted
-// by a subsisting licensing agreement from Arm Limited or its affiliates.
-//
-//            (C) COPYRIGHT 2010-2011 Arm Limited or its affiliates.
-//                ALL RIGHTS RESERVED
-//
-// This entire notice must be reproduced on all copies of this file
-// and copies of this file may only be made by a person if such person is
-// permitted to do so under the terms of a subsisting license agreement
-// from Arm Limited or its affiliates.
-//
-//      SVN Information
-//
-//      Checked In          : $Date: 2017-10-10 15:55:38 +0100 (Tue, 10 Oct 2017) $
-//
-//      Revision            : $Revision: 371321 $
-//
-//      Release Information : Cortex-M System Design Kit-r1p1-00rel0
-//
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// Abstract : AHB-lite example slave, support 4 32-bit register read and write,
-//            each register can be accessed by byte, half word or word.
-//            The example slave always output ready and OKAY response to the master
-//-----------------------------------------------------------------------------
 
 module wrapper_sha256_hashing_stream #(
-  parameter ADDRWIDTH=12
+  parameter AHBADDRWIDTH=12,
+  parameter INPACKETWIDTH=512,
+  parameter CFGSIZEWIDTH=64,
+  parameter CFGSCHEMEWIDTH=2,
+  parameter OUTPACKETWIDTH=256
   ) (
     input  logic                  HCLK,       // Clock
     input  logic                  HRESETn,    // Reset
 
-  // AHB connection to Initiator
-    input  logic                  HSELS,
-    input  logic  [ADDRWIDTH-1:0] HADDRS,
-    input  logic  [1:0]           HTRANSS,
-    input  logic  [2:0]           HSIZES,
-    input  logic                  HWRITES,
-    input  logic                  HREADYS,
-    input  logic  [31:0]          HWDATAS,
+    // AHB connection to Initiator
+    input  logic                     HSELS,
+    input  logic  [AHBADDRWIDTH-1:0] HADDRS,
+    input  logic  [1:0]              HTRANSS,
+    input  logic  [2:0]              HSIZES,
+    input  logic                     HWRITES,
+    input  logic                     HREADYS,
+    input  logic  [31:0]             HWDATAS,
 
-    output logic                  HREADYOUTS,
-    output logic                  HRESPS,
-    output logic  [31:0]          HRDATAS
+    output logic                     HREADYOUTS,
+    output logic                     HRESPS,
+    output logic  [31:0]             HRDATAS,
+
+    //TODO: Add APB Interface
+
+    // Input Data Request Signal to DMAC
+    output logic                  in_data_req,
+
+    // Output Data Request Signal to DMAC
+    output logic                  out_data_req
   );
   
-  // ----------------------------------------
-  // Internal wires declarations
 
-  // Register module interface signals
-  logic  [ADDRWIDTH-1:0]  in_buf_addr;
-  logic                   in_buf_read_en;
-  logic                   in_buf_write_en;
-  logic  [3:0]            in_buf_byte_strobe;
-  logic  [31:0]           in_buf_wdata;
-  logic  [31:0]           in_buf_rdata;
+  //**********************************************************
+  // Internal AHB Parameters
+  //**********************************************************
 
-  // Input Port Wire Declarations
-  logic [ADDRWIDTH-2:0] input_addr;
-  logic                 input_read_en;
-  logic                 input_write_en;
-  logic [3:0]           input_byte_strobe;
-  logic [31:0]          input_wdata;
-  logic [31:0]          input_rdata;
-  logic                 input_wready;
-  logic                 input_rready;
+  // Input Port Parameters
+  localparam [AHBADDRWIDTH-1:0] INPORTADDR         = 'h000;
+  localparam                    INPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
 
-  // Output Port Wire Declarations    
-  logic [ADDRWIDTH-2:0] output_addr;       
-  logic                 output_read_en;    
-  logic                 output_write_en;   
-  logic [3:0]           output_byte_strobe;
-  logic [31:0]          output_wdata;      
-  logic [31:0]          output_rdata;      
-  logic                 output_wready;     
-  logic                 output_rready;     
+  // Output Port Parameters
+  localparam [AHBADDRWIDTH-1:0] OUTPORTADDR         = 'h800;
+  localparam                    OUTPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
 
-  // Internal Wiring
-  // Input Packet Wires
-  logic [511:0] in_packet;    
-  logic         in_packet_last; 
-  logic         in_packet_valid;
-  logic         in_packet_ready;
+  localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);            // Number of Bytes in Packet
+  localparam OUTPACKETSPACEWIDTH = OUTPORTAHBADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
+  
+  //**********************************************************
+  // Wrapper AHB Components
+  //**********************************************************
 
-  // Output Packet Wires
-  logic [255:0] out_packet;    
-  logic         out_packet_last; 
-  logic         out_packet_valid;
-  logic         out_packet_ready;
-
-  // Configuration Tie Off
-  logic [63:0] cfg_size;
-  logic [1:0]  cfg_scheme;
-  logic cfg_last;
-  logic cfg_valid;
-  logic cfg_ready;
-
-  assign cfg_size   = 64'd512;
-  assign cfg_scheme = 2'd0;
-  assign cfg_last   = 1'b1;
-  assign cfg_valid  = 1'b1;
-
-  //-----------------------------------------------------------
-  // Module logic start
+  //----------------------------------------------------------
+  // Internal AHB Decode Logic
   //----------------------------------------------------------
 
-  // Interface block to convert AHB transfers to Register transfers to engine input/output channels
-  // engine Input/Output Channels
-  wrapper_ahb_vr_interface #(
-    ADDRWIDTH
-   ) u_wrapper_ahb_interface (
+  // AHB Target 0 - Engine Input Port
+  logic             hsel0;
+  logic             hreadyout0;
+  logic             hresp0;
+  logic [31:0]      hrdata0;
+
+  // AHB Target 1 - Engine Output Port
+  logic             hsel1;
+  logic             hreadyout1;
+  logic             hresp1;
+  logic [31:0]      hrdata1;
+
+  // AHB Target 2 - Default Target
+  logic             hsel2;
+  logic             hreadyout2;
+  logic             hresp2;
+  logic [31:0]      hrdata2;
+
+  // Internal AHB Address Assignment
+  assign hsel0 = ((HADDRS < OUTPORTADDR) && (HADDRS >= INPORTADDR)) ? 1'b1:1'b0; // Input Port Select
+  assign hsel1 = (HADDRS >= OUTPORTADDR) ? 1'b1:1'b0;                            // Output Port Select
+  assign hsel2 = (hsel0 | hsel1) ? 1'b0:1'b1;                                    // Default Target Select
+
+  // AHB Target Multiplexer
+  cmsdk_ahb_slave_mux  #(
+    1, //PORT0_ENABLE
+    1, //PORT1_ENABLE
+    1, //PORT2_ENABLE
+    0, //PORT3_ENABLE
+    0, //PORT4_ENABLE
+    0, //PORT5_ENABLE
+    0, //PORT6_ENABLE
+    0, //PORT7_ENABLE
+    0, //PORT8_ENABLE
+    0  //PORT9_ENABLE  
+  ) u_ahb_slave_mux (
+    .HCLK        (HCLK),
+    .HRESETn     (HRESETn),
+    .HREADY      (HREADYS),
+    .HSEL0       (hsel0),     // Input Port 0
+    .HREADYOUT0  (hreadyout0),
+    .HRESP0      (hresp0),
+    .HRDATA0     (hrdata0),
+    .HSEL1       (hsel1),     // Input Port 1
+    .HREADYOUT1  (hreadyout1),
+    .HRESP1      (hresp1),
+    .HRDATA1     (hrdata1),
+    .HSEL2       (hsel2),     // Input Port 2
+    .HREADYOUT2  (hreadyout2),
+    .HRESP2      (hresp2),
+    .HRDATA2     (hrdata2),
+    .HSEL3       (1'b0),      // Input Port 3
+    .HREADYOUT3  (),
+    .HRESP3      (),
+    .HRDATA3     (),
+    .HSEL4       (1'b0),      // Input Port 4
+    .HREADYOUT4  (),
+    .HRESP4      (),
+    .HRDATA4     (),
+    .HSEL5       (1'b0),      // Input Port 5
+    .HREADYOUT5  (),
+    .HRESP5      (),
+    .HRDATA5     (),
+    .HSEL6       (1'b0),      // Input Port 6
+    .HREADYOUT6  (),
+    .HRESP6      (),
+    .HRDATA6     (),
+    .HSEL7       (1'b0),      // Input Port 7
+    .HREADYOUT7  (),
+    .HRESP7      (),
+    .HRDATA7     (),
+    .HSEL8       (1'b0),      // Input Port 8
+    .HREADYOUT8  (),
+    .HRESP8      (),
+    .HRDATA8     (),
+    .HSEL9       (1'b0),      // Input Port 9
+    .HREADYOUT9  (),
+    .HRESP9      (),
+    .HRDATA9     (),
+  
+    .HREADYOUT   (HREADYOUTS),     // Outputs
+    .HRESP       (HRESPS),
+    .HRDATA      (HRDATAS)
+  );
+
+  //----------------------------------------------------------
+  // Input Port Logic
+  //----------------------------------------------------------
+
+  // Engine Input Port Wire declarations
+  logic [INPACKETWIDTH-1:0]       in_packet;    
+  logic                           in_packet_last; 
+  logic                           in_packet_valid;
+  logic                           in_packet_ready;
+
+  // Packet Constructor Instantiation
+  wrapper_ahb_packet_constructor #(
+    INPORTAHBADDRWIDTH,
+    INPACKETWIDTH
+  ) u_wrapper_data_input_port (
     .hclk         (HCLK),
     .hresetn      (HRESETn),
 
     // Input slave port: 32 bit data bus interface
-    .hsels        (HSELS),
-    .haddrs       (HADDRS),
+    .hsels        (hsel0),
+    .haddrs       (HADDRS[AHBADDRWIDTH-2:0]),
     .htranss      (HTRANSS),
     .hsizes       (HSIZES),
     .hwrites      (HWRITES),
     .hreadys      (HREADYS),
     .hwdatas      (HWDATAS),
 
-    .hreadyouts   (HREADYOUTS),
-    .hresps       (HRESPS),
-    .hrdatas      (HRDATAS),
-
-    // Register interface - Accelerator Engine Input
-    .input_addr        (input_addr),
-    .input_read_en     (input_read_en),
-    .input_write_en    (input_write_en),
-    .input_byte_strobe (input_byte_strobe),
-    .input_wdata       (input_wdata),
-    .input_rdata       (input_rdata),
-    .input_wready      (input_wready),
-    .input_rready      (input_rready),
-
-    // Register interface - Accelerator Engine Output
-    .output_addr        (output_addr),
-    .output_read_en     (output_read_en),
-    .output_write_en    (output_write_en),
-    .output_byte_strobe (output_byte_strobe),
-    .output_wdata       (output_wdata),
-    .output_rdata       (output_rdata),
-    .output_wready      (output_wready),
-    .output_rready      (output_rready)
-  );
-
-  wrapper_packet_construct #(
-    (ADDRWIDTH - 1),  // Only half address map allocated to this device
-    512               // Packet Width
-  ) u_wrapper_packet_construct (
-    .hclk         (HCLK),
-    .hresetn      (HRESETn),
-
-    // Register interface
-    .addr        (input_addr),
-    .read_en     (input_read_en),
-    .write_en    (input_write_en),
-    .byte_strobe (input_byte_strobe),
-    .wdata       (input_wdata),
-    .rdata       (input_rdata),
-    .wready      (input_wready),
-    .rready      (input_rready),
+    .hreadyouts   (hreadyout0),
+    .hresps       (hresp0),
+    .hrdatas      (hrdata0),
 
     // Valid/Ready Interface
     .packet_data       (in_packet),
     .packet_data_last  (in_packet_last),
     .packet_data_valid (in_packet_valid),
-    .packet_data_ready (in_packet_ready)
+    .packet_data_ready (in_packet_ready),
+
+    // Input Data Request
+    .data_req          (in_data_req)
   );
 
+  //----------------------------------------------------------
+  // Configuration Port Logic
+  //----------------------------------------------------------
+
+  // Engine Configuration Port Wire declarations
+  logic [CFGSIZEWIDTH-1:0]        cfg_size;
+  logic [CFGSCHEMEWIDTH-1:0]      cfg_scheme;
+  logic                           cfg_last;
+  logic                           cfg_valid;
+  logic                           cfg_ready;
+
+  // Engine Configuration Port Tied-off to fixed values
+  assign cfg_size   = 64'd512;
+  assign cfg_scheme = 2'd0;
+  assign cfg_last   = 1'b1;
+  assign cfg_valid  = 1'b1;
+
+  //----------------------------------------------------------
+  // Output Port Logic
+  //----------------------------------------------------------
+
+  // Engine Output Port Wire declarations
+  logic [OUTPACKETWIDTH-1:0]      out_packet;    
+  logic                           out_packet_last; 
+  logic [OUTPACKETSPACEWIDTH-1:0] out_packet_remain;    
+  logic                           out_packet_valid;
+  logic                           out_packet_ready;
+
+  // Relative Read Address for Start of Current Block  
+  logic [OUTPORTAHBADDRWIDTH-1:0]    block_read_addr;
+
+  // Block Packets Remaining Tie-off (only ever one packet per block)
+  assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
+
+  // Packet Deconstructor Instantiation
+  wrapper_ahb_packet_deconstructor #(
+    OUTPORTAHBADDRWIDTH,
+    OUTPACKETWIDTH
+  ) u_wrapper_data_output_port (
+    .hclk         (HCLK),
+    .hresetn      (HRESETn),
+
+    // Input slave port: 32 bit data bus interface
+    .hsels        (hsel1),
+    .haddrs       (HADDRS[AHBADDRWIDTH-2:0]),
+    .htranss      (HTRANSS),
+    .hsizes       (HSIZES),
+    .hwrites      (HWRITES),
+    .hreadys      (HREADYS),
+    .hwdatas      (HWDATAS),
+
+    .hreadyouts   (hreadyout1),
+    .hresps       (hresp1),
+    .hrdatas      (hrdata1),
+
+    // Valid/Ready Interface
+    .packet_data        (out_packet),
+    .packet_data_last   (out_packet_last),
+    .packet_data_remain (out_packet_remain),
+    .packet_data_valid  (out_packet_valid),
+    .packet_data_ready  (out_packet_ready),
+
+    // Input Data Request
+    .data_req          (out_data_req),
+
+    // Read Address Interface
+   .block_read_addr           (block_read_addr)
+  );
+
+  //----------------------------------------------------------
+  // Default AHB Target Logic
+  //----------------------------------------------------------
+
+  // AHB Default Target Instantiation
+  cmsdk_ahb_default_slave  u_ahb_default_slave(
+    .HCLK         (HCLK),
+    .HRESETn      (HRESETn),
+    .HSEL         (hsel2),
+    .HTRANS       (HTRANSS),
+    .HREADY       (HREADYS),
+    .HREADYOUT    (hreadyout2),
+    .HRESP        (hresp2)
+  );
+
+  // Default Targets Data is tied off
+  assign hrdata2 = {32{1'b0}};
+
+  //**********************************************************
+  // Wrapper APB Components
+  //**********************************************************
+
+  // TODO: Instantiate APB Mux
+
+  // TODO: Instantiate APB Default Target
+
+  // TODO: Wrapper Register Blocks
+
+  //**********************************************************
+  // Wrapper Interrupt Generation
+  //**********************************************************
+
+  // TODO: Instantiate IRQ Generator
+
+  //**********************************************************
+  // Wrapper DMA Data Request Generation
+  //**********************************************************
+
+  // TODO: Write up data request logic through registers
+
+  //**********************************************************
+  // Accelerator Engine
+  //**********************************************************
+
+  //----------------------------------------------------------
+  // Accelerator Engine Logic
+  //----------------------------------------------------------
+
+  // Hashing Accelerator Instatiation
   sha256_hashing_stream u_sha256_hashing_stream (
         .clk            (HCLK),
         .nrst           (HRESETn),
@@ -208,28 +335,5 @@ module wrapper_sha256_hashing_stream #(
         .data_out_ready (out_packet_ready)
     );
 
-  wrapper_packet_deconstruct #(
-    (ADDRWIDTH - 1),  // Only half address map allocated to this device
-    256               // Ouptut Packet WIdth
-  ) u_wrapper_packet_deconstruct (
-    .hclk         (HCLK),
-    .hresetn      (HRESETn),
-
-    // Register interface
-    .addr        (output_addr),
-    .read_en     (output_read_en),
-    .write_en    (output_write_en),
-    .byte_strobe (output_byte_strobe),
-    .wdata       (output_wdata),
-    .rdata       (output_rdata),
-    .wready      (output_wready),
-    .rready      (output_rready),
-
-    // Valid/Ready Interface
-    .packet_data       (out_packet),
-    .packet_data_last  (out_packet_last),
-    .packet_data_valid (out_packet_valid),
-    .packet_data_ready (out_packet_ready)
-  );
 
 endmodule

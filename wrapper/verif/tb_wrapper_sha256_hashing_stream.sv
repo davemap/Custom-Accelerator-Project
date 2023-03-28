@@ -147,13 +147,13 @@ cmsdk_ahb_fileread_master32 #(InputFileName,
 
 //********************************************************************************
 // Slave multiplexer module:
-//  multiplex the slave signals to master, three ports are enabled
+//  multiplex the slave signals to master, two ports are enabled
 //********************************************************************************
 
  cmsdk_ahb_slave_mux  #(
    1, //PORT0_ENABLE
    1, //PORT1_ENABLE
-   1, //PORT2_ENABLE
+   0, //PORT2_ENABLE
    0, //PORT3_ENABLE
    0, //PORT4_ENABLE
    0, //PORT5_ENABLE
@@ -231,8 +231,10 @@ cmsdk_ahb_fileread_master32 #(InputFileName,
 
   .HREADYOUTS  (hreadyout0),
   .HRESPS      (hresp0),
-  .HRDATAS     (hrdata0)
+  .HRDATAS     (hrdata0),
 
+  // Input Data Request to DMAC
+  .in_data_req ()
   );
 
 

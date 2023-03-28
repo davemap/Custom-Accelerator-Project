@@ -36,7 +36,7 @@ else
 
     # Source environment variables for all submodules
     for d in $SOC_TOP_DIR/* ; do
-        if [ -f "$d/.git" ]; then
+        if [ -e "$d/.git" ]; then
             if [ -f "$d/set_env.sh" ]; then
             # If .git file exists - submodule
                 source $d/set_env.sh

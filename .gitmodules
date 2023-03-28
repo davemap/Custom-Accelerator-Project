@@ -10,3 +10,6 @@
 [submodule "socsim"]
 	path = socsim
 	url = git@git.soton.ac.uk:soclabs/socsim.git
+[submodule "CHIPKIT"]
+	path = CHIPKIT
+	url = git@git.soton.ac.uk:soclabs/CHIPKIT.git

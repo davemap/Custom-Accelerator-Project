@@ -1,0 +1,5 @@
+name	idx	nbits	start	access	test	rval	desc
+							
+# Wrapper Control Register							
+accelerator_en	0	32	0	rw	0	0x00000000	Accelerator Enable Register
+accelerator_channel_en	1	32	0	rw	0	0x00000000	Accelerator Channel Enable Register
