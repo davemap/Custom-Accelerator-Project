@@ -10,7 +10,6 @@
 #-----------------------------------------------------------------------------
 #!/bin/bash
 
-echo "set_env root"
 # Get Root Location of Design Structure
 if [ -z $DESIGN_ROOT ]; then
     # If $DESIGN_ROOT hasn't been set yet
@@ -38,7 +37,6 @@ else
     # Source environment variables for all submodules
     for d in $SOC_TOP_DIR/* ; do
         if [ -e "$d/.git" ]; then
-            echo $d
             if [ -f "$d/set_env.sh" ]; then
             # If .git file exists - submodule
                 source $d/set_env.sh
