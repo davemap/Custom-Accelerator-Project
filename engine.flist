@@ -1,0 +1,29 @@
+//-----------------------------------------------------------------------------
+// Accelerator Engine Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Top-level Accelerator Wrapper
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    Accelerator Module search path    =============
+-y $(ACC_ENGINE_DIR)/src/rtl/
+-y $(ACC_ENGINE_DIR)/src/interfaces/stream/rtl/
++incdir+$(ACC_ENGINE_DIR)/src/rtl
++incdir+$(ACC_ENGINE_DIR)/src/interfaces/stream/rtl
+
+$(ACC_ENGINE_DIR)/src/rtl/sha256.v
+$(ACC_ENGINE_DIR)/src/rtl/sha256_core.v
+$(ACC_ENGINE_DIR)/src/rtl/sha256_k_constants.v
+$(ACC_ENGINE_DIR)/src/rtl/sha256_w_mem.v
+
+$(ACC_ENGINE_DIR)/src/interfaces/stream/rtl/sha256_stream.v

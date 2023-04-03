@@ -1,6 +1,3 @@
-[submodule "sha-2-accelerator"]
-	path = sha-2-accelerator
-	url = git@git.soton.ac.uk:soclabs/sha-2-accelerator.git
 [submodule "accelerator-wrapper"]
 	path = accelerator-wrapper
 	url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
@@ -13,3 +10,6 @@
 [submodule "CHIPKIT"]
 	path = CHIPKIT
 	url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
+[submodule "secworks-sha256"]
+	path = secworks-sha256
+	url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
