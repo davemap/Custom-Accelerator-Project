@@ -12,6 +12,7 @@
 #!/usr/bin/env bash
 
 # Source environment variables for all submodules
+cd $DESIGN_ROOT
 for d in $SOC_TOP_DIR/* ; do
     if [ -e "$d/.git" ]; then
         echo $d

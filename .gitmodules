@@ -1,28 +1,24 @@
 [submodule "accelerator-wrapper"]
 	path = accelerator-wrapper
 	url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
-	branch = main
-[submodule "nanosoc"]
+	[submodule "nanosoc"]
 	path = nanosoc
 	url = git@git.soton.ac.uk:soclabs/nanosoc.git
-	branch = main
-[submodule "socsim"]
+	[submodule "socsim"]
 	path = socsim
 	url = git@git.soton.ac.uk:soclabs/socsim.git
-	branch = main
-[submodule "CHIPKIT"]
+	[submodule "CHIPKIT"]
 	path = CHIPKIT
 	url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
-	branch = main
-[submodule "secworks-sha256"]
+	[submodule "secworks-sha256"]
 	path = secworks-sha256
 	url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
 	branch = main
-[submodule "$DESIGN_ROOT/accelerator-wrapper"]
+[submodule "accelerator-wrapper"]
 	branch = main
-[submodule "$DESIGN_ROOT/CHIPKIT"]
+[submodule "CHIPKIT"]
 	branch = main
-[submodule "$DESIGN_ROOT/nanosoc"]
+[submodule "nanosoc"]
 	branch = main
-[submodule "$DESIGN_ROOT/socsim"]
+[submodule "socsim"]
 	branch = main
