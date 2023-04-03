@@ -10,6 +10,7 @@
 #-----------------------------------------------------------------------------
 #!/bin/bash
 
+echo "set_env root"
 # Get Root Location of Design Structure
 if [ -z $DESIGN_ROOT ]; then
     # If $DESIGN_ROOT hasn't been set yet
@@ -24,7 +25,7 @@ if [ -z $DESIGN_ROOT ]; then
     source $DESIGN_ROOT/set_env.sh
 else
     # Set Environment Variable for this Repository
-    export SOC_TOP_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+    export SOC_TOP_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
     # If this Repo is root of workspace
     if [ $SOC_TOP_DIR = $DESIGN_ROOT ]; then
@@ -37,6 +38,7 @@ else
     # Source environment variables for all submodules
     for d in $SOC_TOP_DIR/* ; do
         if [ -e "$d/.git" ]; then
+            echo $d
             if [ -f "$d/set_env.sh" ]; then
             # If .git file exists - submodule
                 source $d/set_env.sh
