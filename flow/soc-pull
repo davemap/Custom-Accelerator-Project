@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Update all Submodules to latest commit
-for d in $DESIGN_ROOT/* ; do
-    if [ -f "$d/.git" ]; then
-        echo "Git Pulling $d"
-        cd $d; git pull; cd ..
-    fi
-done
+cd $DESIGN_ROOT; git submodule foreach --recursive git pull
+# for d in $DESIGN_ROOT/* ; do
+#     if [ -f "$d/.git" ]; then
+#         echo "Git Pulling $d"
+#         cd $d; git pull; cd ..
+#     fi
+# done

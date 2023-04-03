@@ -1,0 +1,25 @@
+#-----------------------------------------------------------------------------
+# SoC Labs socsim script to run required simulation
+# A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+#
+# Contributors
+#
+# David Mapstone (d.a.mapstone@soton.ac.uk)
+#
+# Copyright  2022, SoC Labs (www.soclabs.org)
+#-----------------------------------------------------------------------------
+
+#!/usr/bin/env bash
+
+# Source environment variables for all submodules
+for d in $SOC_TOP_DIR/* ; do
+    if [ -e "$d/.git" ]; then
+        echo $d
+        if [ -f "$d/set_env.sh" ]; then
+        # If .git file exists - submodule
+            git config -f .gitmodules submodule.$d.branch main
+        fi
+    fi
+done
+git submodule update --remote --recursive
+git submodule foreach --recursive git checkout main
