@@ -18,9 +18,11 @@ for d in $SOC_TOP_DIR/* ; do
         echo $d
         if [ -f "$d/set_env.sh" ]; then
         # If .git file exists - submodule
-            git config -f .gitmodules submodule.$d.branch main
+            # git config -f .gitmodules submodule.$d.branch main
+            git submodule set-branch --branch main $d
         fi
     fi
 done
 git submodule update --remote --recursive
 git submodule foreach --recursive git checkout main
+git restore $DESIGN_ROOT/.gitmodules

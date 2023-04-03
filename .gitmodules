@@ -1,24 +1,15 @@
 [submodule "accelerator-wrapper"]
-	path = accelerator-wrapper
-	url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
-	[submodule "nanosoc"]
-	path = nanosoc
-	url = git@git.soton.ac.uk:soclabs/nanosoc.git
-	[submodule "socsim"]
-	path = socsim
-	url = git@git.soton.ac.uk:soclabs/socsim.git
-	[submodule "CHIPKIT"]
-	path = CHIPKIT
-	url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
-	[submodule "secworks-sha256"]
-	path = secworks-sha256
-	url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
-	branch = main
-[submodule "secworks-sha-256-system-top/accelerator-wrapper"]
-	branch = main
-[submodule "secworks-sha-256-system-top/CHIPKIT"]
-	branch = main
-[submodule "secworks-sha-256-system-top/nanosoc"]
-	branch = main
-[submodule "secworks-sha-256-system-top/socsim"]
-	branch = main
+path = accelerator-wrapper
+url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
+[submodule "nanosoc"]
+path = nanosoc
+url = git@git.soton.ac.uk:soclabs/nanosoc.git
+[submodule "socsim"]
+path = socsim
+url = git@git.soton.ac.uk:soclabs/socsim.git
+[submodule "CHIPKIT"]
+path = CHIPKIT
+url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
+[submodule "secworks-sha256"]
+path = secworks-sha256
+url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
