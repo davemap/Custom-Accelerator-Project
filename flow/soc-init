@@ -1,5 +1,6 @@
 #-----------------------------------------------------------------------------
-# SoC Labs socsim script to run required simulation
+# SoC Labs Workarea initialisation Script
+# - sets submodule branches to main - can then be checked out to other branches from there.
 # A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 #
 # Contributors
