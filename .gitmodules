@@ -18,3 +18,11 @@
 	path = secworks-sha256
 	url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
 	branch = main
+[submodule "$DESIGN_ROOT/accelerator-wrapper"]
+	branch = main
+[submodule "$DESIGN_ROOT/CHIPKIT"]
+	branch = main
+[submodule "$DESIGN_ROOT/nanosoc"]
+	branch = main
+[submodule "$DESIGN_ROOT/socsim"]
+	branch = main
