@@ -11,5 +11,5 @@ url = git@git.soton.ac.uk:soclabs/socsim.git
 path = CHIPKIT
 url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
 [submodule "secworks-sha256"]
-path = secworks-sha256
-url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
+	path = secworks-sha256
+	url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
