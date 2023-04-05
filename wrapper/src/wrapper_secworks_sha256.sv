@@ -213,17 +213,17 @@ module wrapper_secworks_sha256 #(
   //----------------------------------------------------------
 
   // Engine Output Port Wire declarations
-  logic [OUTPACKETWIDTH-1:0]      out_packet;    
-  logic                           out_packet_last; 
-  logic [OUTPACKETSPACEWIDTH-1:0] out_packet_remain;    
-  logic                           out_packet_valid;
-  logic                           out_packet_ready;
+  logic [OUTPACKETWIDTH-1:0]      out_hash;    
+  logic                           out_hash_last; 
+  logic [OUTPACKETSPACEWIDTH-1:0] out_hash_remain;    
+  logic                           out_hash_valid;
+  logic                           out_hash_ready;
+  
 
   // Relative Read Address for Start of Current Block  
   logic [OUTPORTAHBADDRWIDTH-1:0]    block_read_addr;
 
-  // Block Packets Remaining Tie-off (only ever one packet per block)
-  assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
+
 
   // Packet Deconstructor Instantiation
   wrapper_ahb_packet_deconstructor #(
@@ -247,11 +247,11 @@ module wrapper_secworks_sha256 #(
     .hrdatas      (hrdata1),
 
     // Valid/Ready Interface
-    .packet_data        (out_packet),
-    .packet_data_last   (out_packet_last),
-    .packet_data_remain (out_packet_remain),
-    .packet_data_valid  (out_packet_valid),
-    .packet_data_ready  (out_packet_ready),
+    .packet_data        (out_hash),
+    .packet_data_last   (out_hash_last),
+    .packet_data_remain (out_hash_remain),
+    .packet_data_valid  (out_hash_valid),
+    .packet_data_ready  (out_hash_ready),
 
     // Input Data Request
     .data_req          (out_data_req),
@@ -308,11 +308,39 @@ module wrapper_secworks_sha256 #(
   // Accelerator Engine Logic
   //----------------------------------------------------------
 
+  logic out_digest_valid;
+
+  // Engine Output Port Wire declarations
+  logic [OUTPACKETWIDTH-1:0]      out_packet;    
+  logic                           out_packet_last; 
+  logic [OUTPACKETSPACEWIDTH-1:0] out_packet_remain;    
+  logic                           out_packet_valid;
+  logic                           out_packet_ready;
+
+    // Block Packets Remaining Tie-off (only ever one packet per block)
+  assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
+
+  // Hashing Accelerator Instatiation
+  wrapper_digest_filter u_digest_filter (
+        .clk            (HCLK),
+        .rst            (~HRESETn),
+
+        // Data in Channel
+        .s_tvalid_i     (in_packet_valid),
+        .s_tready_o     (in_packet_ready),
+        .s_tlast_i      (in_packet_last),
+
+        // Data Out Channel
+        .digest_valid_o (out_digest_valid),
+        .hash_valid_o   (out_packet_valid)
+    );
+
+
   // Hashing Accelerator Instatiation
   sha256_stream u_sha256_stream (
         .clk            (HCLK),
-        .nrst           (HRESETn),
-        .mode           (1'b1)
+        .rst            (~HRESETn),
+        .mode           (1'b1),
 
         // Data in Channel
         .s_tdata_i      (in_packet),
@@ -322,9 +350,28 @@ module wrapper_secworks_sha256 #(
 
         // Data Out Channel
         .digest_o       (out_packet),
-        .digest_valid_o (out_packet_valid)
+        .digest_valid_o (out_digest_valid)
     );
   
   assign out_packet_last  = 1'b1;
 
+  // Output FIFO (Output has no handshaking)
+  fifo_vr #(
+    4,
+    256
+  ) u_output_fifo (
+    .clk  (HCLK),
+    .nrst (HRESETn),
+    .en   (1'b1),
+    .sync_rst (1'b0),
+    .data_in       (out_packet),
+    .data_in_last  (out_packet_last),
+    .data_in_valid  (out_packet_valid),
+    .data_in_ready  (),
+    .data_out       (out_hash),
+    .data_out_valid (out_hash_valid),
+    .data_out_ready (out_hash_ready),
+    .data_out_last  (out_hash_last),
+    .status_ptr_dif ()
+  );
 endmodule

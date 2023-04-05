@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Accelerator Wrapper CMSDK Filelist
+// PrimativesFilelist
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -9,16 +9,14 @@
 // Copyright � 2021-3, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Abstract : Verilog Command File for Accelerator CMSDK AHB IP
+// Abstract : Verilog Command File for RTL Primatives
 //-----------------------------------------------------------------------------
 
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(SOC_TOP_DIR)/cmsdk/ip/
-+incdir+$(SOC_TOP_DIR)/hdl/ip/
+-y $(SOC_TOP_DIR)/primatives/src/
++incdir+$(SOC_TOP_DIR)/primatives/src/
 
-$(SOC_TOP_DIR)/cmsdk/ip/cmsdk_ahb_default_slave.v
-$(SOC_TOP_DIR)/cmsdk/ip/cmsdk_ahb_slave_mux.v
-// $(SOC_TOP_DIR)/cmsdk/ip/cmsdk_ahb_ram_beh.v
+$(SOC_TOP_DIR)/primatives/src/fifo_vr.sv

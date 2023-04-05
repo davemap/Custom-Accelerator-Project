@@ -19,5 +19,5 @@
 -y $(SOC_TOP_DIR)/wrapper/src/
 +incdir+$(SOC_TOP_DIR)/wrapper/src/
 
-$(SOC_TOP_DIR)/wrapper/src/wrapper_vr_loopback.sv
-$(SOC_TOP_DIR)/hdl/wrapper/wrapper_sha256_hashing_stream.sv
+$(SOC_TOP_DIR)/wrapper/src/wrapper_secworks_sha256.sv
+$(SOC_TOP_DIR)/wrapper/src/wrapper_digest_filter.sv
