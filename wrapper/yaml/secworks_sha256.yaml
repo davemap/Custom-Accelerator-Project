@@ -28,7 +28,8 @@ wrapper:
   engine_name: stream_sha256
   engine_ports:
   - name: inport
-    type: input
+    type: stream
+    direction: input
     interfaces:
     - name:  packet
       width: 512
@@ -46,12 +47,18 @@ wrapper:
     base: 0x0400
 
   - name: outport
-    type: output
+    type: stream
+    direction: output
     interfaces:
     - name: packet
       width: 256
     size: 0x0400
     base: 0x0800
+  
+  - name: engine_debug
+    type: apb
+    size: 0x0400
+    base: 0xc000
 
   wrapper_registers:
   # Allocated Space to CSR Region
