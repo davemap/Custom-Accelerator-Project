@@ -48,14 +48,18 @@ module wrapper_secworks_sha256 #(
 
   // Input Port Parameters
   localparam [AHBADDRWIDTH-1:0] INPORTADDR         = 'h000;
-  localparam                    INPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
+  localparam                    INPORTAHBADDRWIDTH = AHBADDRWIDTH - 2;
 
   // Output Port Parameters
-  localparam [AHBADDRWIDTH-1:0] OUTPORTADDR         = 'h800;
-  localparam                    OUTPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
+  localparam [AHBADDRWIDTH-1:0] OUTPORTADDR         = 'h400;
+  localparam                    OUTPORTAHBADDRWIDTH = AHBADDRWIDTH - 2;
 
   localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);            // Number of Bytes in Packet
   localparam OUTPACKETSPACEWIDTH = OUTPORTAHBADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
+
+  // Control and Status Register Parameters
+  localparam [AHBADDRWIDTH-1:0] CSRADDR         = 'h800;
+  localparam                    CSRADDRWIDTH    = AHBADDRWIDTH - 2;
   
   //**********************************************************
   // Wrapper AHB Components
@@ -77,16 +81,23 @@ module wrapper_secworks_sha256 #(
   logic             hresp1;
   logic [31:0]      hrdata1;
 
-  // AHB Target 2 - Default Target
+  // AHB Target 2 - CSRs 
   logic             hsel2;
   logic             hreadyout2;
   logic             hresp2;
   logic [31:0]      hrdata2;
 
+  // AHB Target 3 - Default Target
+  logic             hsel3;
+  logic             hreadyout3;
+  logic             hresp3;
+  logic [31:0]      hrdata3;
+
   // Internal AHB Address Assignment
   assign hsel0 = ((HADDRS < OUTPORTADDR) && (HADDRS >= INPORTADDR)) ? 1'b1:1'b0; // Input Port Select
-  assign hsel1 = (HADDRS >= OUTPORTADDR) ? 1'b1:1'b0;                            // Output Port Select
-  assign hsel2 = (hsel0 | hsel1) ? 1'b0:1'b1;                                    // Default Target Select
+  assign hsel1 = ((HADDRS < CSRADDR) && (HADDRS >= OUTPORTADDR)) ? 1'b1:1'b0; // Output Port Select
+  assign hsel2 = (HADDRS >= CSRADDR) ? 1'b1:1'b0;                                // CSR Select
+  assign hsel3 = (hsel0 | hsel1 | hsel2) ? 1'b0:1'b1;                            // Default Target Select
 
   // AHB Target Multiplexer
   cmsdk_ahb_slave_mux  #(
@@ -116,10 +127,10 @@ module wrapper_secworks_sha256 #(
     .HREADYOUT2  (hreadyout2),
     .HRESP2      (hresp2),
     .HRDATA2     (hrdata2),
-    .HSEL3       (1'b0),      // Input Port 3
-    .HREADYOUT3  (),
-    .HRESP3      (),
-    .HRDATA3     (),
+    .HSEL3       (hsel3),     // Input Port 3
+    .HREADYOUT3  (hreadyout3),
+    .HRESP3      (hresp3),
+    .HRDATA3     (hrdata3),
     .HSEL4       (1'b0),      // Input Port 4
     .HREADYOUT4  (),
     .HRESP4      (),
@@ -170,7 +181,7 @@ module wrapper_secworks_sha256 #(
 
     // Input slave port: 32 bit data bus interface
     .hsels        (hsel0),
-    .haddrs       (HADDRS[AHBADDRWIDTH-2:0]),
+    .haddrs       (HADDRS[INPORTAHBADDRWIDTH-1:0]),
     .htranss      (HTRANSS),
     .hsizes       (HSIZES),
     .hwrites      (HWRITES),
@@ -235,7 +246,7 @@ module wrapper_secworks_sha256 #(
 
     // Input slave port: 32 bit data bus interface
     .hsels        (hsel1),
-    .haddrs       (HADDRS[AHBADDRWIDTH-2:0]),
+    .haddrs       (HADDRS[OUTPORTAHBADDRWIDTH-1:0]),
     .htranss      (HTRANSS),
     .hsizes       (HSIZES),
     .hwrites      (HWRITES),
@@ -261,6 +272,112 @@ module wrapper_secworks_sha256 #(
   );
 
   //----------------------------------------------------------
+  // Wrapper Control and Staus Registers
+  //----------------------------------------------------------
+
+  // CSR APB wiring logic
+  logic [CSRADDRWIDTH-1:0] CSRPADDR;
+  logic                    CSRPENABLE;
+  logic                    CSRPWRITE;
+  logic [3:0]              CSRPSTRB;
+  logic [2:0]              CSRPPROT;
+  logic [31:0]             CSRPWDATA;
+  logic                    CSRPSEL;
+
+  logic                    CSRAPBACTIVE;
+  logic [31:0]             CSRPRDATA;
+  logic                    CSRPREADY;
+  logic                    CSRPSLVERR;
+
+  // CSR register wiring logic
+  logic  [CSRADDRWIDTH-1:0] csr_reg_addr;
+  logic                     csr_reg_read_en;
+  logic                     csr_reg_write_en;
+  logic  [31:0]             csr_reg_wdata;
+  logic  [31:0]             csr_reg_rdata;
+
+  // AHB to APB Bridge
+  cmsdk_ahb_to_apb #(
+    CSRADDRWIDTH
+  ) u_csr_ahb_apb_bridge (
+    .HCLK       (HCLK),    // Clock
+    .HRESETn    (HRESETn), // Reset
+    .PCLKEN     (1'b1),    // APB clock enable signal
+    
+    .HSEL       (hsel2),      // Device select
+    .HADDR,     (HADDRS[CSRADDRWIDTH-1:0])   // Address
+    .HTRANS     (HTRANSS),    // Transfer control
+    .HSIZE      (HSIZES),     // Transfer size
+    .HPROT      (4'b1111),    // Protection control
+    .HWRITE     (HWRITES),    // Write control
+    .HREADY,    (HREADYS)     // Transfer phase done
+    .HWDATA     (HWDATAS),    // Write data
+
+    .HREADYOUT  (hreadyout2), // Device ready
+    .HRDATA     (hrdata2),    // Read data output
+    .HRESP      (hresp2),     // Device response
+    
+    // APB Output
+    .PADDR     (CSRPADDR),      // APB Address
+    .PENABLE   (CSRPENABLE),    // APB Enable
+    .PWRITE    (CSRPWRITE),     // APB Write
+    .PSTRB     (CSRPSTRB),      // APB Byte Strobe
+    .PPROT     (CSRPPROT),      // APB Prot
+    .PWDATA    (CSRPWDATA),     // APB write data
+    .PSEL      (CSRPSEL),       // APB Select
+
+    .APBACTIVE (CSRAPBACTIVE),  // APB bus is active, for clock gating
+    // of APB bus
+
+    // APB Input
+    .PRDATA    (CSRPRDATA),    // Read data for each APB slave
+    .PREADY    (CSRPREADY),    // Ready for each APB slave
+    .PSLVERR   (CSRPSLVERR)    // Error state for each APB slave
+  );  
+
+  // APB to Register Interface
+  cmsdk_apb3_eg_slave_interface #(
+    CSRADDRWIDTH
+  ) u_csr_reg_inf (
+
+    .pclk            (HCLK),     // pclk
+    .presetn         (HRESETn),  // reset
+
+    .psel            (CSRPSEL),     // apb interface inputs
+    .paddr           (CSRPADDR),
+    .penable         (CSRPENABLE),
+    .pwrite          (CSRPWRITE),
+    .pwdata          (CSRPWDATA),
+
+    .prdata          (CSRPRDATA),   // apb interface outputs
+    .pready          (CSRPREADY),
+    .pslverr         (CSRPSLVERR),
+
+    // Register interface
+    .addr            (csr_reg_addr),
+    .read_en         (csr_reg_read_en),
+    .write_en        (csr_reg_write_en),
+    .wdata           (csr_reg_wdata),
+    .rdata           (csr_reg_rdata)
+  );
+
+  // Example Register Block
+  cmsdk_apb3_eg_slave_reg #(
+    CSRADDRWIDTH
+  ) u_csr_block (
+    .pclk            (HCLK),
+    .presetn         (HRESETn),
+
+    // Register interface
+    .addr            (csr_reg_addr),
+    .read_en         (csr_reg_read_en),
+    .write_en        (csr_reg_write_en),
+    .wdata           (csr_reg_wdata),
+    .ecorevnum       (4'd0),
+    .rdata           (csr_reg_rdata)
+  );
+
+  //----------------------------------------------------------
   // Default AHB Target Logic
   //----------------------------------------------------------
 
@@ -268,25 +385,15 @@ module wrapper_secworks_sha256 #(
   cmsdk_ahb_default_slave  u_ahb_default_slave(
     .HCLK         (HCLK),
     .HRESETn      (HRESETn),
-    .HSEL         (hsel2),
+    .HSEL         (hsel3),
     .HTRANS       (HTRANSS),
     .HREADY       (HREADYS),
-    .HREADYOUT    (hreadyout2),
-    .HRESP        (hresp2)
+    .HREADYOUT    (hreadyout3),
+    .HRESP        (hresp3)
   );
 
   // Default Targets Data is tied off
-  assign hrdata2 = {32{1'b0}};
-
-  //**********************************************************
-  // Wrapper APB Components
-  //**********************************************************
-
-  // TODO: Instantiate APB Mux
-
-  // TODO: Instantiate APB Default Target
-
-  // TODO: Wrapper Register Blocks
+  assign hrdata3 = {32{1'b0}};
 
   //**********************************************************
   // Wrapper Interrupt Generation
