@@ -9,15 +9,24 @@
 // Copyright 2023; SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 
-module wrapper_secworks_sha256 #(
+module wrapper #(
+  //----------------------------------------------------------
+  // SOCGEN: Wrapper Parameters
+  //----------------------------------------------------------
   parameter AHBADDRWIDTH=12,
   parameter INPACKETWIDTH=512,
   parameter CFGSIZEWIDTH=64,
   parameter CFGSCHEMEWIDTH=2,
   parameter OUTPACKETWIDTH=256
   ) (
-    input  logic                  HCLK,       // Clock
-    input  logic                  HRESETn,    // Reset
+    //----------------------------------------------------------
+    // SOCGEN: Wrapper Ports
+    //----------------------------------------------------------
+    //----------------------------------------------------------
+    // SOCGEN: AHB Port
+    //----------------------------------------------------------
+    input  logic                     HCLK,       // Clock
+    input  logic                     HRESETn,    // Reset
 
     // AHB connection to Initiator
     input  logic                     HSELS,
@@ -32,9 +41,15 @@ module wrapper_secworks_sha256 #(
     output logic                     HRESPS,
     output logic  [31:0]             HRDATAS,
 
+    //----------------------------------------------------------
+    // SOCGEN: DMA in_data DMA Request
+    //----------------------------------------------------------
     // Input Data Request Signal to DMAC
     output logic                  in_data_req,
 
+    //----------------------------------------------------------
+    // SOCGEN: DMA out_data DMA Request
+    //----------------------------------------------------------
     // Output Data Request Signal to DMAC
     output logic                  out_data_req
   );
@@ -44,11 +59,15 @@ module wrapper_secworks_sha256 #(
   // Internal AHB Parameters
   //**********************************************************
 
-  // Input Port Parameters
+  //----------------------------------------------------------
+  // SOCGEN: inport Local Parameters
+  //----------------------------------------------------------
   localparam [AHBADDRWIDTH-1:0] INPORTADDR         = 'h000;
   localparam                    INPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
 
-  // Output Port Parameters
+  //----------------------------------------------------------
+  // SOCGEN: outport Local Parameters
+  //----------------------------------------------------------
   localparam [AHBADDRWIDTH-1:0] OUTPORTADDR         = 'h800;
   localparam                    OUTPORTAHBADDRWIDTH = AHBADDRWIDTH - 1;
 
@@ -306,7 +325,7 @@ module wrapper_secworks_sha256 #(
   //**********************************************************
 
   //----------------------------------------------------------
-  // Accelerator Engine Logic
+  // SOCGEN: Accelerator Engine Logic
   //----------------------------------------------------------
 
   logic out_digest_valid;
