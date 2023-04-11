@@ -428,18 +428,18 @@ module wrapper_secworks_sha256 #(
   assign out_packet_remain = {OUTPACKETSPACEWIDTH{1'b0}};
 
   // Hashing Accelerator Instatiation
-  wrapper_digest_filter u_digest_filter (
+  wrapper_valid_filter u_valid_filter (
         .clk            (HCLK),
         .rst            (~HRESETn),
 
         // Data in Channel
-        .s_tvalid_i     (in_packet_valid),
-        .s_tready_o     (in_packet_ready),
-        .s_tlast_i      (in_packet_last),
+        .data_in_valid     (in_packet_valid),
+        .data_in_ready     (in_packet_ready),
+        .data_in_last      (in_packet_last),
 
         // Data Out Channel
-        .digest_valid_o (out_digest_valid),
-        .hash_valid_o   (out_packet_valid)
+        .data_out_valid    (out_digest_valid),
+        .payload_out_valid (out_packet_valid)
     );
 
 
