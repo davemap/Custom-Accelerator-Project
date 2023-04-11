@@ -16,7 +16,7 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(SOC_TOP_DIR)/primatives/src/
-+incdir+$(SOC_TOP_DIR)/primatives/src/
+-y $(PROJECT_DIR)/primatives/src/
++incdir+$(PROJECT_DIR)/primatives/src/
 
-$(SOC_TOP_DIR)/primatives/src/fifo_vr.sv
+$(PROJECT_DIR)/primatives/src/fifo_vr.sv

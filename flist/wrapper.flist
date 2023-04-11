@@ -16,8 +16,8 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(SOC_TOP_DIR)/wrapper/src/
-+incdir+$(SOC_TOP_DIR)/wrapper/src/
+-y $(PROJECT_DIR)/wrapper/src/
++incdir+$(PROJECT_DIR)/wrapper/src/
 
-$(SOC_TOP_DIR)/wrapper/src/wrapper_secworks_sha256.sv
-$(SOC_TOP_DIR)/wrapper/src/wrapper_digest_filter.sv
+$(PROJECT_DIR)/wrapper/src/wrapper_secworks_sha256.sv
+$(PROJECT_DIR)/wrapper/src/wrapper_digest_filter.sv

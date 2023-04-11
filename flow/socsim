@@ -15,9 +15,9 @@ DEFAULT_SIMULATOR="ivlog"
 if [[ -z "${SIMULATOR}" ]]; then 
     SIMULATOR=$DEFAULT_SIMULATOR
 fi
-# $SOC_TOP_DIR"/flow/simulators/"$SIMULATOR"_sim.sh" $@
+# $PROJECT_DIR"/flow/simulators/"$SIMULATOR"_sim.sh" $@
 
-for d in $SOC_TOP_DIR/* ; do
+for d in $PROJECT_DIR/* ; do
     if [ -f "$d/.git" ]; then
         if [ -f "$d/simulate/socsim/$1.sh" ]; then
         # If .git file exists - submodule

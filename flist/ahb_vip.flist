@@ -16,9 +16,9 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(SOC_TOP_DIR)/cmsdk/vip/
-+incdir+$(SOC_TOP_DIR)/cmsdk/vip/
+-y $(PROJECT_DIR)/cmsdk/vip/
++incdir+$(PROJECT_DIR)/cmsdk/vip/
 
-$(SOC_TOP_DIR)/cmsdk/vip/cmsdk_ahb_fileread_master32.v
-$(SOC_TOP_DIR)/cmsdk/vip/cmsdk_ahb_fileread_funnel.v
-$(SOC_TOP_DIR)/cmsdk/vip/cmsdk_ahb_filereadcore.v
+$(PROJECT_DIR)/cmsdk/vip/cmsdk_ahb_fileread_master32.v
+$(PROJECT_DIR)/cmsdk/vip/cmsdk_ahb_fileread_funnel.v
+$(PROJECT_DIR)/cmsdk/vip/cmsdk_ahb_filereadcore.v

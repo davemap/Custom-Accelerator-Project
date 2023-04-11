@@ -11,6 +11,6 @@
 
 #!/usr/bin/env bash
 
-mkdir -p $SOC_TOP_DIR/simulate/sim/ 
-iverilog -g2012 -o $SOC_TOP_DIR/simulate/sim/$1.vvp $ACC_WRAPPER_DIR/hdl/verif/tb_$1.sv
-cd $SOC_TOP_DIR/simulate/sim/ && vvp $1.vvp $2
+mkdir -p $PROJECT_DIR/simulate/sim/ 
+iverilog -g2012 -o $PROJECT_DIR/simulate/sim/$1.vvp $WRAPPER_TECH_DIR/hdl/verif/tb_$1.sv
+cd $PROJECT_DIR/simulate/sim/ && vvp $1.vvp $2

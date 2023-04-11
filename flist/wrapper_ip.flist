@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Accelerator System Filelist
+// Accelerator Wrapper Filelist
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -9,14 +9,22 @@
 // Copyright � 2021-3, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Abstract : Verilog Command File for Top-level Accelerator System
+// Abstract : Verilog Command File for Accelerator Wrapper IP
 //-----------------------------------------------------------------------------
 
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(PROJECT_DIR)/system/src/
-+incdir+$(PROJECT_DIR)/system/src/
+-y $(WRAPPER_TECH_DIR)/hdl/src/
++incdir+$(WRAPPER_TECH_DIR)/hdl/src/
 
-$(PROJECT_DIR)/system/src/nanosoc_exp.v
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_ahb_packet_constructor.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_ahb_packet_deconstructor.sv
+
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_addr_calc.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_data_req.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_ahb_reg_interface.sv
+// $(WRAPPER_TECH_DIR)/hdl/src/wrapper_ahb_vr_interface.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_packet_construct.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_packet_deconstruct.sv

@@ -24,26 +24,34 @@ if [ -z $DESIGN_ROOT ]; then
     source $DESIGN_ROOT/set_env.sh
 else
     # Set Environment Variable for this Repository
-    export SOC_TOP_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export PROJECT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
     # If this Repo is root of workspace
-    if [ $SOC_TOP_DIR = $DESIGN_ROOT ]; then
+    if [ $PROJECT_DIR = $DESIGN_ROOT ]; then
         echo "Design Workspace: $DESIGN_ROOT" 
         export DESIGN_ROOT
         # Set Default Simulator
         export SIMULATOR="ivlog"
     fi
 
-    # Source environment variables for all submodules
-    for d in $SOC_TOP_DIR/* ; do
-        if [ -e "$d/.git" ]; then
-            if [ -f "$d/set_env.sh" ]; then
-            # If .git file exists - submodule
-                source $d/set_env.sh
-            fi
-        fi
-    done
+    # Source dependency environment variable script
+    source $PROJECT_DIR/env/dependency_env.sh
 
     # Add Scripts to Path
-    export PATH="$PATH:/$SOC_TOP_DIR/flow"
+    # "TECH_DIR"
+    while read line; do 
+        eval PATH="$PATH:\$${line}/flow"
+    done <<< "$(awk 'BEGIN{for(v in ENVIRON) print v}' | grep TECH_DIR)"
+
+    # "FLOW_DIR"
+    while read line; do 
+        eval PATH="$PATH:\$${line}/flow"
+    done <<< "$(awk 'BEGIN{for(v in ENVIRON) print v}' | grep FLOW_DIR)"
+
+    # "PROJECT_DIR"
+    while read line; do 
+        eval PATH="$PATH:\$${line}/flow"
+    done <<< "$(awk 'BEGIN{for(v in ENVIRON) print v}' | grep PROJECT_DIR)"
+
+    export PATH
 fi

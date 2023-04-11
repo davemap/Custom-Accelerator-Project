@@ -16,9 +16,9 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(SOC_TOP_DIR)/cmsdk/ip/
-+incdir+$(SOC_TOP_DIR)/hdl/ip/
+-y $(PROJECT_DIR)/cmsdk/ip/
++incdir+$(PROJECT_DIR)/hdl/ip/
 
-$(SOC_TOP_DIR)/cmsdk/ip/cmsdk_ahb_default_slave.v
-$(SOC_TOP_DIR)/cmsdk/ip/cmsdk_ahb_slave_mux.v
-// $(SOC_TOP_DIR)/cmsdk/ip/cmsdk_ahb_ram_beh.v
+$(PROJECT_DIR)/cmsdk/ip/cmsdk_ahb_default_slave.v
+$(PROJECT_DIR)/cmsdk/ip/cmsdk_ahb_slave_mux.v
+// $(PROJECT_DIR)/cmsdk/ip/cmsdk_ahb_ram_beh.v
