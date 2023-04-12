@@ -16,8 +16,8 @@ module wrapper_secworks_sha256 #(
   parameter CFGSCHEMEWIDTH=2,
   parameter OUTPACKETWIDTH=256
   ) (
-    input  logic                  HCLK,       // Clock
-    input  logic                  HRESETn,    // Reset
+    input  logic                     HCLK,       // Clock
+    input  logic                     HRESETn,    // Reset
 
     // AHB connection to Initiator
     input  logic                     HSELS,
@@ -31,8 +31,6 @@ module wrapper_secworks_sha256 #(
     output logic                     HREADYOUTS,
     output logic                     HRESPS,
     output logic  [31:0]             HRDATAS,
-
-    //TODO: Add APB Interface
 
     // Input Data Request Signal to DMAC
     output logic                  in_data_req,
@@ -54,7 +52,7 @@ module wrapper_secworks_sha256 #(
   localparam [AHBADDRWIDTH-1:0] OUTPORTADDR         = 'h400;
   localparam                    OUTPORTAHBADDRWIDTH = AHBADDRWIDTH - 2;
 
-  localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);            // Number of Bytes in Packet
+  localparam OUTPACKETBYTEWIDTH  = $clog2(OUTPACKETWIDTH/8);               // Number of Bytes in Packet
   localparam OUTPACKETSPACEWIDTH = OUTPORTAHBADDRWIDTH-OUTPACKETBYTEWIDTH; // Number of Bits to represent all Packets in Address Space
 
   // Control and Status Register Parameters
@@ -171,6 +169,9 @@ module wrapper_secworks_sha256 #(
   logic                           in_packet_valid;
   logic                           in_packet_ready;
 
+  // DMA 
+  logic in_dma_req_act;
+
   // Packet Constructor Instantiation
   wrapper_ahb_packet_constructor #(
     INPORTAHBADDRWIDTH,
@@ -199,7 +200,7 @@ module wrapper_secworks_sha256 #(
     .packet_data_ready (in_packet_ready),
 
     // Input Data Request
-    .data_req          (in_data_req)
+    .data_req          (in_dma_req_act)
   );
 
   //----------------------------------------------------------
@@ -234,7 +235,8 @@ module wrapper_secworks_sha256 #(
   // Relative Read Address for Start of Current Block  
   logic [OUTPORTAHBADDRWIDTH-1:0]    block_read_addr;
 
-
+  // DMA Request Line
+  logic out_dma_req_act;
 
   // Packet Deconstructor Instantiation
   wrapper_ahb_packet_deconstructor #(
@@ -265,10 +267,10 @@ module wrapper_secworks_sha256 #(
     .packet_data_ready  (out_hash_ready),
 
     // Input Data Request
-    .data_req          (out_data_req),
+    .data_req           (out_dma_req_act),
 
     // Read Address Interface
-   .block_read_addr           (block_read_addr)
+   .block_read_addr     (block_read_addr)
   );
 
   //----------------------------------------------------------
@@ -305,12 +307,12 @@ module wrapper_secworks_sha256 #(
     .PCLKEN     (1'b1),    // APB clock enable signal
     
     .HSEL       (hsel2),      // Device select
-    .HADDR,     (HADDRS[CSRADDRWIDTH-1:0])   // Address
+    .HADDR     (HADDRS[CSRADDRWIDTH-1:0]),   // Address
     .HTRANS     (HTRANSS),    // Transfer control
     .HSIZE      (HSIZES),     // Transfer size
     .HPROT      (4'b1111),    // Protection control
     .HWRITE     (HWRITES),    // Write control
-    .HREADY,    (HREADYS)     // Transfer phase done
+    .HREADY    (HREADYS),     // Transfer phase done
     .HWDATA     (HWDATAS),    // Write data
 
     .HREADYOUT  (hreadyout2), // Device ready
@@ -361,21 +363,24 @@ module wrapper_secworks_sha256 #(
     .rdata           (csr_reg_rdata)
   );
 
-  // Example Register Block
-  cmsdk_apb3_eg_slave_reg #(
-    CSRADDRWIDTH
-  ) u_csr_block (
-    .pclk            (HCLK),
-    .presetn         (HRESETn),
+  logic ctrl_reg_write_en, ctrl_reg_read_en;
+  assign ctrl_reg_write_en = csr_reg_write_en & (csr_reg_addr < 10'h100);
+  assign ctrl_reg_read_en  = csr_reg_read_en  & (csr_reg_addr < 10'h100);
+  // // Example Register Block
+  // cmsdk_apb3_eg_slave_reg #(
+  //   CSRADDRWIDTH
+  // ) u_csr_block (
+  //   .pclk            (HCLK),
+  //   .presetn         (HRESETn),
 
-    // Register interface
-    .addr            (csr_reg_addr),
-    .read_en         (csr_reg_read_en),
-    .write_en        (csr_reg_write_en),
-    .wdata           (csr_reg_wdata),
-    .ecorevnum       (4'd0),
-    .rdata           (csr_reg_rdata)
-  );
+  //   // Register interface
+  //   .addr            (csr_reg_addr),
+  //   .read_en         (csr_reg_read_en),
+  //   .write_en        (csr_reg_write_en),
+  //   .wdata           (csr_reg_wdata),
+  //   .ecorevnum       (4'd0),
+  //   .rdata           (csr_reg_rdata)
+  // );
 
   //----------------------------------------------------------
   // Default AHB Target Logic
@@ -405,7 +410,39 @@ module wrapper_secworks_sha256 #(
   // Wrapper DMA Data Request Generation
   //**********************************************************
 
-  // TODO: Write up data request logic through registers
+  wrapper_req_ctrl_reg #(
+    CSRADDRWIDTH
+  ) u_wrapper_req_ctrl_reg (
+    .hclk        (HCLK),       
+    .hresetn     (HRESETn),    
+    .addr        (csr_reg_addr),
+    .read_en     (ctrl_reg_read_en),
+    .write_en    (ctrl_reg_write_en),
+    .wdata       (csr_reg_wdata),
+    .rdata       (csr_reg_rdata),
+
+    // Data Transfer Request Signaling
+    .req_act_ch0 (in_dma_req_act),
+    .req_act_ch1 (out_dma_req_act),
+    .req_act_ch2 (1'b0),
+    .req_act_ch3 (1'b0),
+    .req_act_ch4 (1'b0),
+
+    // DMA Request Output
+    .drq_ch0     (in_data_req),
+    .drq_ch1     (out_data_req),
+    .drq_ch2     (),
+    .drq_ch3     (),
+    .drq_ch4     (),
+
+    // Interrupt Request Output
+    .irq_ch0     (),
+    .irq_ch1     (),
+    .irq_ch2     (),
+    .irq_ch3     (),
+    .irq_ch4     (),
+    .irq_merged  ()
+  );
 
   //**********************************************************
   // Accelerator Engine

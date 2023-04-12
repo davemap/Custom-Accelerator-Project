@@ -28,3 +28,6 @@ $(WRAPPER_TECH_DIR)/hdl/src/wrapper_ahb_reg_interface.sv
 // $(WRAPPER_TECH_DIR)/hdl/src/wrapper_ahb_vr_interface.sv
 $(WRAPPER_TECH_DIR)/hdl/src/wrapper_packet_construct.sv
 $(WRAPPER_TECH_DIR)/hdl/src/wrapper_packet_deconstruct.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_req_ctrl_reg.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_dmac_req.sv
+$(WRAPPER_TECH_DIR)/hdl/src/wrapper_valid_filter.sv

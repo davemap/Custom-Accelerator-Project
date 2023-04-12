@@ -46,7 +46,7 @@ module tb_wrapper_secworks_sha256;
 parameter CLK_PERIOD = 10;
 parameter ADDRWIDTH = 12;
 
-parameter InputFileName = ("/home/dam1n19/Design/secworks-sha-256-system-top/wrapper/stimulus/ahb_input_hash_stim.m2d");
+parameter InputFileName = ("/home/dam1n19/Design/secworks-sha256-project/wrapper/stimulus/ahb_input_hash_stim.m2d");
 parameter MessageTag = "FileReader:";
 parameter StimArraySize = 10000;
 

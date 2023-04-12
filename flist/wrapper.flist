@@ -20,4 +20,3 @@
 +incdir+$(PROJECT_DIR)/wrapper/src/
 
 $(PROJECT_DIR)/wrapper/src/wrapper_secworks_sha256.sv
-$(PROJECT_DIR)/wrapper/src/wrapper_digest_filter.sv

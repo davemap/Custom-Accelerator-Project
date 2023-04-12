@@ -27,6 +27,7 @@ xrun \
     -f $PROJECT_DIR/flist/primatives.flist \
     -f $PROJECT_DIR/flist/wrapper_ip.flist \
     -f $PROJECT_DIR/flist/ahb_ip.flist \
+    -f $PROJECT_DIR/flist/apb_ip.flist \
     -f $PROJECT_DIR/flist/wrapper.flist \
     -f $PROJECT_DIR/flist/ahb_vip.flist \
     -f $PROJECT_DIR/flist/secworks_sha25_stream.flist \
