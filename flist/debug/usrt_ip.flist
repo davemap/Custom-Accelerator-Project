@@ -1,0 +1,19 @@
+//-----------------------------------------------------------------------------
+// NanoSoC APB USRT Control Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for APB USRT IP
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============   APB USRT search path    =============
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_apb_usrt.v

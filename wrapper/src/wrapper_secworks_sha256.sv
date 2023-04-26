@@ -24,6 +24,7 @@ module wrapper_secworks_sha256 #(
     input  logic  [AHBADDRWIDTH-1:0] HADDRS,
     input  logic  [1:0]              HTRANSS,
     input  logic  [2:0]              HSIZES,
+    input  logic  [3:0]              HPROTS,
     input  logic                     HWRITES,
     input  logic                     HREADYS,
     input  logic  [31:0]             HWDATAS,
@@ -33,10 +34,10 @@ module wrapper_secworks_sha256 #(
     output logic  [31:0]             HRDATAS,
 
     // Input Data Request Signal to DMAC
-    output logic                  in_data_req,
+    output logic                     in_data_req,
 
     // Output Data Request Signal to DMAC
-    output logic                  out_data_req
+    output logic                     out_data_req
   );
   
 

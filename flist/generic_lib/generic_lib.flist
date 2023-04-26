@@ -1,0 +1,25 @@
+//-----------------------------------------------------------------------------
+// Generic Library Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Generic Library
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    Accelerator Module search path    =============
+$(NANOSOC_TECH_DIR)/GLIB/pads/verilog/PAD_INOUT8MA_NOE.v
+$(NANOSOC_TECH_DIR)/GLIB/pads/verilog/PAD_VDDIO.v
+$(NANOSOC_TECH_DIR)/GLIB/pads/verilog/PAD_VSSIO.v
+$(NANOSOC_TECH_DIR)/GLIB/pads/verilog/PAD_VDDSOC.v
+$(NANOSOC_TECH_DIR)/GLIB/pads/verilog/PAD_VSS.v
+$(NANOSOC_TECH_DIR)/GLIB/mem/verilog/SROM_Ax32.v
+$(NANOSOC_TECH_DIR)/GLIB/sync/verilog/SYNCHRONIZER_EDGES.v

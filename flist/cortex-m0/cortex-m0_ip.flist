@@ -1,0 +1,31 @@
+//-----------------------------------------------------------------------------
+// NanoSoC Cortex-M0 Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Arm Cortex-M0
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    Accelerator Module search path    =============
+-y $(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/cortexm0/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/cortexm0_dap/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/cortexm0_integration/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/models/cells
+-y $(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/models/wrappers
+-y $(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/ualdis/verilog
+
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/cortexm0/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/cortexm0_dap/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/cortexm0_integration/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/models/cells
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/models/wrappers
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Cortex-M0/logical/ualdis/verilog

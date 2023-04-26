@@ -1,0 +1,38 @@
+//-----------------------------------------------------------------------------
+// NanoSoC Corstone-101 Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Arm Corstone-101
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    DMA-230 search path    =============
++incdir+$(PROJECT_DIR)/system/defines/corstone101
+
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_dualtimers/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_watchdog/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/memories/
+
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_timer/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_dualtimers/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_uart/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_watchdog/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_slave_mux/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_subsystem/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_slave_mux/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_default_slave/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_gpio/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_apb/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_iop_gpio/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/clkgate
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/memories/
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_sram/verilog

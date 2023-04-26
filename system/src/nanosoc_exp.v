@@ -12,7 +12,7 @@
 `include "cmsdk_ahb_slave_mux.v"
 
 module nanosoc_exp #(
-    parameter    ADDRWIDTH=29, // Region Address Width
+    parameter    ADDRWIDTH=29,      // Region Address Width
     parameter    ACCEL_ADDRWIDTH=12 // Region Address Width
   )(
     input  wire                  HCLK,       // Clock
@@ -23,13 +23,17 @@ module nanosoc_exp #(
     input  wire  [ADDRWIDTH-1:0] HADDRS,
     input  wire  [1:0]           HTRANSS,
     input  wire  [2:0]           HSIZES,
+    input  wire  [3:0]           HPROTS,
     input  wire                  HWRITES,
     input  wire                  HREADYS,
     input  wire  [31:0]          HWDATAS,
 
     output wire                  HREADYOUTS,
     output wire                  HRESPS,
-    output wire  [31:0]          HRDATAS
+    output wire  [31:0]          HRDATAS,
+
+    output wire                  ip_data_req,
+    output wire                  op_data_req
   );
 
 //********************************************************************************
@@ -127,23 +131,26 @@ cmsdk_ahb_slave_mux  #(
 //********************************************************************************
 // Slave module 1: Accelerator AHB target module
 //********************************************************************************
-  wrapper_sha256_hashing_stream #(ACCEL_ADDRWIDTH
-  ) accelerator (
-  .HCLK        (HCLK),
-  .HRESETn     (HRESETn),
+  wrapper_sha256_secworks_sha256 #(ACCEL_ADDRWIDTH
+  ) u_accelerator (
+  .HCLK         (HCLK),
+  .HRESETn      (HRESETn),
 
   //  Input target port: 32 bit data bus interface
-  .HSELS       (HSEL0),
-  .HADDRS      (HADDRS[ACCEL_ADDRWIDTH-1:0]),
-  .HTRANSS     (HTRANSS),
-  .HSIZES      (HSIZES),
-  .HWRITES     (HWRITES),
-  .HREADYS     (HREADYS),
-  .HWDATAS     (HWDATAS),
+  .HSELS        (HSEL0),
+  .HADDRS       (HADDRS[ACCEL_ADDRWIDTH-1:0]),
+  .HTRANSS      (HTRANSS),
+  .HSIZES       (HSIZES),
+  .HPROTS       (HPROTS),
+  .HWRITES      (HWRITES),
+  .HREADYS      (HREADYS),
+  .HWDATAS      (HWDATAS),
 
-  .HREADYOUTS  (HREADYOUT0),
-  .HRESPS      (HRESP0),
-  .HRDATAS     (HRDATA0)
+  .HREADYOUTS   (HREADYOUT0),
+  .HRESPS       (HRESP0),
+  .HRDATAS      (HRDATA0),
+  .in_data_req  (ip_data_req),
+  .out_data_req (op_data_req)
 
   );
 

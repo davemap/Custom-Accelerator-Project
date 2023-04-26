@@ -1,0 +1,25 @@
+//-----------------------------------------------------------------------------
+// NanoSoC Corstone-101 VIP Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for Arm Corstone-101 VIP
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    DMA-230 search path    =============
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_debug_tester/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/protocol_checkers/AhbLitePC/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/protocol_checkers/ApbPC/verilog
+
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_debug_tester/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/protocol_checkers/AhbLitePC/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/protocol_checkers/ApbPC/verilog
