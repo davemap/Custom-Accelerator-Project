@@ -1,3 +1,4 @@
 *.vcd
 *.vvp
 simulate/sim/*
+.socinit

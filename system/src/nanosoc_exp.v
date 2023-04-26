@@ -131,7 +131,7 @@ cmsdk_ahb_slave_mux  #(
 //********************************************************************************
 // Slave module 1: Accelerator AHB target module
 //********************************************************************************
-  wrapper_sha256_secworks_sha256 #(ACCEL_ADDRWIDTH
+  wrapper_secworks_sha256 #(ACCEL_ADDRWIDTH
   ) u_accelerator (
   .HCLK         (HCLK),
   .HRESETn      (HRESETn),

@@ -1,0 +1,33 @@
+//-----------------------------------------------------------------------------
+// NanoSoC Chip Related IP Filelist
+// A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
+//
+// Contributors
+//
+// David Mapstone (d.a.mapstone@soton.ac.uk)
+//
+// Copyright � 2021-3, SoC Labs (www.soclabs.org)
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// Abstract : Verilog Command File for NanoSoC Bus Matrix IP
+//-----------------------------------------------------------------------------
+
+// ============= Verilog library extensions ===========
++libext+.v+.vlib
+
+// =============    NanoSoC Bus Matrix IP search path    =============
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/nanosoc_chip.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/nanosoc_chip_pads.v
+
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/nanosoc_cpu.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/nanosoc_sysio.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/nanosoc_sys_ahb_decode.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_ahb_cs_rom_table.v
+
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_mcu_pin_mux.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_mcu_stclkctrl.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_mcu_clkctrl.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_mcu_sysctrl.v
+
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/bootrom.v
+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/ahb_bootrom.v

@@ -23,19 +23,21 @@
 
 // =============    System Component Filelist      ================
 
+// - Primatives IP
+-f $(PROJECT_DIR)/flist/primatives/primatives.flist
+
 // - CMSDK IP
 -f $(PROJECT_DIR)/flist/ahb/ahb_ip.flist
 -f $(PROJECT_DIR)/flist/apb/apb_ip.flist
 
-// - Top level
--f $(PROJECT_DIR)/flist/nanosoc/nanosoc_tb.flist
+// - NanoSoC Chip IP
+-f $(PROJECT_DIR)/flist/nanosoc/nanosoc_chip_ip.flist
 
 // - NanoSoC Bus Matrix
 -f $(PROJECT_DIR)/flist/nanosoc/nanosoc_matrix_ip.flist
 
 // - Generic Pad Library
 -f $(PROJECT_DIR)/flist/generic_lib/generic_lib_ip.flist
-
 
 // - CMSDK VIP
 -f $(PROJECT_DIR)/flist/corstone-101/corstone-101_vip.flist
@@ -56,3 +58,6 @@
 
 // - NanoSoC Custom Expansion Region
 $(PROJECT_DIR)/system/src/nanosoc_exp.v
+
+// - Top level
+-f $(PROJECT_DIR)/flist/nanosoc/nanosoc_tb.flist

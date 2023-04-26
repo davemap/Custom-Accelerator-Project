@@ -15,6 +15,9 @@
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
+// =============    Wrapper IP Filelist    ========================
+-f $(PROJECT_DIR)/flist/wrapper/wrapper_ip.flist
+
 // =============    Accelerator Module search path    =============
 -y $(PROJECT_DIR)/wrapper/src/
 +incdir+$(PROJECT_DIR)/wrapper/src/
