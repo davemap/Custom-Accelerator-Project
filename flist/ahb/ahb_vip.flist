@@ -16,9 +16,6 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(PROJECT_DIR)/cmsdk/vip/
-+incdir+$(PROJECT_DIR)/cmsdk/vip/
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/msdk_ahb_fileread_masters/verilog
 
-$(PROJECT_DIR)/cmsdk/vip/cmsdk_ahb_fileread_master32.v
-$(PROJECT_DIR)/cmsdk/vip/cmsdk_ahb_fileread_funnel.v
-$(PROJECT_DIR)/cmsdk/vip/cmsdk_ahb_filereadcore.v
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/msdk_ahb_fileread_masters/verilog

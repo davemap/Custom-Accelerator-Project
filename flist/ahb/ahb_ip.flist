@@ -16,9 +16,8 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(PROJECT_DIR)/cmsdk/ip/
-+incdir+$(PROJECT_DIR)/hdl/ip/
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_slave_mux/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_default_slave/verilog
 
-$(PROJECT_DIR)/cmsdk/ip/cmsdk_ahb_default_slave.v
-$(PROJECT_DIR)/cmsdk/ip/cmsdk_ahb_slave_mux.v
-// $(PROJECT_DIR)/cmsdk/ip/cmsdk_ahb_ram_beh.v
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_slave_mux/verilog
+-y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_default_slave/verilog

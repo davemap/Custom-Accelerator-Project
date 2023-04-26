@@ -16,7 +16,43 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--y $(PROJECT_DIR)/system/src/
-+incdir+$(PROJECT_DIR)/system/src/
+-f $(PROJECT_DIR)/flist/project/secworks_sha256_stream.flist
 
+// =============    Wrapper Filelist      =========================
+-f $(PROJECT_DIR)/flist/project/wrapper.flist
+
+// =============    System Component Filelist      ================
+
+// - CMSDK IP
+-f $(PROJECT_DIR)/flist/ahb/ahb_ip.flist
+-f $(PROJECT_DIR)/flist/apb/apb_ip.flist
+
+// - Top level
+-f $(PROJECT_DIR)/flist/nanosoc/nanosoc_tb.flist
+
+// - NanoSoC Bus Matrix
+-f $(PROJECT_DIR)/flist/nanosoc/nanosoc_matrix_ip.flist
+
+// - Generic Pad Library
+-f $(PROJECT_DIR)/flist/generic_lib/generic_lib_ip.flist
+
+
+// - CMSDK VIP
+-f $(PROJECT_DIR)/flist/corstone-101/corstone-101_vip.flist
+
+// - Corstone-101 System components
+-f $(PROJECT_DIR)/flist/corstone-101/corstone-101_ip.flist
+
+// - DMA controller
+-f $(PROJECT_DIR)/flist/dma-230/pl230_ip.flist
+
+// - Debug Controllers
+-f $(PROJECT_DIR)/flist/debug/usrt_ip.flist
+-f $(PROJECT_DIR)/flist/debug/adp-control_ip.flist
+-f $(PROJECT_DIR)/flist/debug/ft1248_vip.flist
+
+// - Cortex-M0 IP
+-f $(PROJECT_DIR)/flist/cortex-m0/cortex-m0_ip.flist
+
+// - NanoSoC Custom Expansion Region
 $(PROJECT_DIR)/system/src/nanosoc_exp.v
