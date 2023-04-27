@@ -4,7 +4,6 @@ url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
 [submodule "nanosoc"]
 path = nanosoc
 url = git@git.soton.ac.uk:soclabs/nanosoc.git
-branch = feat_accel_decouple
 [submodule "socsim"]
 path = socsim
 url = git@git.soton.ac.uk:soclabs/socsim.git
