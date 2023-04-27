@@ -16,3 +16,6 @@ url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
 [submodule "generic-lib"]
 	path = generic-lib
 	url = git@git.soton.ac.uk:soclabs/generic-lib.git
+[submodule "fpga-lib"]
+	path = fpga-lib
+	url = git@git.soton.ac.uk:soclabs/fpga-lib.git
