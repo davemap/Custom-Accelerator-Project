@@ -70,8 +70,8 @@ if [ ! -f $PROJECT_DIR/.socinit ]; then
             fi
         fi
     done
-    git submodule update --remote --recursive
-    git submodule foreach --recursive git checkout main
+    git submodule update --remote --recursive --init
+    # git submodule foreach --recursive git checkout main
     git restore $DESIGN_ROOT/.gitmodules
     touch $PROJECT_DIR/.socinit
 fi
