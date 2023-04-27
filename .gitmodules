@@ -19,3 +19,5 @@ url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
 [submodule "fpga-lib"]
 	path = fpga-lib
 	url = git@git.soton.ac.uk:soclabs/fpga-lib.git
+[submodule "nanosoc/"]
+	branch = feat_accel_decouple
