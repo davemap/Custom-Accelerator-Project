@@ -59,3 +59,6 @@ $(PROJECT_DIR)/system/src/nanosoc_exp.v
 
 // - Top level
 -f $(PROJECT_DIR)/flist/nanosoc/nanosoc_tb.flist
+
+// =============    Bootrom Filelist      ================
+$(PROJECT_DIR)/system/bootrom/verilog/bootrom.v

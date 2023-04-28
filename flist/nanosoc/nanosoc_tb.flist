@@ -15,8 +15,8 @@
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
-// =============    DMA-230 search path    =============
-+incdir+$(NANOSOC_TECH_DIR)/system/verilog/
+// =============    NanoSoC Testbench search path    =============
++incdir+$(NANOSOC_TECH_DIR)/system/verif/verilog/
 
 // - Top-level testbench
 $(NANOSOC_TECH_DIR)/system/verif/verilog/nanosoc_tb.v

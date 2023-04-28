@@ -26,6 +26,7 @@ cd $PROJECT_DIR/simulate/sim/system_secworks_sha256
 echo ${2}
 make -C $NANOSOC_TECH_DIR/system run_xm \
     SIM_DIR=$SIM_DIR \
+    BOOTROM_GEN=yes  \
     ADP_FILE=$PROJECT_DIR/system/stimulus/adp_hash_stim.cmd \
     ${@:2}
 

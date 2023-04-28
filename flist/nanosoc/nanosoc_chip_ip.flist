@@ -32,6 +32,3 @@ $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_mcu_sysctrl.v
 
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_apb_usrt.v
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_ahb_bootrom.v
-
-
-$(NANOSOC_TECH_DIR)/system/src/bootrom/verilog/bootrom.v

@@ -16,8 +16,6 @@
 +libext+.v+.vlib
 
 // =============    Corstone-101 search path    =============
-+incdir+$(PROJECT_DIR)/system/defines/corstone101
-
 +incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_dualtimers/verilog
 +incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb_watchdog/verilog
 +incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/models/memories/

@@ -18,8 +18,8 @@
 // =============    Accelerator Module search path    =============
 -y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_apb/verilog
 -y $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb3_eg_slave/verilog
-+incdir+(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_apb/verilog
-+incdir+(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb3_eg_slave/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_apb/verilog
++incdir+$(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb3_eg_slave/verilog
 
 $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_ahb_to_apb/verilog/cmsdk_ahb_to_apb.v
 $(ARM_IP_LIBRARY_PATH)/latest/Corstone-101/logical/cmsdk_apb3_eg_slave/verilog/cmsdk_apb3_eg_slave_interface.v
