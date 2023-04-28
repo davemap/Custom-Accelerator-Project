@@ -16,6 +16,6 @@
 +libext+.v+.vlib
 
 // =============    NanoSoC Chip Test Interface IP Filelists   =============
--f $(PROJECT_DIR)/flist/test_io/adp-control_ip.flist
--f $(PROJECT_DIR)/flist/test_io/ft1248_ip.flist
--f $(PROJECT_DIR)/flist/test_io/usrt_ip.flist
+$(NANOSOC_TECH_DIR)/system/test_io/verilog/nanosoc_adp_control_v1_0.v
+$(NANOSOC_TECH_DIR)/system/test_io/verilog/nanosoc_adp_manager.v
+$(NANOSOC_TECH_DIR)/system/test_io/verilog/nanosoc_ft1248_stream_io_v1_0.v

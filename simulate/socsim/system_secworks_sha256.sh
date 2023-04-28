@@ -24,7 +24,7 @@ cd $PROJECT_DIR/simulate/sim/system_secworks_sha256
 # Compile Simulation
 # Call makefile in NanoSoC Repo with options
 echo ${2}
-make -C $NANOSOC_TECH_DIR/systems/mcu run_xm \
+make -C $NANOSOC_TECH_DIR/system run_xm \
     SIM_DIR=$SIM_DIR \
     ADP_FILE=$PROJECT_DIR/system/stimulus/adp_hash_stim.cmd \
     ${@:2}
