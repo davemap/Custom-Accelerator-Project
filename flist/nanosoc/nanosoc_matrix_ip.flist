@@ -16,6 +16,6 @@
 +libext+.v+.vlib
 
 // =============    NanoSoC Bus Matrix IP search path    =============
-+incdir+$(NANOSOC_TECH_DIR)/system/verilog/gen_ahb_busmatrix/verilog/built/soclabs_4x7_AhbMatrix
++incdir+$(NANOSOC_TECH_DIR)/system/src/nanosoc_ahb_busmatrix/verilog/nanosoc_ahb32_4x7_busmatrix
 
--y $(NANOSOC_TECH_DIR)/system/src/nanosoc_ahb_busmatrix/verilog/nanosoc_ahb32_4x7_busmatrixgen_ahb_busmatrix/verilog/built/soclabs_ahb32_4x7_busmatrix
+-y $(NANOSOC_TECH_DIR)/system/src/nanosoc_ahb_busmatrix/verilog/nanosoc_ahb32_4x7_busmatrix

@@ -22,6 +22,7 @@ $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_chip_pads.v
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_cpu.v
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_sysio.v
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_sys_ahb_decode.v
+$(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_apb_subsystem.v
 
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_ahb_cs_rom_table.v
 $(NANOSOC_TECH_DIR)/system/src/verilog/nanosoc_mcu_pin_mux.v
