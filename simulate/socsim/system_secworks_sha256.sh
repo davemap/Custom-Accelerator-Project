@@ -11,10 +11,6 @@
 
 #!/usr/bin/env bash
 
-# Generate Stimulus from stimulus generation Script
-# python3 $SECWORKS_SHA2_TECH_DIR/flow/stimgen.py
-# Create Simulatiom Directory to Run in
-
 # Get simulation name from name of script
 SIM_NAME=`basename -s .sh "$0"`
 
@@ -23,9 +19,13 @@ SIM_DIR=$PROJECT_DIR/simulate/sim/$SIM_NAME
 
 # Create Directory to put simulation files
 mkdir -p $SIM_DIR
-
 cd $PROJECT_DIR/simulate/sim/system_secworks_sha256
+
 # Compile Simulation
 # Call makefile in NanoSoC Repo with options
-make -C $NANOSOC_TECH_DIR/systems/mcu/rtl_sim compile_xm \
-    SIM_DIR=$SIM_DIR
+echo ${2}
+make -C $NANOSOC_TECH_DIR/systems/mcu run_xm \
+    SIM_DIR=$SIM_DIR \
+    ADP_FILE=$PROJECT_DIR/system/stimulus/adp_hash_stim.cmd \
+    ${@:2}
+

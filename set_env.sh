@@ -61,15 +61,6 @@ if [ ! -f $PROJECT_DIR/.socinit ]; then
     echo "Running First Time Repository Initialisation"
     # Source environment variables for all submodules
     cd $DESIGN_ROOT
-    for d in $PROJECT_DIR/* ; do
-        if [ -e "$d/.git" ]; then
-            if [ -f "$d/set_env.sh" ]; then
-            # If .git file exists - submodule
-                # git config -f .gitmodules submodule.$d.branch main
-                git submodule set-branch --branch main $d
-            fi
-        fi
-    done
     git submodule update --remote --recursive
     git submodule foreach --recursive git checkout main
     # Read proj-branch file to find out which branch each subrepo needs to be on

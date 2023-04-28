@@ -16,18 +16,18 @@
 +libext+.v+.vlib
 
 // =============    NanoSoC Bus Matrix IP search path    =============
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/nanosoc_chip.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/nanosoc_chip_pads.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/nanosoc_chip.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/nanosoc_chip_pads.v
 
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/nanosoc_cpu.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/nanosoc_sysio.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/nanosoc_sys_ahb_decode.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_ahb_cs_rom_table.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/nanosoc_cpu.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/nanosoc_sysio.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/nanosoc_sys_ahb_decode.v
 
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_mcu_pin_mux.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_mcu_stclkctrl.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_mcu_clkctrl.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_mcu_sysctrl.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/cmsdk_ahb_cs_rom_table.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/cmsdk_mcu_pin_mux.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/cmsdk_mcu_stclkctrl.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/cmsdk_mcu_clkctrl.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/cmsdk_mcu_sysctrl.v
 
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/bootrom.v
-$(NANOSOC_TECH_DIR)/systems/mcu/verilog/ahb_bootrom.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/bootrom.v
+$(NANOSOC_TECH_DIR)/systems/nanososc/verilog/ahb_bootrom.v
