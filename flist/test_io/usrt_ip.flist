@@ -16,4 +16,4 @@
 +libext+.v+.vlib
 
 // =============   APB USRT search path    =============
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_apb_usrt.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_apb_usrt.v

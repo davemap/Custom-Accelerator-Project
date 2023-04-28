@@ -23,6 +23,12 @@ export WRAPPER_TECH_DIR="$PROJECT_DIR/accelerator-wrapper"
 # NanoSoC
 export NANOSOC_TECH_DIR="$PROJECT_DIR/nanosoc"
 
+# FPGA Libraries
+export FPGA_LIB_TECH_DIR="$PROJECT_DIR/fpga-lib"
+
+# Generic Libraries
+export GENERIC_LIB_TECH_DIR="$PROJECT_DIR/generic-lib"
+
 #-----------------------------------------------------------------------------
 # Flows
 #-----------------------------------------------------------------------------

@@ -16,5 +16,5 @@
 +libext+.v+.vlib
 
 // =============    ADP Control search path    =============
-$(NANOSOC_TECH_DIR)/IPLIB/ADPcontrol_v1_0/ADPcontrol_v1_0.v
-$(NANOSOC_TECH_DIR)/IPLIB/ADPcontrol_v1_0/ADPmanager.v
+$(NANOSOC_TECH_DIR)/test_io/adp_control/verilog/ADPcontrol_v1_0.v
+$(NANOSOC_TECH_DIR)/test_io/adp_control/verilog/ADPmanager.v

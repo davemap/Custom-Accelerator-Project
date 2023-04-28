@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// NanoSoC FT1248 VIP Filelist
+// NanoSoC Chip Test Interface IP Filelist
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -9,11 +9,13 @@
 // Copyright � 2021-3, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Abstract : Verilog Command File for FT1248 IO VIP
+// Abstract : Verilog Command File for NanoSoC Chip Test Interface IP
 //-----------------------------------------------------------------------------
 
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
-// =============    FT1248 VIP search path    =============
-$(NANOSOC_TECH_DIR)/IPLIB/FT1248_streamio_v1_0/ft1248_streamio_v1_0.v
+// =============    NanoSoC Chip Test Interface IP Filelists   =============
+-f $(PROJECT_DIR)/flist/test_io/adp-control_ip.flist
+-f $(PROJECT_DIR)/flist/test_io/ft1248_ip.flist
+-f $(PROJECT_DIR)/flist/test_io/usrt_ip.flist

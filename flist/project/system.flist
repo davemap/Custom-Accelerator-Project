@@ -36,6 +36,9 @@
 // - NanoSoC Bus Matrix
 -f $(PROJECT_DIR)/flist/nanosoc/nanosoc_matrix_ip.flist
 
+// - NanoSoc Test Interface IP
+-f $(PROJECT_DIR)/flist/nanosoc/nanosoc_test_io_ip.flist
+
 // - Generic Pad Library
 -f $(PROJECT_DIR)/flist/generic_lib/generic_lib_ip.flist
 
@@ -47,11 +50,6 @@
 
 // - DMA controller
 -f $(PROJECT_DIR)/flist/dma-230/pl230_ip.flist
-
-// - Debug Controllers
--f $(PROJECT_DIR)/flist/debug/usrt_ip.flist
--f $(PROJECT_DIR)/flist/debug/adp-control_ip.flist
--f $(PROJECT_DIR)/flist/debug/ft1248_vip.flist
 
 // - Cortex-M0 IP
 -f $(PROJECT_DIR)/flist/cortex-m0/cortex-m0_ip.flist

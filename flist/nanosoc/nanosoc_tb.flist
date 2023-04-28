@@ -16,18 +16,18 @@
 +libext+.v+.vlib
 
 // =============    DMA-230 search path    =============
-+incdir+$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/
++incdir+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/
 
 // - Top-level testbench
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/tb_nanosoc.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/tb_nanosoc.v
 
 // - Testbench components
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_clkreset.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/cmsdk_uart_capture.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/axi_streamio8_txd_from_file.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/ft1248x1_to_axi_streamio_v1_0.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/axi_streamio8_rxd_to_file.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/track_tb_iostream.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/ft1248x1_track.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/dma_log_to_file.v
-$(NANOSOC_TECH_DIR)/Cortex-M0/nanosoc/systems/mcu/verilog/aes128_log_to_file.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_clkreset.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/cmsdk_uart_capture.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/axi_streamio8_txd_from_file.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/ft1248x1_to_axi_streamio_v1_0.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/axi_streamio8_rxd_to_file.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/track_tb_iostream.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/ft1248x1_track.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/dma_log_to_file.v
+$(NANOSOC_TECH_DIR)/systems/mcu/verilog/aes128_log_to_file.v

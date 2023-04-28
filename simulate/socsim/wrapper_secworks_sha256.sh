@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# SoC Labs icarus verilog simulation script for engine testbench
+# SoC Labs Simulation script for wrapper level verification testbench
 # A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 #
 # Contributors

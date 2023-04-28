@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Generic Library Filelist
+// NanoSoC FT1248 VIP Filelist
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -9,17 +9,11 @@
 // Copyright � 2021-3, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Abstract : Verilog Command File for Generic Library
+// Abstract : Verilog Command File for FT1248 IO VIP
 //-----------------------------------------------------------------------------
 
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
-// =============    Accelerator Module search path    =============
-$(GENERIC_LIB_TECH_DIR)/pads/verilog/PAD_INOUT8MA_NOE.v
-$(GENERIC_LIB_TECH_DIR)/pads/verilog/PAD_VDDIO.v
-$(GENERIC_LIB_TECH_DIR)/pads/verilog/PAD_VSSIO.v
-$(GENERIC_LIB_TECH_DIR)/pads/verilog/PAD_VDDSOC.v
-$(GENERIC_LIB_TECH_DIR)/pads/verilog/PAD_VSS.v
-$(GENERIC_LIB_TECH_DIR)/mem/verilog/SROM_Ax32.v
-$(GENERIC_LIB_TECH_DIR)/sync/verilog/SYNCHRONIZER_EDGES.v
+// =============    FT1248 VIP search path    =============
+$(NANOSOC_TECH_DIR)/test_io/ft1248_stream_io/verilog/ft1248_stream_io_v1_0.v
