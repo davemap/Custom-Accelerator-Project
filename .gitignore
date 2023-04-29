@@ -2,3 +2,4 @@
 *.vvp
 simulate/sim/*
 .socinit
+system/bootrom
