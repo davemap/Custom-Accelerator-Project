@@ -131,29 +131,8 @@ cmsdk_ahb_slave_mux  #(
 //********************************************************************************
 // Slave module 1: Accelerator AHB target module
 //********************************************************************************
-  wrapper_secworks_sha256 #(ACCEL_ADDRWIDTH
-  ) u_accelerator (
-  .HCLK         (HCLK),
-  .HRESETn      (HRESETn),
 
-  //  Input target port: 32 bit data bus interface
-  .HSELS        (HSEL0),
-  .HADDRS       (HADDRS[ACCEL_ADDRWIDTH-1:0]),
-  .HTRANSS      (HTRANSS),
-  .HSIZES       (HSIZES),
-  .HPROTS       (HPROTS),
-  .HWRITES      (HWRITES),
-  .HREADYS      (HREADYS),
-  .HWDATAS      (HWDATAS),
-
-  .HREADYOUTS   (HREADYOUT0),
-  .HRESPS       (HRESP0),
-  .HRDATAS      (HRDATA0),
-  .in_data_req  (ip_data_req),
-  .out_data_req (op_data_req)
-
-  );
-
+// Instantiate your accelerator wrapper HERE
 
 //********************************************************************************
 // Slave module 2: AHB default target module

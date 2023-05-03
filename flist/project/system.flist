@@ -16,7 +16,8 @@
 +libext+.v+.vlib
 
 // =============    Accelerator Module search path    =============
--f $(PROJECT_DIR)/flist/project/secworks_sha256_stream.flist
+// ! Point this to your accelerator filelist
+// -f $(PROJECT_DIR)/flist/project/accelerator.flist
 
 // =============    Wrapper Filelist      =========================
 -f $(PROJECT_DIR)/flist/project/wrapper.flist

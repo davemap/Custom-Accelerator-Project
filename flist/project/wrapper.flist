@@ -22,4 +22,5 @@
 -y $(PROJECT_DIR)/wrapper/src/
 +incdir+$(PROJECT_DIR)/wrapper/src/
 
-$(PROJECT_DIR)/wrapper/src/wrapper_secworks_sha256.sv
+// Add the source files related to your custom wrapper
+// $(PROJECT_DIR)/wrapper/src/your_wrapper.v

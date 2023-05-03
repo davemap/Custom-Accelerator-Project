@@ -14,8 +14,8 @@
 # Technologies
 #-----------------------------------------------------------------------------
 
-# Accelerator Engine
-export SECWORKS_SHA2_TECH_DIR="$PROJECT_DIR/secworks-sha256"
+# Accelerator Engine -- Add Your Accelerator Environment Variable HERE!
+# export YOUR_ACCELERATOR_DIR="$PROJECT_DIR/your_accelerator"
 
 # Accelerator Wrapper
 export WRAPPER_TECH_DIR="$PROJECT_DIR/accelerator_wrapper_tech"
