@@ -34,7 +34,7 @@ export GENERIC_LIB_TECH_DIR="$PROJECT_DIR/generic_lib_tech"
 #-----------------------------------------------------------------------------
 
 # CHIPKIT - Register Generation
-export CHIPKIT_FLOW_DIR="$PROJECT_DIR/chipkit"
+export CHIPKIT_FLOW_DIR="$PROJECT_DIR/chipkit_flow"
 
 # SoCSim - Basic Simulation Flow Wrapper
-export SOCSIM_FLOW_DIR="$PROJECT_DIR/socsim"
+export SOCSIM_FLOW_DIR="$PROJECT_DIR/socsim_flow"
