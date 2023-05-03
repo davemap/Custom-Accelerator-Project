@@ -18,23 +18,23 @@
 export SECWORKS_SHA2_TECH_DIR="$PROJECT_DIR/secworks-sha256"
 
 # Accelerator Wrapper
-export WRAPPER_TECH_DIR="$PROJECT_DIR/accelerator-wrapper"
+export WRAPPER_TECH_DIR="$PROJECT_DIR/accelerator_wrapper_tech"
 
 # NanoSoC
-export NANOSOC_TECH_DIR="$PROJECT_DIR/nanosoc"
+export NANOSOC_TECH_DIR="$PROJECT_DIR/nanosoc_tech"
 
 # FPGA Libraries
-export FPGA_LIB_TECH_DIR="$PROJECT_DIR/fpga-lib"
+export FPGA_LIB_TECH_DIR="$PROJECT_DIR/fpga_lib_tech"
 
 # Generic Libraries
-export GENERIC_LIB_TECH_DIR="$PROJECT_DIR/generic-lib"
+export GENERIC_LIB_TECH_DIR="$PROJECT_DIR/generic_lib_tech"
 
 #-----------------------------------------------------------------------------
 # Flows
 #-----------------------------------------------------------------------------
 
 # CHIPKIT - Register Generation
-export CHIPKIT_FLOW_DIR="$PROJECT_DIR/CHIPKIT"
+export CHIPKIT_FLOW_DIR="$PROJECT_DIR/chipkit"
 
 # SoCSim - Basic Simulation Flow Wrapper
 export SOCSIM_FLOW_DIR="$PROJECT_DIR/socsim"
