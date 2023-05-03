@@ -19,6 +19,3 @@ url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
 [submodule "fpga-lib"]
 	path = fpga_lib_tech
 	url = git@git.soton.ac.uk:soclabs/fpga-lib.git
-[submodule "vanillaflow"]
-	path = vanillaflow_flow
-	url = git@git.soton.ac.uk:soclabs/vanillaflow.git
