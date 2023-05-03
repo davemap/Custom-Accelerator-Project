@@ -1,21 +1,21 @@
 [submodule "accelerator-wrapper"]
-path = accelerator-wrapper
+	path = accelerator_wrapper_tech
 url = git@git.soton.ac.uk:soclabs/accelerator-wrapper.git
 [submodule "nanosoc"]
-path = nanosoc
+	path = nanosoc_tech
 url = git@git.soton.ac.uk:soclabs/nanosoc.git
 [submodule "socsim"]
 path = socsim
 url = git@git.soton.ac.uk:soclabs/socsim.git
 [submodule "CHIPKIT"]
-path = CHIPKIT
+	path = chipkit
 url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
 [submodule "secworks-sha256"]
 	path = secworks-sha256
 	url = git@git.soton.ac.uk:soclabs/secworks-sha256.git
 [submodule "generic-lib"]
-	path = generic-lib
+	path = generic_lib_tech
 	url = git@git.soton.ac.uk:soclabs/generic-lib.git
 [submodule "fpga-lib"]
-	path = fpga-lib
+	path = fpga_lib_tech
 	url = git@git.soton.ac.uk:soclabs/fpga-lib.git
