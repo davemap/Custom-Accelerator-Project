@@ -16,3 +16,6 @@ url = git@git.soton.ac.uk:soclabs/CHIPKIT.git
 [submodule "fpga-lib"]
 	path = fpga_lib_tech
 	url = git@git.soton.ac.uk:soclabs/fpga-lib.git
+[submodule "rtl_primitives_tech"]
+	path = rtl_primitives_tech
+	url = git@git.soton.ac.uk:soclabs/rtl_primitives_tech.git

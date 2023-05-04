@@ -23,6 +23,9 @@ export WRAPPER_TECH_DIR="$PROJECT_DIR/accelerator_wrapper_tech"
 # NanoSoC
 export NANOSOC_TECH_DIR="$PROJECT_DIR/nanosoc_tech"
 
+# Primtives
+export PRIMITIVES_TECH_DIR="$PROJECT_DIR/rtl_primitives_tech"
+
 # FPGA Libraries
 export FPGA_LIB_TECH_DIR="$PROJECT_DIR/fpga_lib_tech"
 

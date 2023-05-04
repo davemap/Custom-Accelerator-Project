@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// PrimativesFilelist
+// Primitives Filelist
 // A joint work commissioned on behalf of SoC Labs, under Arm Academic Access license.
 //
 // Contributors
@@ -9,14 +9,14 @@
 // Copyright � 2021-3, SoC Labs (www.soclabs.org)
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-// Abstract : Verilog Command File for RTL Primatives
+// Abstract : Verilog Command File for RTL Primitives
 //-----------------------------------------------------------------------------
 
 // ============= Verilog library extensions ===========
 +libext+.v+.vlib
 
-// =============    Accelerator Module search path    =============
--y $(PROJECT_DIR)/primatives/src/
-+incdir+$(PROJECT_DIR)/primatives/src/
+// =============    RTL Primitives search path    =============
+-y $(PRIMITIVES_TECH_DIR)/src/sv/
++incdir+$(PRIMITIVES_TECH_DIR)/src/sv/
 
-$(PROJECT_DIR)/primatives/src/fifo_vr.sv
+$(PRIMITIVES_TECH_DIR)/src/sv/fifo_vr.sv

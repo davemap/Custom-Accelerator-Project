@@ -24,8 +24,8 @@
 
 // =============    System Component Filelist      ================
 
-// - Primatives IP
--f $(PROJECT_DIR)/flist/primatives/primatives.flist
+// - Primitives IP
+-f $(PROJECT_DIR)/flist/primitives/primitives.flist
 
 // - CMSDK IP
 -f $(PROJECT_DIR)/flist/ahb/ahb_ip.flist
