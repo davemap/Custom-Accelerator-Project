@@ -64,7 +64,7 @@ if [ ! -f $PROJECT_DIR/.socinit ]; then
     git submodule update --remote --recursive
     git submodule foreach --recursive git checkout main
     # Read proj-branch file to find out which branch each subrepo needs to be on
-    git config --file .gitmodules --get-regexp path | awk '{ print $2 }' | while read line; do cd $PROJECT_DIR/$line && git checkout `grep $line $PROJECT_DIR/proj-branch | awk '{ print $2 }'`; done
+    git config --file .gitmodules --get-regexp path | awk '{ print $2 }' | while read line; do cd $PROJECT_DIR/$line && git checkout `grep $line $PROJECT_DIR/proj-branch | awk '{ print $2 }'` && git pull; done
     git restore $DESIGN_ROOT/.gitmodules
     touch $PROJECT_DIR/.socinit
 fi

@@ -12,7 +12,7 @@
 # Project Repository Subrepository Branch Index
 # Add your Accelerator Repository here
 # accelerator_repo: main
-nanosoc_tech: feat_accel_decouple
+nanosoc_tech: main
 chipkit_flow: main
 accelerator_wrapper_tech: main
 fpga_lib_tech: main
